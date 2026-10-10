@@ -888,16 +888,22 @@ global(){
   const sources=`<article class="panel c12"><header><h2>Why this layer is built this way</h2></header>
     <p>Absolute wastewater concentrations are not portable between countries: normalization targets, units and laboratory methods diverge, so a figure from one national programme cannot be placed on the same axis as another's. Only <b>within-site relative</b> metrics transfer, which is the standardization this project already uses throughout.</p>
     <p>Of the national programmes publishing wastewater data, only two currently publish it in a genuinely machine-readable, openly licensed form: <b>Germany</b>'s AMELAG (Robert Koch-Institut, CC BY 4.0, versioned with a DOI) and the <b>Netherlands</b>' RIVM open data. Sequences and phylogenetics in this project come from <b>NCBI Virus, GenBank and the SRA</b> — public-domain INSDC records that may be redistributed.</p>
+    <p><b>Sources for this page.</b> Sewer-connected share and population: <a href="https://washdata.org/data/downloads" target="_blank" rel="noopener">WHO/UNICEF Joint Monitoring Programme</a> household world workbook, downloaded and parsed each run, with the raw workbook frozen alongside the run. Income classification: <a href="https://api.worldbank.org/v2/country?format=json" target="_blank" rel="noopener">World Bank country API</a>, fetched each run rather than hard-coded, because those classifications are revised annually. German site-level data: <a href="https://github.com/robert-koch-institut/Abwassersurveillance_AMELAG" target="_blank" rel="noopener">RKI AMELAG</a>. The “Status in this run” column states, per country, whether a feed was actually ingested or is only a known feed not yet wired in — a registry entry is not data in hand.</p>
     <p class="note"><b>On GISAID.</b> GISAID hosts wastewater-relevant content and phylogenetics, including EpiCoV/hCoV-19, EpiFlu, EpiPox with PoxSurver and the Clade I and Clade II trees, EpiArbo and EpiNiV. None of it appears here, and the reason is terms rather than content. The Database Access Agreement bars distributing Data to third parties, bars a “separate portal,” bars use “in connection with any other database,” and defines Data to include <i>derivatives or other enhancements</i> — so a tree rendered from GISAID sequences remains GISAID's Data, with ownership retained by GISAID. In October 2025 GISAID terminated the Nextstrain feed, which also affected covSPECTRUM and outbreak.info. Publication with acknowledgement is permitted; a public dashboard layer is not. Analyses that use GISAID are therefore reported in manuscripts and cited there, never served from this site.</p></article>`;
 
   if(!D.global_coverage||!D.global_coverage.length){
     el.innerHTML=head+`<article class="panel c12"><header><h2>Not populated in this run</h2></header>
-      <p>This layer needs the WHO/UNICEF Joint Monitoring Programme sanitation extract as a frozen input, because the JMP portal exposes no stable machine-readable endpoint. Until that extract is in place the view stays empty rather than estimating a denominator it does not have.</p>
+      <p>The sanitation denominator comes from the WHO/UNICEF Joint Monitoring Programme household workbook, which this pipeline downloads and parses on each run. It did not parse this time — either the download failed, or the workbook's sheet and column layout changed from what the parser recognises. The Audit log records which.</p>
+      <p>The view stays empty rather than estimating a denominator it does not have. If a frozen JMP extract is present in the repository it is used as a fallback, and the next run will try the live download again.</p>
       <p class="small muted">The German AMELAG fetch is attempted on every run and reported on the Audit log whether or not it succeeds.</p></article>`+sources;
     return;
   }
 
   const g=D.global_coverage, inc=D.global_income||[];
+  const withSM=g.filter(c=>c.safely_managed_pct!=null&&c.sanitation_not_observable_pct!=null);
+  const hasSM=withSM.length>0, smN=withSM.length;
+  const smPop=d3.sum(withSM,c=>c.sanitation_not_observable_population||0);
+  const topGap=withSM.slice().sort((a,b)=>b.sanitation_not_observable_pct-a.sanitation_not_observable_pct).slice(0,3);
   const feeds=g.filter(c=>c.has_open_feed);
   const totPop=d3.sum(g,c=>c.population||0), obs=d3.sum(g,c=>c.observable_population||0);
   el.innerHTML=head+`
@@ -911,9 +917,17 @@ global(){
     <div class="tbl"><table><tr><th>Income group</th><th class="n">Countries</th><th class="n">Open feed</th><th class="n">Median sewer %</th><th class="n">Observable</th></tr>
       ${inc.map(i=>`<tr><td>${esc(i.income_group)}</td><td class="n">${i.countries}</td><td class="n">${i.countries_with_open_feed}</td><td class="n">${fmt(i.median_sewer_connected_pct,0)}%</td><td class="n">${fmt(i.pct_population_observable,0)}%</td></tr>`).join('')}</table></div>
     <p class="note">The gradient is the finding: where sewer connection is lowest, surveillance capacity is lowest too, so the populations least observable by this method are also the least likely to be covered by a programme that could observe them.</p></article>`:''}
+  ${hasSM?`<article class="panel c12"><header><h2>Sanitation is not the same as visibility</h2></header>
+    <p>“Safely managed sanitation” (World Bank <span class="mono">SH.STA.SMSS.ZS</span>) counts septic tanks and improved latrines as success — and rightly so, as public health. But neither reaches a treatment plant, so neither can be observed by testing wastewater. The difference between the two columns below is, approximately, <b>the population with working sanitation that this method still cannot see.</b></p>
+    <div class="statgrid">
+      <div class="stat"><span class="label">Population with sanitation but not sewered</span><span class="big">${smPop?Math.round(smPop).toLocaleString():'—'}</span><span class="small muted">across ${smN} countries reporting both</span></div>
+      <div class="stat"><span class="label">Median gap</span><span class="big">${fmt(d3.median(withSM,c=>c.sanitation_not_observable_pct),1)}%</span><span class="small muted">safely managed minus sewer-connected</span></div>
+      <div class="stat"><span class="label">Largest gaps</span><span class="big" style="font-size:1.2rem">${topGap.map(c=>esc(c.country)).join(', ')||'—'}</span></div>
+    </div>
+    <p class="note">The two series come from different collections and can cross in either direction for a given country-year. Where safely managed is reported below sewer-connected the gap is not interpretable and is shown as zero rather than a negative number.</p></article>`:''}
   <article class="panel c6"><header><h2>Sewer-connected population by country <button class="qmark" data-gloss="sewer-connected" aria-label="What does sewer-connected mean?">?</button></h2><span class="small muted">lowest first</span></header>
-    <div class="tbl scroll"><table><tr><th>Country</th><th class="n">Sewer %</th><th>Income group</th><th>Open feed</th><th>Status in this run</th></tr>
-      ${g.slice(0,60).map(c=>`<tr><td>${esc(c.country)}</td><td class="n">${fmt(c.sewer_connected_pct,1)}</td><td class="small">${esc(c.income_group??'—')}</td><td class="small">${c.open_machine_readable_feed?esc(c.open_machine_readable_feed):'—'}</td><td class="small muted">${esc(c.feed_status??'—')}</td></tr>`).join('')}</table></div>
+    <div class="tbl scroll"><table><tr><th>Country</th><th class="n">Sewer %</th>${hasSM?'<th class="n">Safely managed %</th><th class="n">Gap</th>':''}<th>Income group</th><th>Open feed</th><th>Status in this run</th></tr>
+      ${g.slice(0,60).map(c=>`<tr><td>${esc(c.country)}</td><td class="n">${fmt(c.sewer_connected_pct,1)}</td>${hasSM?`<td class="n">${c.safely_managed_pct!=null?fmt(c.safely_managed_pct,1):'—'}</td><td class="n">${c.sanitation_not_observable_pct!=null?fmt(c.sanitation_not_observable_pct,1):'—'}</td>`:''}<td class="small">${esc(c.income_group??'—')}</td><td class="small">${c.open_machine_readable_feed?esc(c.open_machine_readable_feed):'—'}</td><td class="small muted">${esc(c.feed_status??'—')}</td></tr>`).join('')}</table></div>
     ${g.length>60?`<p class="small muted">Showing the 60 countries with the lowest sewer-connected share, of ${g.length}.</p>`:''}</article>`
   +sources;
 

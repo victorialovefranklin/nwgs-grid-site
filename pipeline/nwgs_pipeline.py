@@ -5380,6 +5380,7 @@ AMELAG_URL = os.getenv(
     "https://raw.githubusercontent.com/robert-koch-institut/Abwassersurveillance_AMELAG/main/amelag_einzelstandorte.tsv",
 )
 JMP_PATH = Path(os.getenv("NWGS_JMP_PATH", str(STATIC_ROOT / "WHO_UNICEF_JMP_SANITATION.csv")))
+JMP_URL = os.getenv("NWGS_JMP_URL", "https://washdata.org/data/country/WLD/household/download")
 
 
 # ------------------------------------------------------------
@@ -5894,7 +5895,191 @@ def fetch_amelag(url=AMELAG_URL):
         return pd.DataFrame()
 
 
-def global_coverage_equity(jmp_path=JMP_PATH, amelag=None):
+def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
+    """Download and parse the WHO/UNICEF JMP household world file.
+
+    The JMP publishes an .xlsx workbook rather than a tabular endpoint, and its
+    sheet and header layout has changed between editions. So this parser does
+    not assume fixed positions: it searches for a sanitation sheet, finds the
+    header row by looking for a country/ISO3 pair, and then locates a column
+    whose header mentions a sewer connection. If any of those searches fails it
+    returns empty and says which step failed, so a layout change shows up as a
+    clear warning instead of silently wrong numbers.
+
+    Returns a tidy frame with one row per country at its most recent year.
+    """
+    out_dir = Path(out_dir) if out_dir else RAW_DIR
+    try:
+        r = SESSION.get(url, timeout=180)
+        r.raise_for_status()
+        raw = out_dir / "WHO_UNICEF_JMP_HOUSEHOLD_WORLD_FROZEN.xlsx"
+        raw.parent.mkdir(parents=True, exist_ok=True)
+        raw.write_bytes(r.content)
+        print(f"[OK] JMP workbook downloaded ({len(r.content):,} bytes) -> {raw.name}")
+    except Exception as exc:
+        print(f"[WARN] JMP download failed ({type(exc).__name__}: {exc}); "
+              f"falling back to any frozen CSV extract.")
+        return pd.DataFrame()
+
+    try:
+        book = pd.read_excel(raw, sheet_name=None, header=None)
+    except Exception as exc:
+        print(f"[WARN] JMP workbook unreadable: {exc}")
+        return pd.DataFrame()
+
+    def norm(v):
+        return re.sub(r"\s+", " ", str(v)).strip().lower()
+
+    sheet = next((n for n in book if "sanitation" in n.lower()), None)
+    if sheet is None:
+        print(f"[WARN] No sanitation sheet in JMP workbook; sheets present: {list(book)[:12]}")
+        return pd.DataFrame()
+    df = book[sheet]
+
+    # Find the header row: the first row mentioning both a country and an ISO3 label.
+    hdr = None
+    for i in range(min(12, len(df))):
+        cells = [norm(c) for c in df.iloc[i].tolist()]
+        if any("country" in c for c in cells) and any(c in ("iso3", "iso 3", "iso3 code") for c in cells):
+            hdr = i
+            break
+    if hdr is None:
+        print("[WARN] Could not locate the JMP header row (no country + ISO3 pair found).")
+        return pd.DataFrame()
+
+    # JMP uses a two-row header; merge the row above into blank cells where needed.
+    top = [norm(c) for c in df.iloc[hdr].tolist()]
+    sub = [norm(c) for c in df.iloc[hdr + 1].tolist()] if hdr + 1 < len(df) else [""] * len(top)
+    cols, carry = [], ""
+    for t, s in zip(top, sub):
+        if t and t != "nan":
+            carry = t
+        label = f"{carry} {s}".strip() if s and s != "nan" else carry
+        cols.append(label)
+
+    body = df.iloc[hdr + 2:].copy()
+    body.columns = cols[:body.shape[1]]
+    body = body.loc[:, [c for c in body.columns if c and c != "nan"]]
+
+    def pick(*patterns):
+        for p in patterns:
+            for c in body.columns:
+                if re.search(p, c):
+                    return c
+        return None
+
+    c_country = pick(r"^country", r"country")
+    c_iso = pick(r"^iso ?3")
+    c_year = pick(r"^year")
+    c_pop = pick(r"population")
+    c_sewer = pick(r"sewer")
+    if not c_country or not c_sewer:
+        print(f"[WARN] JMP sheet parsed but no sewer column found. Columns seen: {list(body.columns)[:20]}")
+        return pd.DataFrame()
+    print(f"[OK] JMP sanitation parsed from sheet '{sheet}' | sewer column: '{c_sewer}'")
+
+    out = pd.DataFrame({
+        "country": body[c_country],
+        "iso3": body[c_iso] if c_iso else None,
+        "year": pd.to_numeric(body[c_year], errors="coerce") if c_year else np.nan,
+        "sewer_connected_pct": pd.to_numeric(body[c_sewer], errors="coerce"),
+        "population": pd.to_numeric(body[c_pop], errors="coerce") if c_pop else np.nan,
+    }).dropna(subset=["country", "sewer_connected_pct"])
+
+    # JMP reports population in thousands; convert so the denominator is people.
+    if c_pop and "thousand" in c_pop:
+        out["population"] = out["population"] * 1000.0
+
+    if out["year"].notna().any():
+        out = (out.sort_values("year").groupby("country", as_index=False).tail(1))
+    print(f"[OK] JMP sanitation: {len(out):,} countries at their most recent year")
+    return out.reset_index(drop=True)
+
+
+def fetch_worldbank_income(url="https://api.worldbank.org/v2/country?format=json&per_page=400"):
+    """World Bank income classification per country, keyed by ISO3.
+
+    Used only to group countries on the global coverage page. Taken from the
+    World Bank's own API rather than hard-coded here, because income
+    classifications are revised annually and a stale hard-coded list would put
+    wrong labels on the page. Failure is non-fatal: without it the income
+    grouping is omitted and the country table still renders.
+    """
+    try:
+        r = SESSION.get(url, timeout=90)
+        r.raise_for_status()
+        payload = r.json()
+        rows = payload[1] if isinstance(payload, list) and len(payload) > 1 else []
+        out = []
+        for c in rows:
+            lvl = (c.get("incomeLevel") or {}).get("value")
+            # Aggregates carry this label and are not countries.
+            if not lvl or lvl == "Aggregates":
+                continue
+            out.append({"iso3": c.get("id"), "income_group": lvl})
+        df = pd.DataFrame(out)
+        print(f"[OK] World Bank income groups: {len(df):,} countries")
+        return df
+    except Exception as exc:
+        print(f"[WARN] World Bank income groups unavailable ({exc}); "
+              f"global page will omit the income grouping.")
+        return pd.DataFrame()
+
+
+def fetch_wdi_indicator(code="SH.STA.SMSS.ZS", date="2015:2024"):
+    """One World Bank WDI indicator per country, at its most recent year.
+
+    Used for SH.STA.SMSS.ZS, "people using safely managed sanitation services."
+    That indicator is NOT a substitute for sewer connection: it counts septic
+    tanks and improved latrines as safely managed, and neither is observable by
+    wastewater surveillance. It is pulled here precisely so the two can be
+    shown side by side, because the difference between them approximates the
+    population that has working sanitation and still cannot be seen by this
+    method. Plain REST, no extra dependency; failure is non-fatal.
+    """
+    rows, page = [], 1
+    try:
+        while page <= 20:
+            url = (f"https://api.worldbank.org/v2/country/all/indicator/{code}"
+                   f"?date={date}&format=json&per_page=2000&page={page}")
+            r = SESSION.get(url, timeout=120)
+            r.raise_for_status()
+            payload = r.json()
+            if not isinstance(payload, list) or len(payload) < 2 or not payload[1]:
+                break
+            meta, data = payload[0], payload[1]
+            bad = 0
+            for d in data:
+                v = d.get("value")
+                if v is None:
+                    continue
+                cc = (d.get("countryiso3code") or "").strip()
+                if not cc:
+                    continue
+                # One malformed observation must not discard the whole indicator.
+                try:
+                    rows.append({"iso3": cc, "year": int(d.get("date")), "value": float(v)})
+                except (TypeError, ValueError):
+                    bad += 1
+            if bad:
+                print(f"[WARN] WDI {code}: skipped {bad} unparseable observation(s) on page {page}.")
+            if page >= int(meta.get("pages", 1)):
+                break
+            page += 1
+    except Exception as exc:
+        print(f"[WARN] WDI {code} unavailable ({exc}); the safely-managed comparison is omitted.")
+        return pd.DataFrame()
+
+    if not rows:
+        print(f"[WARN] WDI {code} returned no usable values.")
+        return pd.DataFrame()
+    df = pd.DataFrame(rows).sort_values("year").groupby("iso3", as_index=False).tail(1)
+    print(f"[OK] WDI {code}: {len(df):,} countries (most recent year per country)")
+    return df.rename(columns={"value": code, "year": f"{code}_year"}).reset_index(drop=True)
+
+
+def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_df=None,
+                           wdi_safely_managed=None):
     """Country-level surveillance coverage against sewer-connected population.
 
     The denominator question nobody publishes: wastewater-based surveillance can
@@ -5908,14 +6093,20 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None):
     does not expose a stable machine-readable endpoint. Absent that file this
     returns empty and the view says so.
     """
-    if not jmp_path.exists():
-        print(f"[INFO] No JMP sanitation extract at {jmp_path}; "
+    # Prefer a live JMP parse; fall back to a frozen CSV extract if one exists.
+    if jmp_df is not None and not jmp_df.empty:
+        j = jmp_df.copy()
+        print("[OK] global coverage using the live JMP parse")
+    elif jmp_path.exists():
+        try:
+            j = pd.read_csv(jmp_path)
+            print(f"[OK] global coverage using the frozen extract {jmp_path.name}")
+        except Exception as exc:
+            print(f"[WARN] JMP extract unreadable: {exc}")
+            return pd.DataFrame(), pd.DataFrame()
+    else:
+        print(f"[INFO] No JMP data (live fetch empty, no extract at {jmp_path}); "
               f"global coverage-equity view will report an empty, honest state.")
-        return pd.DataFrame(), pd.DataFrame()
-    try:
-        j = pd.read_csv(jmp_path)
-    except Exception as exc:
-        print(f"[WARN] JMP extract unreadable: {exc}")
         return pd.DataFrame(), pd.DataFrame()
 
     cols = {c.lower().strip(): c for c in j.columns}
@@ -5941,6 +6132,12 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None):
         "population": pd.to_numeric(j[c_pop], errors="coerce") if c_pop else np.nan,
     })
 
+    # Attach World Bank income groups when the source table lacks them.
+    if g["income_group"].isna().all() and income_df is not None and not income_df.empty and g["iso3"].notna().any():
+        g = g.drop(columns=["income_group"]).merge(
+            income_df.drop_duplicates("iso3"), on="iso3", how="left")
+        print(f"[OK] income groups attached for {int(g['income_group'].notna().sum()):,} countries")
+
     # Registry of national programmes known to publish openly licensed,
     # machine-readable wastewater data. Being in this registry is NOT the same
     # as this pipeline having ingested it: only Germany is fetched today, and
@@ -5962,6 +6159,31 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None):
 
     g["observable_population"] = g["population"] * g["sewer_connected_pct"] / 100.0
     g["unobservable_population"] = g["population"] - g["observable_population"]
+
+    # Safely managed sanitation (WDI SH.STA.SMSS.ZS) alongside sewer connection.
+    # The two measure different things on purpose: safely managed counts septic
+    # tanks and improved latrines, which wastewater surveillance cannot observe.
+    # Their difference approximates the population that has working sanitation
+    # and is still invisible to this method. Clipped at zero because the two
+    # series come from different collections and can cross in either direction
+    # for a given country-year; a negative gap is not interpretable.
+    if wdi_safely_managed is not None and not wdi_safely_managed.empty and g["iso3"].notna().any():
+        # Match the value column exactly. The frame also carries a "<code>_year"
+        # column, and a prefix match picks that up first and silently writes
+        # years into the percentage field.
+        col = next((c for c in wdi_safely_managed.columns
+                    if c.startswith("SH.STA") and not c.endswith("_year")), None)
+        if col:
+            g = g.merge(wdi_safely_managed[["iso3", col]].drop_duplicates("iso3"),
+                        on="iso3", how="left")
+            g = g.rename(columns={col: "safely_managed_pct"})
+            gap = g["safely_managed_pct"] - g["sewer_connected_pct"]
+            g["sanitation_not_observable_pct"] = gap.clip(lower=0)
+            g["sanitation_not_observable_population"] = (
+                g["population"] * g["sanitation_not_observable_pct"] / 100.0)
+            g["gap_uninterpretable"] = gap < 0
+            n = int(g["safely_managed_pct"].notna().sum())
+            print(f"[OK] safely-managed sanitation attached for {n:,} countries")
 
     summary_rows = []
     if g["income_group"].notna().any():
@@ -7496,7 +7718,14 @@ def main():
         amelag = fetch_amelag()
         if not amelag.empty:
             save_df(amelag, RAW_DIR / "RKI_AMELAG_FROZEN.csv")
-        global_countries, global_income = global_coverage_equity(amelag=amelag)
+        jmp_live = fetch_jmp_sanitation()
+        if not jmp_live.empty:
+            save_df(jmp_live, TABLE_DIR / "Table26c_JMP_Sanitation_Parsed.csv")
+        wb_income = fetch_worldbank_income()
+        wdi_smss = fetch_wdi_indicator("SH.STA.SMSS.ZS")
+        global_countries, global_income = global_coverage_equity(
+            amelag=amelag, jmp_df=jmp_live, income_df=wb_income,
+            wdi_safely_managed=wdi_smss)
         if not global_countries.empty:
             save_df(global_countries, TABLE_DIR / "Table26_Global_Coverage_Equity.csv")
         if not global_income.empty:
