@@ -1,0 +1,81 @@
+{
+  "run_id": "run_20261009T1509Z",
+  "data_as_of": "2026-09-05",
+  "data_pulled_utc": "2026-10-09T15:09:18+00:00",
+  "gate_status": "PASS_WITH_WARNINGS",
+  "consistency_checks": [
+    {
+      "check": "Table07 vs Table13 recent counties (SARS-CoV-2)",
+      "expected": 813,
+      "found": 814,
+      "ok": false
+    },
+    {
+      "check": "Table07 vs Table13 recent counties (RSV)",
+      "expected": 748,
+      "found": 749,
+      "ok": false
+    },
+    {
+      "check": "Table07 vs Table13 recent counties (Influenza A)",
+      "expected": 766,
+      "found": 768,
+      "ok": false
+    },
+    {
+      "check": "Table08 LISA rows vs Table13",
+      "expected": 2270,
+      "found": 2270,
+      "ok": true
+    },
+    {
+      "check": "Table04 best-lag rows vs Table13",
+      "expected": 151,
+      "found": 151,
+      "ok": true
+    },
+    {
+      "check": "Table12f outlier rows vs Table13",
+      "expected": 59,
+      "found": 59,
+      "ok": true
+    },
+    {
+      "check": "Table06b OR vs Table13",
+      "expected": 0.893,
+      "found": 0.893,
+      "ok": true
+    }
+  ],
+  "entities": {
+    "PipelineRun": 1,
+    "DataSource": 6,
+    "PathogenSummary": 6,
+    "NationalTrend": 617,
+    "EmergingTrend": 464,
+    "CountyActivity": 2331,
+    "CountyCluster": 2270,
+    "SpatialSummary": 3,
+    "CountyCoverage": 4621,
+    "StateLag": 151,
+    "SeasonalPeak": 9,
+    "SeasonalVariability": 3,
+    "SeasonalPeakState": 412,
+    "EquitySummary": 4,
+    "ModelPerformance": 3,
+    "ShapFeature": 30,
+    "AmrTarget": 11,
+    "AmrState": 39,
+    "GenomicSummary": 5,
+    "GenomicByYear": 6,
+    "GenomicRecord": 3738,
+    "ProteinStructure": 6,
+    "TennesseeCounty": 95,
+    "TennesseeAlignment": 3,
+    "TennesseeEquity": 4,
+    "TennesseeSeasonal": 15,
+    "AuditLog": 37,
+    "Alert": 29
+  },
+  "payload_sha256": "4f6557d0a88919c581d626f97dfbceb762ad9f10a515300ccafdb54e8f09ac9b"
+}

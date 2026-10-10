@@ -1,0 +1,4 @@
+run_id,data_as_of,pathogen,n_counties,weights_method,morans_i,expected_i,p_sim,z_sim,recent_activity_counties,total_excluded_from_spatial,high-high,high-low,low-high,low-low,not_significant
+run_20261009T1509Z,2026-09-05,Influenza A,747,KNN_k6_EPSG5070,0.260347,-0.00134,0.001,13.719016,766,19,74,11,20,75,567
+run_20261009T1509Z,2026-09-05,RSV,729,KNN_k6_EPSG5070,0.262926,-0.001374,0.001,13.193238,748,19,60,13,32,95,529
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,794,KNN_k6_EPSG5070,0.553483,-0.001261,0.001,27.863286,813,19,152,19,17,142,464

@@ -1,0 +1,2 @@
+run_id,data_as_of,data_pulled_utc,gate_status,n_pass,n_warning,n_fail,consistency_ok
+run_20261009T1509Z,2026-09-05,2026-10-09T15:09:18+00:00,PASS_WITH_WARNINGS,23,5,0,False

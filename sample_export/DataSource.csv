@@ -1,0 +1,7 @@
+run_id,data_as_of,pathogen,dataset_id,dataset_name,rows,updated_utc,source_url
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,j9g8-acpt,CDC Wastewater Data for SARS-CoV-2,509323,2026-10-09 15:04:08+00:00,https://data.cdc.gov/d/j9g8-acpt
+run_20261009T1509Z,2026-09-05,Influenza A,ymmh-divb,CDC Wastewater Data for Influenza A,321370,2026-10-09 15:03:59+00:00,https://data.cdc.gov/d/ymmh-divb
+run_20261009T1509Z,2026-09-05,RSV,45cq-cw4i,CDC Wastewater Data for RSV,304506,2026-10-09 15:09:18+00:00,https://data.cdc.gov/d/45cq-cw4i
+run_20261009T1509Z,2026-09-05,Influenza A(H5),mtpu-urpp,CDC Wastewater Data for Avian Influenza A (H5),120390,2026-10-09 15:02:08+00:00,https://data.cdc.gov/d/mtpu-urpp
+run_20261009T1509Z,2026-09-05,Mpox,xpxn-rzgz,CDC Wastewater Data for Mpox,302244,2026-10-09 15:02:42+00:00,https://data.cdc.gov/d/xpxn-rzgz
+run_20261009T1509Z,2026-09-05,Measles,akvg-8vrb,CDC Wastewater Data for Measles,72845,2026-10-09 15:01:46+00:00,https://data.cdc.gov/d/akvg-8vrb

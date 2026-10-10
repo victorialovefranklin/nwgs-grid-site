@@ -1,0 +1,17 @@
+# Site build and export
+pandas>=2.1
+numpy>=1.26
+
+# Pipeline (check against the imports at the top of nwgs_pipeline.py and add anything missing)
+requests
+scipy
+statsmodels
+scikit-learn
+shap
+matplotlib
+geopandas
+shapely
+pyproj
+libpysal
+esda
+pyarrow

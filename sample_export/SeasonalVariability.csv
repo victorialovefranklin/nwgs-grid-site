@@ -1,0 +1,4 @@
+run_id,data_as_of,pathogen,eligible_seasons,mean_ww_peak_week_from_july1,sd_ww_peak_week_from_july1,mean_ww_peak_magnitude_z,sd_ww_peak_magnitude_z,mean_half_peak_duration_weeks,sd_half_peak_duration_weeks,median_ww_lead_to_clinical_peak_weeks,n_implausible_lead_flagged
+run_20261009T1509Z,2026-09-05,Influenza A,3,27.095238,3.147183,1.372166,0.479394,7.333333,1.527525,0.0,0
+run_20261009T1509Z,2026-09-05,RSV,3,29.761905,5.908025,0.860147,0.371713,8.333333,1.527525,-1.0,0
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,3,13.761905,10.77254,0.960543,0.427384,9.666667,3.21455,0.0,0

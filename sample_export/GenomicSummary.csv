@@ -1,0 +1,6 @@
+run_id,data_as_of,pathogen,records,dated_collection,complete_genome_records
+run_20261009T1509Z,2026-09-05,Influenza A,430,341,0
+run_20261009T1509Z,2026-09-05,Measles,689,231,89
+run_20261009T1509Z,2026-09-05,Mpox,900,480,129
+run_20261009T1509Z,2026-09-05,RSV,936,695,22
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,783,722,237

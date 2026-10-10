@@ -1,0 +1,88 @@
+name: Weekly NWGS Grid update
+
+on:
+  schedule:
+    - cron: "17 13 * * 6"   # Saturdays 13:17 UTC (8:17 a.m. Central), after CDC's weekly NWSS refresh
+  workflow_dispatch:         # "Run workflow" button for manual runs
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: nwgs-weekly
+  cancel-in-progress: false
+
+env:
+  NWGS_ROOT: /content/NWGS_GRID                 # same paths the Colab script uses
+  TABLE_DIR: /content/NWGS_GRID/outputs/tables
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Prepare Colab-style folders
+        run: |
+          sudo mkdir -p "$NWGS_ROOT"
+          sudo chown -R "$USER" /content
+          mkdir -p "$NWGS_ROOT/data" "$TABLE_DIR"
+          # Files the pipeline does not download itself (SVI, TIGER, AMR, etc.)
+          if [ -d static_inputs ]; then cp -r static_inputs/. "$NWGS_ROOT/data/"; fi
+
+      - name: Run surveillance pipeline
+        if: hashFiles('pipeline/nwgs_pipeline.py') != ''
+        env:
+          SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          MPLBACKEND: Agg
+        run: python pipeline/nwgs_pipeline.py
+
+      - name: Export app data (stops here if validation fails or tables are from mixed runs)
+        if: hashFiles('pipeline/nwgs_pipeline.py') != ''
+        run: python scripts/nwgs_app_export.py "$TABLE_DIR" app_export
+
+      - name: Use the saved Oct 9 export until the pipeline is added
+        if: hashFiles('pipeline/nwgs_pipeline.py') == ''
+        run: cp -r sample_export app_export
+
+      - name: Build site
+        run: |
+          python scripts/build_site.py app_export site
+          cp site_src/CNAME site/ 2>/dev/null || true
+
+      - name: Keep this run's export (90 days)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-export-${{ github.run_number }}
+          path: |
+            app_export/manifest.json
+            app_export/*.csv
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

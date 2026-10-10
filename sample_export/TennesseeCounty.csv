@@ -1,0 +1,96 @@
+run_id,data_as_of,county_fips,county_name,surveillance_weeks,any_analysis_ready,pathogens_observed,sites,last_season_with_data,reporting_now,status
+run_20261009T1509Z,2026-09-05,47157,Shelby,205.0,True,3.0,2.0,2026-27,True,Reporting now
+run_20261009T1509Z,2026-09-05,47065,Hamilton,168.0,True,3.0,1.0,2026-27,True,Reporting now
+run_20261009T1509Z,2026-09-05,47011,Bradley,87.0,True,3.0,1.0,2024-25,False,"Analysis-ready, stopped"
+run_20261009T1509Z,2026-09-05,47163,Sullivan,80.0,True,1.0,2.0,2023-24,False,"Analysis-ready, stopped"
+run_20261009T1509Z,2026-09-05,47037,Davidson,79.0,True,1.0,2.0,2023-24,False,"Analysis-ready, stopped"
+run_20261009T1509Z,2026-09-05,47023,Chester,75.0,True,3.0,1.0,2024-25,False,"Analysis-ready, stopped"
+run_20261009T1509Z,2026-09-05,47165,Sumner,71.0,True,1.0,1.0,2023-24,False,"Analysis-ready, stopped"
+run_20261009T1509Z,2026-09-05,47187,Williamson,50.0,False,1.0,1.0,2023-24,False,"Observed, not analysis-ready"
+run_20261009T1509Z,2026-09-05,47149,Rutherford,50.0,False,1.0,1.0,2023-24,False,"Observed, not analysis-ready"
+run_20261009T1509Z,2026-09-05,47073,Hawkins,50.0,False,1.0,1.0,2023-24,False,"Observed, not analysis-ready"
+run_20261009T1509Z,2026-09-05,47063,Hamblen,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47055,Giles,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47173,Union,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47045,Dyer,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47117,Marshall,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47057,Grainger,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47101,Lewis,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47155,Sevier,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47139,Polk,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47003,Bedford,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47027,Clay,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47097,Lauderdale,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47021,Cheatham,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47053,Gibson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47093,Knox,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47047,Fayette,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47043,Dickson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47049,Fentress,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47019,Carter,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47179,Washington,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47125,Montgomery,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47105,Loudon,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47147,Robertson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47131,Obion,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47175,Van Buren,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47009,Blount,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47035,Cumberland,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47069,Hardeman,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47059,Greene,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47145,Roane,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47159,Smith,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47001,Anderson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47169,Trousdale,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47133,Overton,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47075,Haywood,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47123,Monroe,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47143,Rhea,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47005,Benton,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47137,Pickett,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47099,Lawrence,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47031,Coffee,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47085,Humphreys,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47171,Unicoi,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47041,DeKalb,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47051,Franklin,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47161,Stewart,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47113,Madison,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47153,Sequatchie,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47189,Wilson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47089,Jefferson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47177,Warren,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47095,Lake,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47121,Meigs,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47107,McMinn,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47087,Jackson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47141,Putnam,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47081,Hickman,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47181,Wayne,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47183,Weakley,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47007,Bledsoe,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47015,Cannon,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47061,Grundy,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47185,White,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47103,Lincoln,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47111,Macon,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47091,Johnson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47115,Marion,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47013,Campbell,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47017,Carroll,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47025,Claiborne,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47071,Hardin,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47067,Hancock,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47029,Cocke,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47127,Moore,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47167,Tipton,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47083,Houston,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47129,Morgan,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47109,McNairy,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47077,Henderson,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47039,Decatur,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47151,Scott,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47033,Crockett,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47135,Perry,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47079,Henry,0.0,False,0.0,0.0,,False,No CDC NWSS data
+run_20261009T1509Z,2026-09-05,47119,Maury,0.0,False,0.0,0.0,,False,No CDC NWSS data

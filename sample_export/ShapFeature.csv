@@ -1,0 +1,31 @@
+run_id,data_as_of,pathogen,model,feature,rank,mean_abs_shap
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,clinical_lag1,1,1.745824
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,clinical_lag2,2,0.163551
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,wastewater_index,3,0.12627
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,clinical_lag4,4,0.087816
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,ww_lag2,5,0.046269
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,ww_lag4,6,0.04147
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,clinical_lag3,7,0.034492
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,ww_lag3,8,0.033111
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,ww_lag1,9,0.029742
+run_20261009T1509Z,2026-09-05,Influenza A,HistGradientBoosting,n_sites,10,0.014846
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,clinical_lag1,1,0.317441
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,clinical_lag4,2,0.032305
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,clinical_lag2,3,0.008117
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,clinical_lag3,4,0.006047
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,ww_lag4,5,0.004278
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,ww_lag3,6,0.004026
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,ww_lag1,7,0.003187
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,wastewater_index,8,0.00266
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,ww_lag2,9,0.002313
+run_20261009T1509Z,2026-09-05,RSV,RandomForest,n_sites,10,0.001914
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,clinical_lag1,1,0.73426
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,wastewater_index,2,0.053082
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,ww_lag4,3,0.030222
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,clinical_lag3,4,0.02419
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,ww_lag3,5,0.022678
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,clinical_lag4,6,0.022094
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,clinical_lag2,7,0.017719
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,ww_lag2,8,0.015611
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,ww_lag1,9,0.01451
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,HistGradientBoosting,n_sites,10,0.005022

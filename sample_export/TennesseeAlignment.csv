@@ -1,0 +1,4 @@
+run_id,data_as_of,pathogen,paired_weeks,spearman_rho_same_week
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,205,0.881384
+run_20261009T1509Z,2026-09-05,RSV,169,0.784297
+run_20261009T1509Z,2026-09-05,Influenza A,168,0.733838

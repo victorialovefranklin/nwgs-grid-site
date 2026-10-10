@@ -1,0 +1,7 @@
+run_id,data_as_of,pathogen,pathogen_group,records,sites,counties_represented,states_territories,first_observation,latest_observation,recent_records,recent_detection_rate,recent_median_site_z,change_vs_previous_window_z,trend,recent_level
+run_20261009T1509Z,2026-09-05,Influenza A,routine_respiratory,321370,1488,944,52,2022-10-01,2026-09-05,8564,,-0.50327,0.014647,Stable,Low
+run_20261009T1509Z,2026-09-05,Influenza A(H5),emerging,120390,936,630,49,2022-10-16,2026-09-05,4257,0.016419,,,Detection-based,Detection-based
+run_20261009T1509Z,2026-09-05,Measles,emerging,72845,768,512,50,2024-12-09,2026-09-05,5364,0.008229,,,Detection-based,Detection-based
+run_20261009T1509Z,2026-09-05,Mpox,emerging,302244,841,536,52,2022-10-01,2026-09-05,8347,0.002169,,,Detection-based,Detection-based
+run_20261009T1509Z,2026-09-05,RSV,routine_respiratory,304506,1432,912,52,2022-10-01,2026-09-05,8453,,-0.469894,0.024326,Stable,Low
+run_20261009T1509Z,2026-09-05,SARS-CoV-2,routine_respiratory,509323,1872,1087,53,2022-10-01,2026-09-05,9077,,-0.386167,0.519977,Increasing,Low

@@ -1,0 +1,540 @@
+<title>NWGS Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: lab console — fixed left rail of views, a run-status strip across the top, data panels in a 12-col grid */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#13222a; --muted:#56686d; --line:#d6dedc;
+  --accent:#146a66; --accent-ink:#ffffff; --accent-soft:#dcecea; --nodata:#e2e7e6; --typ:#f2f4f3; --typ-line:#b9c4c1;
+  --vl:#2166ac; --lo:#67a9cf; --el:#ef8a62; --hi:#b2182b; --warn:#b4630f; --ok:#2e7d4f;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1618; --surface:#152024; --ink:#e3ecea; --muted:#94a7aa; --line:#29393d;
+  --accent:#5db7af; --accent-ink:#0e1618; --accent-soft:#1b3332; --nodata:#273336; --typ:#8e9a98; --typ-line:#8e9a98;
+  --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1618; --surface:#152024; --ink:#e3ecea; --muted:#94a7aa; --line:#29393d;
+  --accent:#5db7af; --accent-ink:#0e1618; --accent-soft:#1b3332; --nodata:#273336; --typ:#8e9a98; --typ-line:#8e9a98;
+  --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:.005em;text-wrap:balance;margin:0}
+h1{font-size:1.85rem;line-height:1.15}
+h2{font-size:1.25rem}
+h3{font-size:1rem;font-weight:600}
+p{margin:0}
+.num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.82rem}
+.label{font:600 .7rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100%}
+.rail{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;border-right:1px solid var(--line);background:var(--surface);padding:20px 14px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;flex-direction:column;gap:2px;padding:0 8px}
+.brand b{font:700 1.35rem/1 var(--display);letter-spacing:.01em}
+.brand b span{color:var(--accent)}
+.brand small{color:var(--muted);font-size:.75rem}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;padding:7px 10px;border-radius:var(--r);font-size:.9rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.nav button:hover{color:var(--ink);background:var(--bg)}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.nav button:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nav .count{font:500 .72rem var(--mono);color:var(--hi)}
+.rail .foot{margin-top:auto;font-size:.72rem;color:var(--muted);padding:0 8px}
+
+.main{min-width:0;padding-block:20px 48px;padding-inline:28px;display:flex;flex-direction:column;gap:22px}
+.status{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:500 .74rem var(--body);padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:var(--surface);white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pill.warn i{background:var(--warn)} .pill.ok i{background:var(--ok)} .pill.bad i{background:var(--hi)}
+.status button.pill{cursor:pointer}
+
+.view{display:flex;flex-direction:column;gap:20px}
+.view[hidden]{display:none}
+.head{display:flex;flex-direction:column;gap:6px;max-width:72ch}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
+.c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}.c3{grid-column:span 3}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.panel.flat{background:transparent;border:none;padding:0}
+.panel header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+
+.card-p{display:flex;flex-direction:column;gap:10px}
+.card-p .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 .72rem var(--body);letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;border:1px solid transparent}
+.chip.sw{width:12px;height:12px;padding:0;border-radius:3px}
+.big{font:600 2rem/1 var(--display);font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.kv div{display:flex;flex-direction:column;gap:2px}
+.kv b{font:500 .95rem var(--mono)}
+.trend-up{color:var(--hi)} .trend-flat{color:var(--muted)} .trend-down{color:var(--vl)}
+
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;font-size:.84rem;color:var(--muted);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+
+.mapbox{width:100%;aspect-ratio:960/610;max-width:100%}
+.mapbox svg{width:100%;height:100%;display:block}
+.county{stroke:var(--surface);stroke-width:.25}
+.county:hover{stroke:var(--ink);stroke-width:1}
+.statebd{fill:none;stroke:var(--surface);stroke-width:.9;pointer-events:none}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--muted);font:11px var(--body)}
+.chart .axis path,.chart .axis line{stroke:var(--line)}
+.chart .gridl line{stroke:var(--line);stroke-opacity:.7}
+
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th{font:600 .7rem var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+
+.alert{display:grid;grid-template-columns:4px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.alert:last-child{border-bottom:none}
+.alert .bar{border-radius:2px}
+.alert .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.76rem;color:var(--muted)}
+.sev-high{background:var(--hi)} .sev-moderate{background:var(--warn)} .sev-info{background:var(--accent)}
+.status-PASS{color:var(--ok)} .status-WARN{color:var(--warn)} .status-FAIL{color:var(--hi)}
+
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.note{font-size:.82rem;color:var(--muted);max-width:80ch}
+.callout{border-left:3px solid var(--warn);padding:8px 12px;background:var(--surface);font-size:.86rem;border-radius:0 var(--r) var(--r) 0}
+.detail{min-height:62px;font-size:.86rem}
+.flag{color:var(--warn);font-weight:600}
+
+#tip{position:fixed;pointer-events:none;z-index:20;background:var(--ink);color:var(--bg);font-size:.78rem;line-height:1.35;padding:7px 9px;border-radius:5px;max-width:240px;opacity:0;transition:opacity .08s}
+#tip b{font-weight:600}
+
+@media (max-width:1100px){.c8,.c7,.c6,.c5,.c4{grid-column:span 12}.c3{grid-column:span 6}}
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:10;flex-direction:column;gap:10px;padding:12px 16px;border-right:none;border-bottom:1px solid var(--line)}
+  .rail .foot{display:none}
+  .nav{flex-direction:row;overflow-x:auto;scrollbar-width:none}
+  .nav button{white-space:nowrap}
+  .main{padding-inline:16px}
+  .c3{grid-column:span 12}
+  h1{font-size:1.5rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand"><b>NWGS <span>Grid</span></b><small>National Wastewater Genomic Surveillance</small></div>
+    <nav class="nav" id="nav" aria-label="Views"></nav>
+    <div class="foot">Static build from the weekly pipeline export. Prototype for nwgsgrid.com.</div>
+  </aside>
+  <main class="main">
+    <div class="status" id="status"></div>
+    <section class="view" id="v-dashboard"></section>
+    <section class="view" id="v-map" hidden></section>
+    <section class="view" id="v-analytics" hidden></section>
+    <section class="view" id="v-predictive" hidden></section>
+    <section class="view" id="v-equity" hidden></section>
+    <section class="view" id="v-tennessee" hidden></section>
+    <section class="view" id="v-genomics" hidden></section>
+    <section class="view" id="v-structures" hidden></section>
+    <section class="view" id="v-alerts" hidden></section>
+    <section class="view" id="v-audit" hidden></section>
+    <section class="view" id="v-methods" hidden></section>
+  </main>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script type="application/json" id="data">__DATA__</script>
+<script type="application/json" id="topo">__TOPO__</script>
+<script>
+const D = JSON.parse(document.getElementById('data').textContent);
+const TOPO = JSON.parse(document.getElementById('topo').textContent);
+const ROUTINE = ['SARS-CoV-2','RSV','Influenza A'];
+const EMERGING = ['Influenza A(H5)','Measles','Mpox'];
+const LEVELS = ['Very Low','Low','Typical','Elevated','High'];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const LV = {'Very Low':'--vl','Low':'--lo','Typical':'--typ','Elevated':'--el','High':'--hi'};
+const level = z => z==null?null : z<=-1?'Very Low': z<=-0.25?'Low': z<=0.25?'Typical': z<=1?'Elevated':'High';
+const lvColor = l => l? css(LV[l]) : css('--nodata');
+const fmt = (x,d=2) => x==null||isNaN(x)?'—':Number(x).toFixed(d);
+const pct = (x,d=1) => x==null?'—':(x*100).toFixed(d)+'%';
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dateFmt = s => s? new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+const STATE_FIPS = {'01':'AL','02':'AK','04':'AZ','05':'AR','06':'CA','08':'CO','09':'CT','10':'DE','11':'DC','12':'FL','13':'GA','15':'HI','16':'ID','17':'IL','18':'IN','19':'IA','20':'KS','21':'KY','22':'LA','23':'ME','24':'MD','25':'MA','26':'MI','27':'MN','28':'MS','29':'MO','30':'MT','31':'NE','32':'NV','33':'NH','34':'NJ','35':'NM','36':'NY','37':'NC','38':'ND','39':'OH','40':'OK','41':'OR','42':'PA','44':'RI','45':'SC','46':'SD','47':'TN','48':'TX','49':'UT','50':'VT','51':'VA','53':'WA','54':'WV','55':'WI','56':'WY'};
+
+/* ---------- tooltip ---------- */
+const tip = document.getElementById('tip');
+function showTip(e,html){tip.innerHTML=html;tip.style.opacity=1;moveTip(e)}
+function moveTip(e){const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){tip.style.opacity=0}
+
+/* ---------- geometry ---------- */
+const counties = topojson.feature(TOPO, TOPO.objects.counties).features;
+const statesMesh = topojson.mesh(TOPO, TOPO.objects.states, (a,b)=>a!==b);
+const statesFeat = topojson.feature(TOPO, TOPO.objects.states).features;
+const nationFeat = topojson.feature(TOPO, TOPO.objects.nation);
+const path = d3.geoPath();
+
+function countyMap(el, colorOf, tipOf, opts={}){
+  el.innerHTML='';
+  const feats = opts.filter? counties.filter(opts.filter) : counties;
+  let vb='0 0 975 610';
+  if(opts.fit){const b=d3.geoPath().bounds({type:'FeatureCollection',features:feats});const p=6;vb=`${b[0][0]-p} ${b[0][1]-p} ${b[1][0]-b[0][0]+2*p} ${b[1][1]-b[0][1]+2*p}`;el.style.aspectRatio=`${b[1][0]-b[0][0]+2*p}/${b[1][1]-b[0][1]+2*p}`}
+  const svg=d3.select(el).append('svg').attr('viewBox',vb).attr('role','img').attr('aria-label',opts.label||'County map');
+  svg.append('g').selectAll('path').data(feats).join('path').attr('class','county').attr('d',path)
+    .attr('fill',d=>colorOf(d.id)).attr('stroke-width',opts.fit?.8:.25)
+    .on('mouseenter',(e,d)=>showTip(e,tipOf(d.id))).on('mousemove',moveTip).on('mouseleave',hideTip)
+    .on('click',(e,d)=>opts.onClick&&opts.onClick(d.id));
+  if(!opts.fit) svg.append('path').attr('class','statebd').attr('d',path(statesMesh));
+  return svg;
+}
+function stateMap(el, colorOf, tipOf){
+  el.innerHTML='';
+  const svg=d3.select(el).append('svg').attr('viewBox','0 0 975 610').attr('role','img').attr('aria-label','State map');
+  svg.append('g').selectAll('path').data(statesFeat).join('path').attr('d',path).attr('stroke',css('--surface')).attr('stroke-width',1)
+    .attr('fill',d=>colorOf(STATE_FIPS[d.id])).on('mouseenter',(e,d)=>showTip(e,tipOf(STATE_FIPS[d.id],d.properties.name))).on('mousemove',moveTip).on('mouseleave',hideTip);
+}
+const cname = f => {const n=D.names[f];return n?`${esc(n[0])}, ${esc(n[1])}`:`County ${f}`};
+
+/* ---------- charts ---------- */
+function lineChart(el, series, o={}){
+  el.innerHTML='';
+  const W=o.w||720,H=o.h||220,m={t:10,r:14,b:24,l:o.left||38};
+  const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const all=series.flatMap(s=>s.values);
+  const x=d3.scaleUtc().domain(d3.extent(all,d=>d[0])).range([m.l,W-m.r]);
+  const ext=d3.extent(all,d=>d[1]); const lo=o.ymin??Math.min(ext[0],-1.2), hi=o.ymax??Math.max(ext[1],1.2);
+  const y=d3.scaleLinear().domain([lo,hi]).nice().range([H-m.b,m.t]);
+  if(o.bands){const b=[[-99,-1,'--vl'],[-1,-.25,'--lo'],[.25,1,'--el'],[1,99,'--hi']];
+    b.forEach(([a,c,col])=>{const y0=y(Math.max(a,y.domain()[0])),y1=y(Math.min(c,y.domain()[1]));if(y0>y1)svg.append('rect').attr('x',m.l).attr('width',W-m.l-m.r).attr('y',y1).attr('height',y0-y1).attr('fill',css(col)).attr('opacity',.09)})}
+  svg.append('g').attr('class','gridl').attr('transform',`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(o.yticks||5).tickSize(-(W-m.l-m.r)).tickFormat(o.yfmt||d3.format('.1f'))).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('text').attr('x',-6));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x).ticks(o.xticks||6).tickSizeOuter(0));
+  if(o.zero) svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',css('--muted')).attr('stroke-dasharray','2 3');
+  series.forEach(s=>{
+    if(s.area){svg.append('path').datum(s.values).attr('fill',s.color).attr('opacity',.12).attr('d',d3.area().x(d=>x(d[0])).y0(y(Math.max(0,y.domain()[0]))).y1(d=>y(d[1])).curve(d3.curveMonotoneX))}
+    svg.append('path').datum(s.values).attr('fill','none').attr('stroke',s.color).attr('stroke-width',s.width||1.8).attr('d',d3.line().x(d=>x(d[0])).y(d=>y(d[1])).curve(d3.curveMonotoneX));
+    const last=s.values[s.values.length-1];svg.append('circle').attr('cx',x(last[0])).attr('cy',y(last[1])).attr('r',3.2).attr('fill',s.color);
+  });
+  // hover
+  const bis=d3.bisector(d=>d[0]).center; const g=svg.append('g').style('display','none');
+  g.append('line').attr('y1',m.t).attr('y2',H-m.b).attr('stroke',css('--muted')).attr('stroke-dasharray','2 2');
+  svg.append('rect').attr('x',m.l).attr('y',m.t).attr('width',W-m.l-m.r).attr('height',H-m.t-m.b).attr('fill','transparent')
+    .on('mousemove',e=>{const [mx]=d3.pointer(e);const t=x.invert(mx);g.style('display',null);
+      const rows=series.map(s=>{const d=s.values[bis(s.values,t)];return d?`<div>${esc(s.name)}: <b>${(o.tipfmt||(v=>fmt(v)))(d[1])}</b></div>`:''});
+      const d0=series[0].values[bis(series[0].values,t)];g.select('line').attr('x1',x(d0[0])).attr('x2',x(d0[0]));
+      showTip(e,`<b>Week ending ${d3.utcFormat('%b %d, %Y')(d0[0])}</b>${rows.join('')}`)})
+    .on('mouseleave',()=>{g.style('display','none');hideTip()});
+}
+function spark(el, vals, color, o={}){
+  const W=260,H=54; el.innerHTML='';
+  const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('aria-hidden','true');
+  const x=d3.scaleLinear().domain([0,vals.length-1]).range([2,W-4]);
+  const ext=d3.extent(vals); const y=d3.scaleLinear().domain(o.dom||[Math.min(ext[0],-1),Math.max(ext[1],1)]).range([H-3,3]);
+  if(o.zero!==false) svg.append('line').attr('x1',0).attr('x2',W).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',css('--line'));
+  svg.append('path').datum(vals).attr('fill',color).attr('opacity',.12).attr('d',d3.area().x((d,i)=>x(i)).y0(y(o.base??0)).y1(d=>y(d)).curve(d3.curveMonotoneX));
+  svg.append('path').datum(vals).attr('fill','none').attr('stroke',color).attr('stroke-width',1.6).attr('d',d3.line().x((d,i)=>x(i)).y(d=>y(d)).curve(d3.curveMonotoneX));
+  svg.append('circle').attr('cx',x(vals.length-1)).attr('cy',y(vals[vals.length-1])).attr('r',3).attr('fill',color);
+}
+function hbars(el, rows, o={}){
+  el.innerHTML='';const W=o.w||520,bh=o.bh||20,gap=6,m={l:o.left||140,r:54};
+  const H=rows.length*(bh+gap)+4;const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const x=d3.scaleLinear().domain([o.min??0,o.max??d3.max(rows,r=>r.v)]).range([m.l,W-m.r]);
+  rows.forEach((r,i)=>{const yy=i*(bh+gap)+2;
+    svg.append('text').attr('x',m.l-8).attr('y',yy+bh/2).attr('dy','.35em').attr('text-anchor','end').text(r.label).style('fill',css('--ink'));
+    const x0=x(Math.max(0,x.domain()[0])),x1=x(r.v);
+    svg.append('rect').attr('x',Math.min(x0,x1)).attr('y',yy).attr('width',Math.max(1,Math.abs(x1-x0))).attr('height',bh).attr('rx',2).attr('fill',r.color||css('--accent'));
+    svg.append('text').attr('x',Math.max(x0,x1)+6).attr('y',yy+bh/2).attr('dy','.35em').text(o.fmt?o.fmt(r.v):fmt(r.v)).attr('font-family','var(--mono)');
+  });
+  if(x.domain()[0]<0) svg.append('line').attr('x1',x(0)).attr('x2',x(0)).attr('y1',0).attr('y2',H).attr('stroke',css('--muted'));
+}
+function groupedBars(el, groups, keys, colors, o={}){
+  el.innerHTML='';const W=o.w||640,H=o.h||240,m={t:12,r:10,b:28,l:40};
+  const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const x0=d3.scaleBand().domain(groups.map(g=>g.name)).range([m.l,W-m.r]).padding(.25);
+  const x1=d3.scaleBand().domain(keys).range([0,x0.bandwidth()]).padding(.08);
+  const vals=groups.flatMap(g=>keys.map(k=>g[k]));
+  const y=d3.scaleLinear().domain([Math.min(0,d3.min(vals)),o.max??Math.max(1,d3.max(vals))]).nice().range([H-m.b,m.t]);
+  svg.append('g').attr('class','gridl').attr('transform',`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W-m.l-m.r)).tickFormat(o.yfmt||d3.format('.1f'))).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('text').attr('x',-6));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${y(0)})`).call(d3.axisBottom(x0).tickSize(0)).call(g=>g.selectAll('text').attr('dy','1.3em').style('fill',css('--ink')).style('font-size','12px'));
+  groups.forEach(g=>keys.forEach((k,i)=>{const v=g[k];const yy=y(Math.max(0,v)),h=Math.abs(y(v)-y(0));
+    svg.append('rect').attr('x',x0(g.name)+x1(k)).attr('y',yy).attr('width',x1.bandwidth()).attr('height',Math.max(1,h)).attr('fill',colors[i]).attr('rx',2)
+      .on('mouseenter',e=>showTip(e,`<b>${esc(g.name)}</b><div>${esc(o.labels?o.labels[i]:k)}: <b>${fmt(v,3)}</b></div>`)).on('mousemove',moveTip).on('mouseleave',hideTip);
+    if(o.valueLabels) svg.append('text').attr('x',x0(g.name)+x1(k)+x1.bandwidth()/2).attr('y',v>=0?yy-4:yy+h+11).attr('text-anchor','middle').text(fmt(v,2)).attr('font-family','var(--mono)').style('font-size','10px');
+  }));
+}
+const legend = items => `<div class="legend">${items.map(([c,l])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')}</div>`;
+const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodata'),'No recent data']]);
+const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
+
+/* ---------- routing ---------- */
+const VIEWS=[['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['predictive','Predictive models'],['equity','Coverage & equity'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['audit','Audit log'],['methods','Methods & sources']];
+const built={};
+const nav=document.getElementById('nav');
+const highAlerts=D.alerts.filter(a=>a.severity==='high').length;
+nav.innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}">${l}${k==='alerts'?`<span class="count">${D.alerts.length}</span>`:''}</button>`).join('');
+nav.addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)});
+function go(v,push=true){
+  if(!VIEWS.some(x=>x[0]===v))v='dashboard';
+  VIEWS.forEach(([k])=>{document.getElementById('v-'+k).hidden=k!==v});
+  nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'page':'false'));
+  if(!built[v]){RENDER[v]();built[v]=true}
+  if(push&&location.hash!=='#'+v)history.replaceState(null,'','#'+v);
+  try{localStorage.setItem('nwgs_view',v)}catch(e){}
+  window.scrollTo(0,0);
+}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a){e.preventDefault();go(a.dataset.go)}});
+
+/* ---------- status strip ---------- */
+const R=D.run;
+const gateCls=R.gate_status==='PASS'?'ok':R.gate_status==='BLOCKED'?'bad':'warn';
+document.getElementById('status').innerHTML=
+  `<span>Data through <b class="num" style="color:var(--ink)">${dateFmt(R.data_as_of)}</b></span>
+   <span>Pulled <span class="num">${new Date(R.data_pulled_utc).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}</span></span>
+   <span>Updated weekly from CDC NWSS</span>
+   <button class="pill ${gateCls}" data-go="audit"><i></i>Validation: ${R.n_pass} pass · ${R.n_warning} warnings · ${R.n_fail} fail</button>
+   ${R.consistency_ok?'':'<button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button>'}`;
+
+const S = Object.fromEntries(D.summary.map(s=>[s.pathogen,s]));
+const ser = p => D.trend[p].map(([w,z])=>[new Date(w),z]);
+const highCount = p => Object.values(D.activity[p]).filter(([z])=>z>1).length;
+
+/* ---------- views ---------- */
+const RENDER={
+dashboard(){
+  const el=document.getElementById('v-dashboard');
+  const arrow=t=>t==='Increasing'?'<span class="trend-up">▲ Increasing</span>':t==='Decreasing'?'<span class="trend-down">▼ Decreasing</span>':'<span class="trend-flat">● Stable</span>';
+  el.innerHTML=`
+  <div class="head"><h1>Respiratory virus signals in U.S. wastewater</h1>
+  <p class="muted">Site-standardized wastewater activity for the four weeks ending ${dateFmt(D.activity_end)}, with clinical alignment, spatial clustering and coverage equity from the same weekly run.</p></div>
+  <div class="grid">${ROUTINE.map(p=>{const s=S[p];const l=level(s.recent_median_site_z);return `
+    <article class="panel card-p c4"><div class="top"><h2>${p}</h2>${chip(l)}</div>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="big">${fmt(s.recent_median_site_z)}</span><span class="small muted">median site z</span><span class="small">${arrow(s.trend)}</span></div>
+      <div class="chart" id="sp-${p.replace(/\W/g,'')}"></div>
+      <div class="kv small"><div><span class="label">Sites</span><b>${s.sites.toLocaleString()}</b></div><div><span class="label">Counties</span><b>${s.counties_represented.toLocaleString()}</b></div><div><span class="label">High now</span><b style="color:var(--hi)">${highCount(p)}</b></div></div>
+      <p class="small muted">Change vs previous window: <span class="num">${s.change_vs_previous_window_z>0?'+':''}${fmt(s.change_vs_previous_window_z)}</span> z · last 52 weeks shown</p>
+    </article>`}).join('')}
+  </div>
+  <div class="grid">
+    <article class="panel c7"><header><h2>Emerging pathogen detections</h2><span class="small muted">share of sites with a positive test, latest window</span></header>
+      <div class="grid" style="gap:12px">${EMERGING.map(p=>{const s=S[p];return `<div class="c4" style="display:flex;flex-direction:column;gap:6px;min-width:0"><span class="label">${p}</span><span class="big" style="font-size:1.6rem">${pct(s.recent_detection_rate)}</span><div class="chart" id="se-${p.replace(/\W/g,'')}"></div><span class="small muted">${s.sites.toLocaleString()} sites · since ${dateFmt(s.first_observation)}</span></div>`}).join('')}</div>
+    </article>
+    <article class="panel c5"><header><h2>Latest alerts</h2><a href="#alerts" data-go="alerts" class="small">All ${D.alerts.length} alerts</a></header>
+      <div>${[...D.alerts].sort((a,b)=>['high','moderate','info'].indexOf(a.severity)-['high','moderate','info'].indexOf(b.severity)).filter((a,i,arr)=>a.severity!=='high'||arr.filter(x=>x.severity==='high').indexOf(a)<2).slice(0,5).map(alertRow).join('')}</div>
+    </article>
+  </div>
+  <p class="note">Levels compare each site with its own history (within-site log-concentration z-score), then take the county or national median. They describe relative change, not case counts.</p>`;
+  ROUTINE.forEach(p=>spark(document.getElementById('sp-'+p.replace(/\W/g,'')),D.trend[p].slice(-52).map(d=>d[1]),css('--accent')));
+  EMERGING.forEach(p=>spark(document.getElementById('se-'+p.replace(/\W/g,'')),D.emerging[p].slice(-52).map(d=>d[1]*100),css('--warn'),{zero:false,base:0,dom:[0,Math.max(3,d3.max(D.emerging[p].slice(-52),d=>d[1]*100))]}));
+},
+
+map(){
+  const el=document.getElementById('v-map');
+  el.innerHTML=`<div class="head"><h1>Surveillance map</h1><p class="muted">County wastewater activity, spatial clusters and surveillance coverage. Hover or tap a county for details.</p></div>
+  <div class="controls"><div class="seg" id="m-path">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
+  <div class="seg" id="m-layer"><button aria-pressed="true" data-l="activity">Recent activity</button><button aria-pressed="false" data-l="cluster">Spatial clusters</button><button aria-pressed="false" data-l="coverage">Coverage</button></div></div>
+  <div class="grid"><div class="panel c8"><div class="mapbox" id="m-map"></div><div id="m-legend"></div></div>
+  <div class="c4" style="display:flex;flex-direction:column;gap:16px;min-width:0"><div class="panel"><span class="label">Selected county</span><div class="detail" id="m-detail"><span class="muted">Tap a county to pin its details here.</span></div></div>
+  <div class="panel" id="m-stats"></div></div></div>`;
+  let P='SARS-CoV-2',L='activity';
+  const CL={'High-High':'--hi','Low-Low':'--vl','High-Low':'--el','Low-High':'--lo','Not Significant':'--typ'};
+  const covBins=[[0,'No data','--nodata'],[25,'1–25 weeks','--accent-soft'],[51,'26–51','--lo'],[103,'52–103','--vl'],[155,'104–155','--accent'],[1e9,'≥156 weeks','--ink']];
+  const covCol=w=>{if(!w)return css('--nodata');for(const [m,,c] of covBins.slice(1)) if(w<=m) return css(c);};
+  const info=f=>{const a=D.activity[P][f],c=D.clusters[P][f],v=D.coverage[f];
+    return `<b>${cname(f)}</b><div>${P} activity: ${a?`<b>${fmt(a[0])}</b> z (${level(a[0])}), ${a[1]} site${a[1]>1?'s':''}`:'no recent data'}</div><div>Cluster: ${c||'—'}</div><div>Coverage: ${v?`${v[0]} weeks${v[1]?', analysis-ready':''}`:'none'}</div>${v&&v[2]!=null?`<div>SVI: ${fmt(v[2])}</div>`:''}`};
+  function draw(){
+    const color=L==='activity'?f=>{const a=D.activity[P][f];return a?lvColor(level(a[0])):css('--nodata')}
+      :L==='cluster'?f=>{const c=D.clusters[P][f];return c?css(CL[c]):css('--nodata')}
+      :f=>covCol(D.coverage[f]?.[0]);
+    countyMap(document.getElementById('m-map'),color,info,{label:`${P} ${L} map`,onClick:f=>{document.getElementById('m-detail').innerHTML=info(f)}});
+    document.getElementById('m-legend').innerHTML=L==='activity'?levelLegend()+`<p class="note">Four weeks ending ${dateFmt(D.activity_end)}. ${Object.keys(D.activity[P]).length} counties with recent data.</p>`
+      :L==='cluster'?legend(Object.entries(CL).map(([k,v])=>[css(v),k]).concat([[css('--nodata'),'No recent data']]))+'<p class="note">Local Moran’s I with k=6 nearest neighbours; cluster classes shown at permutation p&lt;0.05.</p>'
+      :legend(covBins.map(([,l,c])=>[css(c),l]))+'<p class="note">Most qualifying weeks across SARS-CoV-2, RSV and influenza A.</p>';
+    const s=D.spatial.find(x=>x.pathogen===P);const vals=Object.values(D.activity[P]).map(a=>level(a[0]));
+    document.getElementById('m-stats').innerHTML=`<span class="label">${P} · national picture</span>
+      <div class="statgrid" style="grid-template-columns:1fr 1fr"><div><span class="label">Moran’s I</span><div class="big" style="font-size:1.5rem">${fmt(s.morans_i,3)}</div><span class="small muted">p = ${s.p_sim}</span></div><div><span class="label">Counties</span><div class="big" style="font-size:1.5rem">${s.n_counties}</div><span class="small muted">in spatial analysis</span></div></div>
+      <div class="tbl"><table><tr><th>Level</th><th class="n">Counties</th></tr>${LEVELS.slice().reverse().map(l=>`<tr><td>${chip(l)}</td><td class="n">${vals.filter(v=>v===l).length}</td></tr>`).join('')}</table></div>
+      <p class="small muted">High-High clusters: <b class="num">${s['high-high']}</b> · Low-Low: <b class="num">${s['low-low']}</b></p>`;
+  }
+  el.querySelector('#m-path').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;P=b.dataset.p;el.querySelectorAll('#m-path button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
+  el.querySelector('#m-layer').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;L=b.dataset.l;el.querySelectorAll('#m-layer button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
+  draw();
+},
+
+analytics(){
+  const el=document.getElementById('v-analytics');
+  const lagSum=p=>{const r=D.statelag.filter(x=>x.pathogen===p);return {n:r.length,sync:r.filter(x=>x.lag_weeks===0).length,lead:r.filter(x=>x.lag_weeks>0).length,rho:d3.median(r,x=>x.spearman_r),sig:r.filter(x=>x.significant_fdr).length}};
+  el.innerHTML=`<div class="head"><h1>Trends & timing</h1><p class="muted">National wastewater activity, how closely it tracks emergency-department visits, and when seasons peak.</p></div>
+  <article class="panel"><header><h2>National wastewater activity</h2><div class="seg" id="a-path">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div></header>
+  <div class="chart" id="a-trend"></div>${legend([['var(--vl)','Very Low ≤ −1'],['var(--lo)','Low'],['var(--el)','Elevated'],['var(--hi)','High > 1']])}</article>
+  <div class="grid">
+  <article class="panel c7"><header><h2>Wastewater vs. emergency-department timing</h2></header>
+    <div class="seg" id="a-lagp">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
+    <div class="mapbox" id="a-lagmap"></div>${legend([['var(--accent)','Same week'],['var(--el)','Wastewater leads'],['var(--nodata)','Not significant or no data']])}</article>
+  <article class="panel c5"><header><h2>By pathogen</h2><span class="small muted">best lag per state</span></header>
+    <div class="tbl"><table><tr><th>Pathogen</th><th class="n">Same week</th><th class="n">WW leads</th><th class="n">Median ρ</th><th class="n">Significant</th></tr>
+    ${ROUTINE.map(p=>{const s=lagSum(p);return `<tr><td>${p}</td><td class="n">${s.sync}/${s.n}</td><td class="n">${s.lead}</td><td class="n">${fmt(s.rho)}</td><td class="n">${s.sig}/${s.n}</td></tr>`}).join('')}</table></div>
+    <p class="note">Most states peak in the same week in wastewater and clinical data. Leads, where present, are almost always one week. Significance uses FDR-corrected Spearman tests.</p></article>
+  </div>
+  <div class="grid">
+  <article class="panel c7"><header><h2>National seasonal peaks</h2><span class="small muted">complete July–June seasons</span></header>
+    <div class="tbl"><table><tr><th>Pathogen</th><th>Season</th><th>Wastewater peak</th><th>Clinical peak</th><th class="n">Lead (wk)</th><th class="n">Peak z</th></tr>
+    ${D.seasonal.map(s=>`<tr><td>${s.pathogen}</td><td class="mono">${s.season}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td><td class="n">${fmt(s.ww_peak_magnitude_z)}</td></tr>`).join('')}</table></div>
+    <p class="note">Positive lead = wastewater peaked first. At state level, ${D.state_seasons.flagged} of ${D.state_seasons.n} eligible state-seasons are flagged for implausible leads (${D.state_seasons.by.map(b=>`${b.pathogen} ${b.flagged}`).join(', ')}).</p></article>
+  <article class="panel c5"><header><h2>Emerging pathogens</h2><div class="seg" id="a-em">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p.replace('Influenza A(H5)','H5')}</button>`).join('')}</div></header>
+    <div class="chart" id="a-emc"></div><p class="note">Weekly share of tested sites with a detection. Weeks with fewer than 20 sites are hidden.</p></article>
+  </div>`;
+  let P='SARS-CoV-2';
+  const drawT=()=>lineChart(document.getElementById('a-trend'),[{name:P,values:ser(P),color:css('--accent'),area:false}],{bands:true,zero:true,h:240});
+  const drawLag=p=>{const by=Object.fromEntries(D.statelag.filter(x=>x.pathogen===p).map(x=>[x.state_code,x]));
+    stateMap(document.getElementById('a-lagmap'),st=>{const r=by[st];return !r||!r.significant_fdr?css('--nodata'):r.lag_weeks>0?css('--el'):css('--accent')},
+      (st,name)=>{const r=by[st];return r?`<b>${esc(name)}</b><div>${r.relationship}${r.lag_weeks?` by ${r.lag_weeks} wk`:''}</div><div>ρ = ${fmt(r.spearman_r)} · ${r.paired_weeks} weeks</div>${r.significant_fdr?'':'<div>Not significant after FDR</div>'}`:`<b>${esc(name)}</b><div>No qualifying data</div>`})};
+  const drawEm=p=>lineChart(document.getElementById('a-emc'),[{name:p,values:D.emerging[p].filter(d=>d[2]>=20).map(d=>[new Date(d[0]),d[1]]),color:css('--warn'),area:true}],{ymin:0,yfmt:d3.format('.0%'),tipfmt:v=>pct(v),h:230,left:42,xticks:4});
+  const seg=(id,fn)=>el.querySelector(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll(id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.p)});
+  seg('#a-path',p=>{P=p;drawT()});seg('#a-lagp',drawLag);seg('#a-em',drawEm);
+  drawT();drawLag('SARS-CoV-2');drawEm('Influenza A(H5)');
+},
+
+predictive(){
+  const el=document.getElementById('v-predictive');
+  const M=Object.fromEntries(D.models.map(m=>[m.pathogen,m]));
+  el.innerHTML=`<div class="head"><h1>Predictive models</h1><p class="muted">Does wastewater help predict emergency-department burden? Each model was trained on earlier weeks and tested on a later held-out period.</p></div>
+  <article class="panel"><header><h2>Held-out accuracy (R²)</h2></header><div class="chart" id="p-bars"></div>
+  ${legend([['var(--muted)','Clinical history only (persistence)'],['var(--el)','Wastewater only'],['var(--accent)','Full multimodal model']])}</article>
+  <div class="grid">${ROUTINE.map(p=>{const m=M[p];return `<article class="panel c4"><header><h2>${p}</h2><span class="small mono">${m.best_model}</span></header>
+    <p style="font-weight:600">${esc(m.plain_language)}</p>
+    <div class="kv small"><div><span class="label">Full R²</span><b>${fmt(m.full_model_r2,3)}</b></div><div><span class="label">Clinical only</span><b>${fmt(m.clinical_persistence_r2,3)}</b></div><div><span class="label">Gain</span><b>${m.gain_over_persistence>0?'+':''}${fmt(m.gain_over_persistence,3)}</b></div></div>
+    <p class="small muted">${esc(m.interpretation)}</p>
+    <span class="label">Top features (mean |SHAP|)</span><div class="chart" id="p-shap-${p.replace(/\W/g,'')}"></div></article>`}).join('')}</div>
+  <p class="note">Wastewater features (orange) are often strongly correlated with last week’s clinical value (r up to 0.77), so a small SHAP rank inside the full model can understate wastewater’s standalone signal. That is why the wastewater-only model is shown separately.</p>`;
+  groupedBars(document.getElementById('p-bars'),ROUTINE.map(p=>({name:p,a:M[p].clinical_persistence_r2,b:M[p].wastewater_only_r2,c:M[p].full_model_r2})),['a','b','c'],[css('--muted'),css('--el'),css('--accent')],{labels:['Clinical only','Wastewater only','Full model'],valueLabels:true,max:1,h:260});
+  ROUTINE.forEach(p=>hbars(document.getElementById('p-shap-'+p.replace(/\W/g,'')),D.shap.filter(s=>s.pathogen===p).slice(0,8).map(s=>({label:s.feature,v:s.mean_abs_shap,color:/^(ww_|wastewater)/.test(s.feature)?css('--el'):css('--muted')})),{left:120,w:420,bh:16,fmt:v=>v<.01?v.toExponential(1):v.toFixed(2)}));
+},
+
+equity(){
+  const el=document.getElementById('v-equity');
+  const g=D.equity[0];const sig=g.glm_p_value<.05;
+  const line=sig?(g.glm_odds_ratio<1?'More socially vulnerable counties are less likely to have analysis-ready wastewater surveillance.':'More socially vulnerable counties are more likely to have analysis-ready surveillance.'):'No clear difference by social vulnerability.';
+  el.innerHTML=`<div class="head"><h1>Coverage & equity</h1><p class="muted">Who the wastewater system reaches, measured against the CDC/ATSDR Social Vulnerability Index (SVI).</p></div>
+  <div class="grid"><article class="panel c5"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
+    <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
+  <article class="panel c7"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
+    <p style="font-size:1.05rem;font-weight:600;max-width:60ch">${line}</p>
+    <div class="statgrid"><div class="stat"><span class="label">Odds ratio per 0.10 SVI</span><span class="big">${fmt(g.glm_odds_ratio,3)}</span></div><div class="stat"><span class="label">95% CI</span><span class="big" style="font-size:1.4rem">${fmt(g.glm_or_95ci_low,3)}–${fmt(g.glm_or_95ci_high,3)}</span></div><div class="stat"><span class="label">p value</span><span class="big" style="font-size:1.4rem">${g.glm_p_value.toExponential(2)}</span></div></div>
+    <div class="mapbox" id="e-map"></div>${legend([['var(--accent)','Analysis-ready'],['var(--lo)','Observed, not ready'],['var(--nodata)','No surveillance']])}
+    <p class="note">Analysis-ready = at least 52 qualifying weeks and at least 70% completeness across the active span. Association, not cause.</p></article></div>`;
+  hbars(document.getElementById('e-bars'),D.equity.map(q=>({label:q.svi_quartile.replace(' vulnerability',''),v:q.pct_analysis_ready})),{min:0,max:100,left:110,w:440,fmt:v=>v.toFixed(1)+'%'});
+  countyMap(document.getElementById('e-map'),f=>{const v=D.coverage[f];return !v?css('--nodata'):v[1]?css('--accent'):css('--lo')},f=>{const v=D.coverage[f];return `<b>${cname(f)}</b><div>${v?`${v[0]} weeks${v[1]?', analysis-ready':', not analysis-ready'}`:'No surveillance'}</div>${v&&v[2]!=null?`<div>SVI ${fmt(v[2])}</div>`:''}`},{label:'Coverage readiness map'});
+},
+
+tennessee(){
+  const el=document.getElementById('v-tennessee');
+  const T=D.tn_county, obs=T.filter(c=>c.surveillance_weeks>0), ready=T.filter(c=>c.any_analysis_ready), now=T.filter(c=>c.reporting_now);
+  const ST={'Reporting now':'--accent','Analysis-ready, stopped':'--vl','Observed, not analysis-ready':'--lo','No CDC NWSS data':'--nodata'};
+  const byF=Object.fromEntries(T.map(c=>[c.county_fips,c]));
+  const q=D.tn_equity[0];
+  el.innerHTML=`<div class="head"><h1>Tennessee</h1><p class="muted">How much of Tennessee’s 95 counties CDC wastewater surveillance reaches, and how it has changed.</p></div>
+  <div class="statgrid"><div class="stat"><span class="label">Ever monitored</span><span class="big">${obs.length}<span class="small muted"> / 95</span></span></div><div class="stat"><span class="label">Analysis-ready</span><span class="big">${ready.length}<span class="small muted"> / 95</span></span></div><div class="stat"><span class="label">Reporting now</span><span class="big" style="color:var(--hi)">${now.length}<span class="small muted"> / 95</span></span><span class="small muted">${now.map(c=>c.county_name).join(' and ')}</span></div></div>
+  <div class="grid"><article class="panel c7"><div class="mapbox" id="t-map"></div>${legend(Object.entries(ST).map(([k,v])=>[css(v),k]))}</article>
+  <article class="panel c5"><header><h2>Monitored counties</h2></header><div class="tbl"><table><tr><th>County</th><th class="n">Weeks</th><th>Last season</th><th>Status</th></tr>
+  ${obs.map(c=>`<tr><td>${esc(c.county_name)}</td><td class="n">${c.surveillance_weeks}</td><td class="mono">${c.last_season_with_data??'—'}</td><td><span class="chip sw" style="background:${css(ST[c.status])}"></span> ${c.status}</td></tr>`).join('')}</table></div></article></div>
+  <div class="grid"><article class="panel c4"><header><h2>Wastewater vs. ED</h2><span class="small muted">same-week Spearman ρ</span></header>
+    <div class="chart" id="t-rho"></div></article>
+  <article class="panel c8"><header><h2>Seasonal peaks</h2><span class="small muted">seasons meeting coverage criteria</span></header>
+    <div class="tbl"><table><tr><th>Pathogen</th><th>Season</th><th class="n">Ready counties</th><th>WW peak</th><th>ED peak</th><th class="n">Lead</th></tr>
+    ${D.tn_seasonal.filter(s=>s.eligible_for_tennessee_seasonal_inference).map(s=>`<tr><td>${s.pathogen}</td><td class="mono">${s.season}</td><td class="n">${s.season_ready_counties}/${s.observed_counties}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td></tr>`).join('')}</table></div>
+    <p class="callout">⚑ SARS-CoV-2 has summer and winter waves. In flagged seasons the clinical peak was the August wave and the wastewater peak the December wave, so the −18 weeks compares two different waves rather than measuring a lag.</p></article></div>
+  <article class="panel"><header><h2>Equity</h2><span class="small muted">exploratory, unadjusted</span></header>
+    <p>Odds ratio per 0.10 SVI: <b class="num">${fmt(q.glm_odds_ratio_per_0_10_svi,2)}</b> (95% CI <span class="num">${fmt(q.glm_or_95ci_low,2)}–${fmt(q.glm_or_95ci_high,2)}</span>), p = <span class="num">${fmt(q.glm_p_value,3)}</span>. Readiness by quartile: ${D.tn_equity.map(x=>`${x.svi_quartile} ${fmt(x.pct_analysis_ready,1)}%`).join(' · ')}.</p>
+    <p class="note">With only ${ready.length} analysis-ready counties, this cannot show whether coverage is equitable. Counts reflect CDC NWSS public data; counties may be monitored by other programs.</p></article>`;
+  countyMap(document.getElementById('t-map'),f=>css(ST[byF[f]?.status||'No CDC NWSS data']),f=>{const c=byF[f];return c?`<b>${esc(c.county_name)} County</b><div>${c.status}</div>${c.surveillance_weeks?`<div>${c.surveillance_weeks} weeks · last season ${c.last_season_with_data}</div>`:''}`:''},{filter:d=>d.id.startsWith('47'),fit:true,label:'Tennessee counties map'});
+  hbars(document.getElementById('t-rho'),D.tn_align.map(a=>({label:a.pathogen,v:a.spearman_rho_same_week})),{min:0,max:1,left:84,w:280,bh:22,fmt:v=>v.toFixed(2)});
+},
+
+genomics(){
+  const el=document.getElementById('v-genomics');
+  const yrs=[...new Set(D.genomic_year.map(r=>r.release_year))].sort();
+  el.innerHTML=`<div class="head"><h1>Genomics & antimicrobial resistance</h1><p class="muted">Resistance genes measured in wastewater, and the public NCBI genome records behind each pathogen.</p></div>
+  <div class="grid"><article class="panel c6"><header><h2>Resistance genes in wastewater</h2><span class="small muted">share of sites with detection</span></header><div class="chart" id="g-amr"></div></article>
+  <article class="panel c6"><header><h2>Mean detection by state</h2></header><div class="mapbox" id="g-map"></div>
+    <div class="legend"><span>Lower</span><i style="background:linear-gradient(90deg,var(--accent-soft),var(--accent));width:90px"></i><span>Higher</span><span><i style="background:var(--nodata)"></i>No sites</span></div></article></div>
+  <article class="panel"><header><h2>NCBI virus genome records</h2></header><div class="tbl"><table><tr><th>Pathogen</th><th class="n">Records</th><th class="n">With collection date</th><th class="n">Complete genomes</th><th>Main hosts</th><th>Main locations</th></tr>
+  ${D.genomic.map(g=>`<tr><td>${g.pathogen}</td><td class="n">${g.records}</td><td class="n">${g.dated_collection}</td><td class="n">${g.complete_genome_records}</td><td class="small">${Object.entries(D.genomic_hosts[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td><td class="small">${Object.entries(D.genomic_places[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td></tr>`).join('')}</table></div>
+  <p class="note">Most recent records from NCBI Virus per pathogen. These are public sequence records, not sequences from the wastewater samples.</p></article>`;
+  hbars(document.getElementById('g-amr'),[...D.amr].sort((a,b)=>b.detection_rate_pct-a.detection_rate_pct).map(a=>({label:`${a.target} · ${a.amr_class}`,v:a.detection_rate_pct})),{min:0,max:100,left:170,w:520,bh:17,fmt:v=>v.toFixed(0)+'%'});
+  const by=Object.fromEntries(D.amr_state.map(s=>[s.state_code,s]));const ext=d3.extent(D.amr_state,s=>s.mean_detection_rate_pct);
+  const col=d3.scaleLinear().domain(ext).range([css('--accent-soft'),css('--accent')]);
+  stateMap(document.getElementById('g-map'),st=>by[st]?col(by[st].mean_detection_rate_pct):css('--nodata'),(st,name)=>by[st]?`<b>${esc(name)}</b><div>${fmt(by[st].mean_detection_rate_pct,1)}% mean detection</div><div>${by[st].sites} site${by[st].sites>1?'s':''}</div>`:`<b>${esc(name)}</b><div>No AMR sites</div>`);
+},
+
+structures(){
+  const el=document.getElementById('v-structures');
+  el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One representative reference structure per pathogen from the RCSB Protein Data Bank, all passing the pipeline’s structural QC.</p></div>
+  <div class="grid">${D.structures.map(s=>`<article class="panel c4"><header><h2>${s.pathogen}</h2><a class="mono" href="${s.pdb_entry_url}" target="_blank" rel="noopener">${s.pdb_entry_id} ↗</a></header>
+    <p style="font-weight:600">${esc(s.protein)}</p><p class="small muted">${esc(s.rcsb_title)}</p>
+    <div class="kv small"><div><span class="label">Method</span><b style="font-family:var(--body);font-size:.82rem">${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')}</b></div><div><span class="label">Resolution</span><b>${fmt(s.resolution_a,2)} Å</b></div><div><span class="label">Cα atoms</span><b>${s.ca_atom_count.toLocaleString()}</b></div></div>
+    <p class="small muted">UniProt: <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc}</p></article>`).join('')}</div>
+  <p class="note">Reference structures give biological context only; they are not derived from wastewater samples.</p>`;
+},
+
+alerts(){
+  const el=document.getElementById('v-alerts');
+  const groups=[['high','High county activity'],['moderate','Trends and detections'],['info','Coverage']];
+  el.innerHTML=`<div class="head"><h1>Alerts</h1><p class="muted">Generated from this run’s data. Nothing on this page is written by hand.</p></div>
+  ${groups.map(([s,t])=>{const a=D.alerts.filter(x=>x.severity===s);return a.length?`<article class="panel"><header><h2>${t}</h2><span class="small muted">${a.length}</span></header><div>${a.map(alertRow).join('')}</div></article>`:''}).join('')}
+  <p class="note">Rules: county z-score above 1.0 in the latest four weeks; national trend marked Increasing; an emerging pathogen detected at more than twice its 8-week median share of sites; Tennessee reporting coverage.</p>`;
+},
+
+audit(){
+  const el=document.getElementById('v-audit');
+  const cls=s=>s.startsWith('PASS')?'PASS':s.startsWith('FAIL')?'FAIL':'WARN';
+  el.innerHTML=`<div class="head"><h1>Audit log</h1><p class="muted">Every validation check from this run. The app only updates when no check fails.</p></div>
+  <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono">${R.n_pass} pass · ${R.n_warning} warn · ${R.n_fail} fail</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
+  ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
+  <article class="panel"><div class="tbl"><table><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
+  ${D.audit.map(a=>`<tr><td>${esc(a.component)}</td><td class="status-${cls(a.status)}" style="white-space:nowrap;font-weight:600">${esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;word-break:break-word">${esc(a.detail)}</td><td class="small muted">${esc(a.source)}</td></tr>`).join('')}</table></div></article>`;
+},
+
+methods(){
+  const el=document.getElementById('v-methods');
+  el.innerHTML=`<div class="head"><h1>Methods & sources</h1><p class="muted">How the numbers on this site are made.</p></div>
+  <article class="panel"><header><h2>Data sources</h2><span class="small muted">frozen snapshot, pulled ${new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></header>
+  <div class="tbl"><table><tr><th>Pathogen</th><th>Dataset</th><th>ID</th><th class="n">Rows</th></tr>${D.sources.map(s=>`<tr><td>${s.pathogen}</td><td>${esc(s.dataset_name)}</td><td><a class="mono" href="${s.source_url}" target="_blank" rel="noopener">${s.dataset_id}</a></td><td class="n">${s.rows.toLocaleString()}</td></tr>`).join('')}</table></div>
+  <p class="small muted">Also used: CDC NSSP emergency-department visits, CDC/ATSDR Social Vulnerability Index, U.S. Census TIGER/Line, NCBI Virus, RCSB Protein Data Bank.</p></article>
+  <div class="grid"><article class="panel c6"><h2>Measures</h2><ul class="small" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+    <li><b>Activity level</b> — within-site z-score of log concentration, median across a county’s sites for the latest 4 weeks. Very Low ≤ −1, Low ≤ −0.25, Typical ≤ 0.25, Elevated ≤ 1, High &gt; 1.</li>
+    <li><b>Analysis-ready</b> — at least 52 qualifying weeks and at least 70% completeness across the active span.</li>
+    <li><b>Timing</b> — Spearman correlation between state wastewater and ED activity at lags of 0–6 weeks, FDR-corrected; best lag reported.</li>
+    <li><b>Seasonal peaks</b> — complete July–June seasons only; leads near season boundaries are flagged.</li>
+    <li><b>Clusters</b> — global and local Moran’s I, k=6 nearest neighbours, EPSG:5070, permutation inference.</li>
+    <li><b>Models</b> — random forest and gradient boosting vs. clinical persistence on a chronological holdout; ablation, wastewater-only benchmark and SHAP.</li></ul></article>
+  <article class="panel c6"><h2>About this version</h2><p class="small">This is a static build: one HTML page generated from the weekly pipeline export, with no server or database. It covers every public view of the Base44 app.</p>
+    <p class="small">Account features need a backend and are not included: sign-in, saved alert rules with email, user admin, and the data-upload pages. License requests and beta feedback can link to an external form.</p>
+    <p class="small muted">Victoria Love Franklin · Meharry Medical College · NWGS Grid™</p></article></div>`;
+}
+};
+
+function alertRow(a){return `<div class="alert"><span class="bar sev-${a.severity}"></span><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="meta"><b style="color:var(--ink)">${esc(a.alert_type)}</b>${a.pathogen?`<span>${esc(a.pathogen)}</span>`:''}${a.geography?`<span>${esc(a.geography)}</span>`:''}</div><p class="small">${esc(a.message)}</p></div></div>`}
+
+/* ---------- boot ---------- */
+let start=location.hash.slice(1);
+if(!start){try{start=localStorage.getItem('nwgs_view')||''}catch(e){}}
+go(start||'dashboard',false);
+addEventListener('hashchange',()=>go(location.hash.slice(1),false));
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{Object.keys(built).forEach(k=>delete built[k]);go(location.hash.slice(1)||'dashboard',false)});
+new MutationObserver(()=>{Object.keys(built).forEach(k=>delete built[k]);go(location.hash.slice(1)||'dashboard',false)}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
