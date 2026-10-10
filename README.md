@@ -59,6 +59,14 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
 | `static_inputs/` | Files the pipeline doesn't download (SVI, AMR); TIGER is downloaded each run |
 | `scripts/` | Export (validation gate), site build, weekly alert emails |
 | `supabase/` | Database tables and security rules for accounts and alerts |
+
+## Structural annotation layer
+`pull_uniprot_functional_regions()` in the pipeline imports UniProtKB's curated feature table
+for each representative structure's protein and maps the residue ranges onto that structure's
+author numbering via RCSB's 1D-coordinates alignment, writing
+`Table11d_UniProt_Functional_Regions.csv`. The app shows only rows with `mapping_status=MAPPED`
+and marks them `pending_expert_review` until a structural biology collaborator signs off.
+It is a descriptive, cited reference layer: nothing is predicted, scored or ranked.
 | `site_src/` | Page template and U.S. county map (us-atlas, ISC license) |
 | `sample_export/` | Oct 9, 2026 export used until the pipeline runs here |
 | `LICENSE`, `CITATION.cff` | Copyright terms and citation details |

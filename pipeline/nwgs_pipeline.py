@@ -5087,6 +5087,274 @@ def pull_rcsb_structure_mappings(genomics):
 
 
 # ============================================================
+# 21b. UNIPROT FUNCTIONAL REGION ANNOTATIONS (v5.21)
+# ============================================================
+# Descriptive, citation-backed annotation layer only. Every region below is
+# imported verbatim from UniProt's curated feature table for the same protein
+# the representative structure contains, then mapped onto that structure's own
+# author residue numbering using RCSB's published sequence alignments. Nothing
+# here is predicted, scored or ranked by this pipeline: the app reproduces
+# public reference annotations next to the structure they describe, with the
+# source accession and evidence recorded for every row.
+
+UNIPROT_REST = "https://rest.uniprot.org/uniprotkb"
+RCSB_DATA_GRAPHQL = "https://data.rcsb.org/graphql"
+
+# UniProt feature types kept for display, mapped to plain-language labels.
+# Per-residue bookkeeping types (glycosylation, disulfide bonds, variants) are
+# deliberately excluded: they are numerous and add noise rather than context.
+UNIPROT_FEATURE_TYPES = {
+    "Domain": "Domain",
+    "Region": "Region",
+    "Motif": "Motif",
+    "Binding site": "Binding site",
+    "Active site": "Active site",
+    "Site": "Functional site",
+    "Transmembrane": "Transmembrane",
+    "Intramembrane": "Intramembrane",
+    "Signal": "Signal peptide",
+    "Topological domain": "Topological domain",
+    "Coiled coil": "Coiled coil",
+}
+
+
+def _uniprot_feature_table(accession):
+    """Curated feature table for one UniProt accession (REST, public, no key)."""
+    r = SESSION.get(f"{UNIPROT_REST}/{accession}.json", timeout=90,
+                    headers={"Accept": "application/json"})
+    r.raise_for_status()
+    return parse_uniprot_features(r.json(), accession)
+
+
+def parse_uniprot_features(payload, accession):
+    """Pull display-worthy features out of a UniProtKB JSON record."""
+    rows = []
+    protein_name = (((payload.get("proteinDescription") or {}).get("recommendedName") or {})
+                    .get("fullName") or {}).get("value")
+    seq_len = (payload.get("sequence") or {}).get("length")
+    for feat in payload.get("features") or []:
+        label = UNIPROT_FEATURE_TYPES.get(feat.get("type"))
+        if not label:
+            continue
+        loc = feat.get("location") or {}
+        start = (loc.get("start") or {}).get("value")
+        end = (loc.get("end") or {}).get("value")
+        if start is None or end is None:
+            continue   # uncertain or open-ended positions are skipped, never guessed
+        evidence = feat.get("evidences") or []
+        rows.append({
+            "uniprot_accession": accession,
+            "uniprot_protein_name": protein_name,
+            "uniprot_sequence_length": seq_len,
+            "feature_type": label,
+            "feature_description": (feat.get("description") or "").strip() or label,
+            "uniprot_start": int(start),
+            "uniprot_end": int(end),
+            "evidence_codes": ";".join(sorted({e.get("evidenceCode") for e in evidence if e.get("evidenceCode")})),
+            "evidence_count": len(evidence),
+        })
+    return rows
+
+
+def _rcsb_uniprot_entity_alignment(accession):
+    """
+    RCSB 1D-coordinates alignment: UniProt sequence positions -> PDB entity
+    (label_seq_id) positions, per aligned block.
+    """
+    query = """
+    query Align($id: String!){
+      alignment(from: UNIPROT, to: PDB_ENTITY, queryId: $id) {
+        target_alignment {
+          target_id
+          aligned_regions { query_begin query_end target_begin target_end }
+        }
+      }
+    }
+    """
+    r = SESSION.post(RCSB_SEQUENCE_COORDINATES,
+                     json={"query": query, "variables": {"id": str(accession)}},
+                     headers={"Content-Type": "application/json",
+                              "User-Agent": "NWGS-Grid-Research/5.21"},
+                     timeout=90)
+    if not r.ok:
+        return {}
+    return parse_rcsb_alignment(r.json())
+
+
+def parse_rcsb_alignment(payload):
+    """{entity_id: [(query_begin, query_end, target_begin, target_end), ...]}"""
+    out = {}
+    if payload.get("errors"):
+        return out
+    targets = (((payload.get("data") or {}).get("alignment") or {}).get("target_alignment") or [])
+    for tgt in targets:
+        tid = tgt.get("target_id")
+        if not tid:
+            continue
+        blocks = []
+        for reg in tgt.get("aligned_regions") or []:
+            qb, qe = reg.get("query_begin"), reg.get("query_end")
+            tb, te = reg.get("target_begin"), reg.get("target_end")
+            if None in (qb, qe, tb, te):
+                continue
+            blocks.append((int(qb), int(qe), int(tb), int(te)))
+        if blocks:
+            out[tid] = blocks
+    return out
+
+
+def _rcsb_entity_auth_numbering(pdb_id, entity_id):
+    """
+    Author residue numbering for one polymer entity, per chain. RCSB gives
+    auth_to_entity_poly_seq_mapping: position i in the entity sequence is
+    author residue number mapping[i-1] in that chain.
+    """
+    query = """
+    query Inst($entry: String!, $entity: String!){
+      polymer_entity(entry_id: $entry, entity_id: $entity) {
+        polymer_entity_instances {
+          rcsb_polymer_entity_instance_container_identifiers {
+            auth_asym_id
+            auth_to_entity_poly_seq_mapping
+          }
+        }
+      }
+    }
+    """
+    r = SESSION.post(RCSB_DATA_GRAPHQL,
+                     json={"query": query, "variables": {"entry": str(pdb_id).upper(),
+                                                         "entity": str(entity_id)}},
+                     headers={"Content-Type": "application/json",
+                              "User-Agent": "NWGS-Grid-Research/5.21"},
+                     timeout=90)
+    if not r.ok:
+        return {}
+    return parse_rcsb_auth_mapping(r.json())
+
+
+def parse_rcsb_auth_mapping(payload):
+    """{auth_asym_id: [author residue numbers, indexed by entity seq position]}"""
+    out = {}
+    if payload.get("errors"):
+        return out
+    insts = (((payload.get("data") or {}).get("polymer_entity") or {})
+             .get("polymer_entity_instances") or [])
+    for inst in insts:
+        ids = inst.get("rcsb_polymer_entity_instance_container_identifiers") or {}
+        chain = ids.get("auth_asym_id")
+        mapping = ids.get("auth_to_entity_poly_seq_mapping")
+        if chain and mapping:
+            out[chain] = list(mapping)
+    return out
+
+
+def uniprot_range_to_entity_range(start, end, blocks):
+    """
+    Convert a UniProt residue range to PDB entity positions using aligned
+    blocks. Returns (entity_start, entity_end) for the covered portion, or
+    None when the region falls outside every aligned block.
+    """
+    hits = []
+    for qb, qe, tb, te in blocks:
+        lo, hi = max(start, qb), min(end, qe)
+        if lo > hi:
+            continue
+        hits.append((tb + (lo - qb), tb + (hi - qb)))
+    if not hits:
+        return None
+    return min(h[0] for h in hits), max(h[1] for h in hits)
+
+
+def entity_range_to_auth_range(e_start, e_end, auth_map):
+    """Entity sequence positions -> author residue numbers for one chain."""
+    n = len(auth_map)
+    if e_start < 1 or e_end > n or e_start > e_end:
+        return None
+    vals = [v for v in auth_map[e_start - 1:e_end] if v is not None]
+    if not vals:
+        return None
+    try:
+        nums = [int(v) for v in vals]
+    except (TypeError, ValueError):
+        return None
+    return min(nums), max(nums)
+
+
+def pull_uniprot_functional_regions(entities):
+    """
+    Build Table11d: UniProt curated regions for every representative structure,
+    mapped onto that structure's author residue numbering so the app can
+    highlight them in 3D. Purely descriptive; see the section note above.
+    """
+    if entities is None or entities.empty:
+        return pd.DataFrame()
+
+    rows, seen_acc = [], {}
+    for rec in entities.to_dict("records"):
+        pdb_id = str(rec.get("pdb_entry_id") or "").upper()
+        entity_id = str(rec.get("entity_id") or "")
+        accessions = [a.strip() for a in str(rec.get("uniprot_ids") or "").split(";") if a.strip()]
+        if not pdb_id or not entity_id or not accessions:
+            continue
+
+        auth_map = {}
+        try:
+            auth_map = _rcsb_entity_auth_numbering(pdb_id, entity_id)
+        except Exception as exc:
+            print(f"[UNIPROT] {pdb_id}_{entity_id}: author-numbering lookup failed ({type(exc).__name__})")
+
+        for acc in accessions:
+            if acc not in seen_acc:
+                try:
+                    seen_acc[acc] = (_uniprot_feature_table(acc), _rcsb_uniprot_entity_alignment(acc))
+                except Exception as exc:
+                    print(f"[UNIPROT] {acc}: fetch failed ({type(exc).__name__}: {exc})")
+                    seen_acc[acc] = ([], {})
+            feats, aligns = seen_acc[acc]
+            blocks = aligns.get(f"{pdb_id}_{entity_id}") or []
+
+            for f in feats:
+                e_rng = uniprot_range_to_entity_range(f["uniprot_start"], f["uniprot_end"], blocks) if blocks else None
+                chain = auth_start = auth_end = None
+                if e_rng and auth_map:
+                    for ch in sorted(auth_map):
+                        a_rng = entity_range_to_auth_range(e_rng[0], e_rng[1], auth_map[ch])
+                        if a_rng:
+                            chain, auth_start, auth_end = ch, a_rng[0], a_rng[1]
+                            break
+                if auth_start is None:
+                    status = "NOT_IN_STRUCTURE" if blocks else "NO_ALIGNMENT"
+                else:
+                    status = "MAPPED"
+                row = {
+                    "pathogen": rec.get("pathogen"),
+                    "pdb_entry_id": pdb_id,
+                    "entity_id": entity_id,
+                    "reference_protein": rec.get("reference_protein"),
+                }
+                row.update(f)
+                row.update({
+                    "pdb_chain": chain,
+                    "pdb_start": auth_start,
+                    "pdb_end": auth_end,
+                    "mapping_status": status,
+                    "annotation_source": "UniProtKB",
+                    "annotation_source_url": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
+                    "mapping_source": "RCSB 1D-coordinates alignment + auth_to_entity_poly_seq_mapping",
+                    "expert_review_status": "pending_expert_review",
+                })
+                rows.append(row)
+
+    out = pd.DataFrame(rows)
+    if not out.empty:
+        out = out.sort_values(["pathogen", "pdb_entry_id", "uniprot_start"]).reset_index(drop=True)
+    save_df(out, TABLE_DIR / "Table11d_UniProt_Functional_Regions.csv")
+    n_mapped = int((out["mapping_status"] == "MAPPED").sum()) if not out.empty else 0
+    print(f"[UNIPROT] functional regions: {len(out)} annotations, {n_mapped} mapped onto structure coordinates")
+    return out
+
+
+# ============================================================
 # 21. APP EXPORTS
 # ============================================================
 def export_app_json(summary, activity, best_lag, global_moran, amr_target=None, amr_state=None, genomics=None, pdb_map=None):
@@ -6470,6 +6738,14 @@ def main():
 
     print("\n[15/19] Pulling RCSB protein metadata + rendering deposited structures...")
     pdb_map = pull_rcsb_structure_mappings(genomics)
+    try:
+        _ent_path = TABLE_DIR / "Table11b_RCSB_Protein_Entities.csv"
+        structure_regions = pull_uniprot_functional_regions(
+            pd.read_csv(_ent_path) if _ent_path.exists() else pd.DataFrame())
+    except Exception as exc:   # optional annotation layer; never blocks a run
+        structure_regions = pd.DataFrame()
+        print(f"[WARN] UniProt functional regions skipped: {type(exc).__name__}: {exc}")
+
     print("\n[16/19] Creating genomic + structural pathogen intelligence figure...")
     pathogen_intelligence_figure = create_pathogen_intelligence_figure(pathogen_manifest, pdb_map)
     save_df(pathogen_manifest, APP_DIR / "pathogen_image_manifest.csv")

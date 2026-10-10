@@ -120,6 +120,19 @@ def main(export_dir, site_dir):
     D["genomic_hosts"] = {p: q.host.fillna("Not reported").value_counts().head(4).to_dict() for p, q in gr.groupby("pathogen")}
     D["genomic_places"] = {p: q.geographic_location.fillna("Not reported").value_counts().head(4).to_dict() for p, q in gr.groupby("pathogen")}
     D["structures"] = recs(r("ProteinStructure"))
+    sr_path = Path(export_dir) / "StructuralRegion.csv"
+    if sr_path.exists():
+        sr = pd.read_csv(sr_path)
+        sr = sr[sr["mapping_status"].eq("MAPPED")] if "mapping_status" in sr else sr
+        cols = ["feature_type", "feature_description", "uniprot_accession", "uniprot_start", "uniprot_end",
+                "pdb_chain", "pdb_start", "pdb_end", "evidence_count", "annotation_source_url"]
+        D["regions"] = {p: recs(q[[c for c in cols if c in q.columns]])
+                        for p, q in sr.groupby("pdb_entry_id")} if len(sr) else {}
+        D["regions_review"] = (str(sr["expert_review_status"].iloc[0])
+                               if len(sr) and "expert_review_status" in sr else None)
+    else:
+        D["regions"] = {}
+        D["regions_review"] = None
     latest = D_summary_latest(r("PathogenSummary"))
     D["latest_sample"] = str(latest.date()) if latest is not None else None
     D["tn_county"] = recs(r("TennesseeCounty"))

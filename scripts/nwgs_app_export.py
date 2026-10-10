@@ -187,6 +187,15 @@ def main(table_dir, out_dir, allow_mixed=False):
     ents["CountyActivity"] = ca[["pathogen", "county_fips", "county_name", "state_code", "activity_z",
                                  "level", "n_sites", "n_records", "activity_end_week"]]
 
+    # StructuralRegion (Table11d, v5.21+; optional so older runs still export)
+    t11d = find(table_dir, "Table11d_UniProt_Functional_Regions", required=False)
+    if t11d is not None and len(t11d):
+        keep = ["pathogen", "pdb_entry_id", "entity_id", "feature_type", "feature_description",
+                "uniprot_accession", "uniprot_start", "uniprot_end", "evidence_codes", "evidence_count",
+                "pdb_chain", "pdb_start", "pdb_end", "mapping_status",
+                "annotation_source", "annotation_source_url", "expert_review_status"]
+        ents["StructuralRegion"] = t11d[[c for c in keep if c in t11d.columns]]
+
     # EmergingCounty (Table07c, v5.21+; optional so older runs still export)
     t07c = find(table_dir, "Table07c_Recent_County_Emerging_Detections", required=False)
     if t07c is not None and len(t07c):

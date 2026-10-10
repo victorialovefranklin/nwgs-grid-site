@@ -7,9 +7,9 @@
 :root{
   /* NWGS Grid™ brand (Victoria Love Franklin signature palette): navy, wine, gold on paper */
   --navy:#14213a; --navy-2:#1c2c4c; --wine:#6e1f2b; --gold:#c49a4a; --gold-soft:#f0cf8f; --paper:#fbf8f3; --cream:#f7f1e8;
-  --bg:#ffffff; --surface:#ffffff; --ink:#14213a; --muted:#5b6070; --line:#e7e4de;
+  --bg:#ffffff; --surface:#ffffff; --ink:#14213a; --muted:#262b36; --line:#e7e4de;
   --accent:#1c2c4c; --accent-ink:#ffffff; --accent-soft:#e7ebf3; --link:#1c2c4c;
-  --rail-bg:#ffffff; --rail-ink:#14213a; --rail-muted:#4e5566; --rail-hover:#f5f3ef; --rail-active:rgba(196,154,74,.16); --rail-line:#e7e4de; --count-ink:#6e1f2b; --count-bg:rgba(196,154,74,.18); --brand-accent:#1d4f91;
+  --rail-bg:#ffffff; --rail-ink:#14213a; --rail-muted:#262b36; --rail-hover:#f5f3ef; --rail-active:rgba(196,154,74,.16); --rail-line:#e7e4de; --count-ink:#6e1f2b; --count-bg:rgba(196,154,74,.18); --brand-accent:#1d4f91;
   --nodata:#e8e6e1; --typ:#f4f3ef; --typ-line:#bdb8ad; --hi-soft:#f5cdc6;
   --vl:#2166ac; --lo:#67a9cf; --el:#ef8a62; --hi:#b2182b; --warn:#b4630f; --ok:#2e7d4f;
   --display:"Fraunces",Georgia,"Times New Roman",serif;
@@ -35,7 +35,7 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased}
 a{color:var(--link);text-decoration-color:color-mix(in srgb,var(--gold) 70%,transparent);text-underline-offset:2px}
-h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.005em;text-wrap:balance;margin:0;font-optical-sizing:auto}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.005em;text-wrap:pretty;margin:0;font-optical-sizing:auto;text-align:left}
 h1{font-size:2rem;line-height:1.12}
 h2{font-size:1.25rem}
 h3{font-size:1rem;font-weight:600;font-family:var(--body)}
@@ -69,8 +69,8 @@ li{text-wrap:pretty}
 .nav button:focus-visible,button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .nav .count{font:500 .72rem var(--mono);color:var(--count-ink);background:var(--count-bg);padding:1px 7px;border-radius:999px}
 .rail .foot{margin-top:auto;font-size:.72rem;color:var(--rail-muted);padding:0 8px;line-height:1.5}
-.sitefoot{margin-top:12px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.78rem;color:var(--muted)}
-.acct{margin-left:auto}
+.sitefoot{margin-top:12px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:center;text-align:center;gap:4px 18px;font-size:.78rem;color:var(--muted)}
+.acct{margin-left:0}
 .acct button{all:unset;cursor:pointer;font-size:.82rem;color:var(--accent);font-weight:600}
 .acct button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .form{display:grid;gap:10px}
@@ -127,10 +127,47 @@ details>summary.btn::-webkit-details-marker{display:none}
 .molview{position:relative;width:100%;height:min(70vh,560px)}
 .emlist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto}
 .emlist li{border-top:1px solid var(--line);padding-top:8px}
+.glist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.gsec dl{margin:0;display:flex;flex-direction:column}
+.gitem{padding:10px 0;border-top:1px solid var(--line);scroll-margin:90px;transition:background .3s}
+.gitem:first-child{border-top:none;padding-top:0}
+.gitem dt{font-weight:600;font-size:.92rem}
+.gitem dd{margin:3px 0 0;font-size:.88rem;color:var(--muted)}
+.gitem.hl{background:var(--count-bg);border-radius:6px}
+.gsearch input{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;width:min(420px,90vw)}
+.gsearch input:focus{outline:2px solid var(--gold);outline-offset:0}
+@media (max-width:1100px){.glist{grid-template-columns:1fr}}
+.tapcue{display:flex;align-items:center;gap:10px;margin:0;padding:8px 12px;border-radius:999px;background:var(--count-bg);color:var(--ink);font-weight:600;font-size:.88rem;align-self:center}
+.tapdot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(196,154,74,.6);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(196,154,74,.6)}70%{box-shadow:0 0 0 10px rgba(196,154,74,0)}100%{box-shadow:0 0 0 0 rgba(196,154,74,0)}}
+.county.sel{stroke:var(--gold)!important;stroke-width:2.4!important}
+.panel.selcard{border:2px solid var(--gold);box-shadow:0 2px 10px rgba(196,154,74,.18)}
+.selcard .detail{min-height:0}
+.selempty{margin:0;font-size:.9rem}
+.selname{font:600 1.15rem var(--display);margin:0 0 6px}
+.selrow{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line);font-size:.88rem}
+.selrow>span:first-child{font-weight:600}
+.regions{display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--line);padding-top:12px}
+.regions h3{font-size:.95rem}
+.rlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:300px;overflow:auto}
+.rbtn{all:unset;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"type name" "type res";align-items:center;gap:1px 8px;width:100%;padding:7px 8px;border-radius:6px;border:1px solid transparent;font-size:.84rem;box-sizing:border-box}
+.rbtn:hover{background:var(--count-bg);border-color:var(--gold)}
+.rbtn:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.rname{grid-area:name;overflow-wrap:anywhere}
+.rres{grid-area:res;font-size:.74rem;color:var(--muted);white-space:nowrap}
+.rtype{grid-area:type;align-self:center;font:600 .62rem/1 var(--body);letter-spacing:.06em;text-transform:uppercase;padding:4px 6px;border-radius:4px;background:var(--accent-soft);color:var(--ink);white-space:nowrap}
+.rt-binding-site,.rt-active-site,.rt-functional-site{background:var(--count-bg);color:var(--count-ink)}
+.rt-transmembrane,.rt-intramembrane,.rt-topological-domain,.rt-signal-peptide{background:var(--typ);color:var(--ink)}
+.scope{max-width:none}
+.molhead #mol-r{display:block;font-weight:400;margin-top:2px}
 .cite{font-size:.84rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;overflow-wrap:anywhere}
 
 .main{min-width:0;padding-block:20px 48px;padding-inline:28px;display:flex;flex-direction:column;gap:22px}
-.status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
+.status{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px 16px;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
+.status .sinfo{grid-column:2;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;text-align:center}
+.status .acct{grid-column:3;justify-self:end;margin:0}
+.qmark{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);font:600 .66rem var(--body);color:var(--muted)}
+.qmark:hover{border-color:var(--gold);color:var(--ink)}
 .status .opt-s{white-space:nowrap}
 .pill{display:inline-flex;align-items:center;gap:6px;font:500 .74rem var(--body);padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:var(--surface);white-space:nowrap}
 .pill i{width:8px;height:8px;border-radius:50%;display:inline-block}
@@ -139,8 +176,8 @@ details>summary.btn::-webkit-details-marker{display:none}
 
 .view{display:flex;flex-direction:column;gap:20px}
 .view[hidden]{display:none}
-.head{display:flex;flex-direction:column;gap:8px;max-width:68ch}
-.head p{text-wrap:balance;font-size:1rem}
+.head{display:flex;flex-direction:column;gap:8px;max-width:none;text-align:left}
+.head p{text-wrap:pretty;font-size:1rem;max-width:none}
 .head .eyebrow{font:600 .72rem/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
 .c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}.c3{grid-column:span 3}
@@ -158,7 +195,7 @@ details>summary.btn::-webkit-details-marker{display:none}
 .kv b{font:500 .95rem var(--mono)}
 .trend-up{color:var(--hi)} .trend-flat{color:var(--muted)} .trend-down{color:var(--vl)}
 
-.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
 .seg button{all:unset;cursor:pointer;padding:6px 12px;font-size:.84rem;color:var(--muted);border-right:1px solid var(--line)}
 .seg button:last-child{border-right:none}
@@ -210,7 +247,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 .stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
 .note{font-size:.82rem;color:var(--muted);max-width:80ch}
 .callout{border-left:3px solid var(--warn);padding:8px 12px;background:var(--surface);font-size:.86rem;border-radius:0 var(--r) var(--r) 0}
-.detail{min-height:62px;font-size:.86rem}
+.detail{font-size:.88rem}
 .flag{color:var(--warn);font-weight:600}
 
 #tip{position:fixed;pointer-events:none;z-index:20;background:var(--ink);color:var(--bg);font-size:.78rem;line-height:1.35;padding:7px 9px;border-radius:5px;max-width:240px;opacity:0;transition:opacity .08s}
@@ -249,6 +286,9 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   h1{font-size:1.6rem}
   .status{font-size:.78rem;gap:6px 12px}
   .status .opt-s{display:none}
+  .status{grid-template-columns:1fr}
+  .status .sinfo{grid-column:1}
+  .status .acct{grid-column:1;justify-self:center}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -277,6 +317,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-myalerts" hidden></section>
     <section class="view" id="v-audit" hidden></section>
     <section class="view" id="v-methods" hidden></section>
+    <section class="view" id="v-glossary" hidden></section>
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
       <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
@@ -425,7 +466,7 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['predictive','Predictive models'],['equity','Coverage & equity'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['about','About & contact']];
+const VIEWS=[['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['predictive','Predictive models'],['equity','Coverage & equity'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About & contact']];
 const built={};
 let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
@@ -445,7 +486,8 @@ function go(v,push=true){
   rail.classList.remove('open');menubtn.setAttribute('aria-expanded','false');
   window.scrollTo(0,0);
 }
-document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a){e.preventDefault();go(a.dataset.go)}});
+document.addEventListener('click',e=>{const g=e.target.closest('[data-gloss]');if(g){e.preventDefault();go('glossary');const el=document.getElementById('g-'+g.dataset.gloss);if(el){el.scrollIntoView({block:'center'});el.classList.add('hl');setTimeout(()=>el.classList.remove('hl'),2200)}return}
+  const a=e.target.closest('[data-go]');if(a){e.preventDefault();go(a.dataset.go)}});
 
 /* ---------- status strip ---------- */
 const R=D.run;
@@ -455,10 +497,11 @@ document.querySelectorAll('.cy').forEach(e=>e.textContent=copyYears);
 document.querySelectorAll('.footmail').forEach(e=>e.innerHTML=`<a href="mailto:${EMAIL}">${EMAIL}</a>`);
 const gateCls=R.gate_status==='PASS'?'ok':R.gate_status==='BLOCKED'?'bad':'warn';
 document.getElementById('status').innerHTML=
-  `<span>Latest sample <b style="color:var(--ink)">${dateFmt(D.latest_sample||R.data_as_of)}</b></span>
+  `<div class="sinfo"><span>Latest sample <b style="color:var(--ink)">${dateFmt(D.latest_sample||R.data_as_of)}</b> <button class="qmark" data-gloss="latest-sample" aria-label="What is the latest sample?">?</button></span>
    <span class="opt-s">CDC data updated ${new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · refreshed every Saturday</span>
    <button class="pill ${gateCls}" data-go="audit" title="${R.n_pass} pass · ${R.n_warning} warnings · ${R.n_fail} fail"><i></i>Validated: ${R.n_pass} checks passed${R.n_fail?` · ${R.n_fail} failed`:''}</button>
-   ${R.consistency_ok?'':'<button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button>'}
+   <button class="qmark" data-gloss="validated" aria-label="What does validated mean?">?</button>
+   ${R.consistency_ok?'':'<button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button>'}</div>
    <span id="acct" class="acct"></span>`;
 
 const S = Object.fromEntries(D.summary.map(s=>[s.pathogen,s]));
@@ -482,14 +525,15 @@ dashboard(){
     </article>`}).join('')}
   </div>
   <div class="grid">
-    <article class="panel c7"><header><h2>Emerging pathogen detections</h2><span class="small muted">share of sites with a positive test, latest window</span></header>
+    <div class="c7 stackcol"><article class="panel"><header><h2>Emerging pathogen detections</h2><span class="small muted">share of sites with a positive test, latest window</span></header>
       <div class="grid" style="gap:12px">${EMERGING.map(p=>{const s=S[p];return `<div class="c4" style="display:flex;flex-direction:column;gap:6px;min-width:0"><span class="label">${p}</span><span class="big" style="font-size:1.6rem">${pct(s.recent_detection_rate)}</span><div class="chart" id="se-${p.replace(/\W/g,'')}"></div><span class="small muted">${s.sites.toLocaleString()} sites · since ${dateFmt(s.first_observation)}</span></div>`}).join('')}</div>
     </article>
+    <article class="panel readme"><h2>How to read the levels</h2><p class="small">Levels compare each site with its own history (within-site log-concentration z-score), then take the county or national median. They describe relative change, not case counts.</p>
+      <div class="legend">${LEVELS.map(l=>`<span>${chip(l)}</span>`).join('')}</div></article></div>
     <article class="panel c5"><header><h2>Latest alerts</h2><a href="#alerts" data-go="alerts" class="small">All ${D.alerts.length} alerts</a></header>
       <div>${[...D.alerts].sort((a,b)=>['high','moderate','info'].indexOf(a.severity)-['high','moderate','info'].indexOf(b.severity)).filter((a,i,arr)=>a.severity!=='high'||arr.filter(x=>x.severity==='high').indexOf(a)<2).slice(0,5).map(alertRow).join('')}</div>
     </article>
-  </div>
-  <p class="note">Levels compare each site with its own history (within-site log-concentration z-score), then take the county or national median. They describe relative change, not case counts.</p>`;
+  </div>`;
   ROUTINE.forEach(p=>spark(document.getElementById('sp-'+p.replace(/\W/g,'')),D.trend[p].slice(-52).map(d=>d[1]),css('--accent')));
   EMERGING.forEach(p=>spark(document.getElementById('se-'+p.replace(/\W/g,'')),D.emerging[p].slice(-52).map(d=>d[1]*100),css('--warn'),{zero:false,base:0,dom:[0,Math.max(3,d3.max(D.emerging[p].slice(-52),d=>d[1]*100))]}));
 },
@@ -499,10 +543,10 @@ map(){
   el.innerHTML=`<div class="head"><h1>Surveillance map</h1><p class="muted">County wastewater activity, spatial clusters and surveillance coverage. Hover or tap a county for details.</p></div>
   <div class="controls"><div class="seg" id="m-path">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
   <div class="seg" id="m-layer"><button aria-pressed="true" data-l="activity">Recent activity</button><button aria-pressed="false" data-l="cluster">Spatial clusters</button><button aria-pressed="false" data-l="coverage">Coverage</button></div></div>
-  <div class="grid"><div class="panel c8"><div class="mapbox" id="m-map"></div><div id="m-legend"></div></div>
-  <div class="c4" style="display:flex;flex-direction:column;gap:16px;min-width:0"><div class="panel"><span class="label">Selected county</span><div class="detail" id="m-detail"><span class="muted">Tap a county to pin its details here.</span></div></div>
+  <div class="grid"><div class="panel c8"><p class="tapcue"><span class="tapdot" aria-hidden="true"></span>Interactive map: click or tap any county to see its details</p><div class="mapbox" id="m-map"></div><div id="m-legend"></div></div>
+  <div class="c4 stackcol"><div class="panel selcard" id="m-sel" hidden><h2>Selected county</h2><div class="detail" id="m-detail"></div></div>
   <div class="panel" id="m-stats"></div></div></div>`;
-  let P='SARS-CoV-2',L='activity';
+  let P='SARS-CoV-2',L='activity',SEL=null;
   const CL={'High-High':'--hi','Low-Low':'--vl','High-Low':'--el','Low-High':'--lo','Not Significant':'--typ'};
   const covBins=[[0,'No data','--nodata'],[25,'1–25 weeks','--accent-soft'],[51,'26–51','--lo'],[103,'52–103','--vl'],[155,'104–155','--accent'],[1e9,'≥156 weeks','--ink']];
   const covCol=w=>{if(!w)return css('--nodata');for(const [m,,c] of covBins.slice(1)) if(w<=m) return css(c);};
@@ -512,12 +556,21 @@ map(){
     const color=L==='activity'?f=>{const a=D.activity[P][f];return a?lvColor(level(a[0])):css('--nodata')}
       :L==='cluster'?f=>{const c=D.clusters[P][f];return c?css(CL[c]):css('--nodata')}
       :f=>covCol(D.coverage[f]?.[0]);
-    countyMap(document.getElementById('m-map'),color,info,{label:`${P} ${L} map`,onClick:f=>{document.getElementById('m-detail').innerHTML=info(f)}});
+    const detail=f=>{const a=D.activity[P][f],c=D.clusters[P][f],v=D.coverage[f];
+      return `<h3 class="selname">${cname(f)}</h3>
+        <div class="selrow"><span>${P} activity</span><span>${a?`${chip(level(a[0]))} <span class="mono">z ${fmt(a[0])}</span>`:'No recent data'}</span></div>
+        <div class="selrow"><span>Sites reporting</span><span class="mono">${a?a[1]:'—'}</span></div>
+        <div class="selrow"><span>Spatial cluster</span><span>${c||'—'}</span></div>
+        <div class="selrow"><span>Coverage</span><span>${v?`${v[0]} weeks${v[1]?' · analysis-ready':''}`:'None'}</span></div>
+        ${v&&v[2]!=null?`<div class="selrow"><span>SVI</span><span class="mono">${fmt(v[2])}</span></div>`:''}`};
+    const svg=countyMap(document.getElementById('m-map'),color,info,{label:`${P} ${L} map`,onClick:f=>{SEL=f;mark();document.getElementById('m-detail').innerHTML=detail(f);document.getElementById('m-sel').hidden=false}});
+    const mark=()=>{svg.selectAll('path.county').classed('sel',d=>d.id===SEL).filter(d=>d.id===SEL).raise()};
+    if(SEL){mark();document.getElementById('m-detail').innerHTML=detail(SEL);document.getElementById('m-sel').hidden=false}
     document.getElementById('m-legend').innerHTML=L==='activity'?levelLegend()+`<p class="note">Four weeks ending ${dateFmt(D.activity_end)}. ${Object.keys(D.activity[P]).length} counties with recent data.</p>`
       :L==='cluster'?legend(Object.entries(CL).map(([k,v])=>[css(v),k]).concat([[css('--nodata'),'No recent data']]))+'<p class="note">Local Moran’s I with k=6 nearest neighbours; cluster classes shown at permutation p&lt;0.05.</p>'
       :legend(covBins.map(([,l,c])=>[css(c),l]))+'<p class="note">Most qualifying weeks across SARS-CoV-2, RSV and influenza A.</p>';
     const s=D.spatial.find(x=>x.pathogen===P);const vals=Object.values(D.activity[P]).map(a=>level(a[0]));
-    document.getElementById('m-stats').innerHTML=`<span class="label">${P} · national picture</span>
+    document.getElementById('m-stats').innerHTML=`<h2>${P} nationally</h2>
       <div class="statgrid" style="grid-template-columns:1fr 1fr"><div><span class="label">Moran’s I</span><div class="big" style="font-size:1.5rem">${fmt(s.morans_i,3)}</div><span class="small muted">p = ${s.p_sim}</span></div><div><span class="label">Counties</span><div class="big" style="font-size:1.5rem">${s.n_counties}</div><span class="small muted">in spatial analysis</span></div></div>
       <div class="tbl"><table><tr><th>Level</th><th class="n">Counties</th></tr>${LEVELS.slice().reverse().map(l=>`<tr><td>${chip(l)}</td><td class="n">${vals.filter(v=>v===l).length}</td></tr>`).join('')}</table></div>
       <p class="small muted">High-High clusters: <b class="num">${s['high-high']}</b> · Low-Low: <b class="num">${s['low-low']}</b></p>`;
@@ -642,20 +695,38 @@ genomics(){
 
 structures(){
   const el=document.getElementById('v-structures');
-  el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One reference structure per pathogen from the RCSB Protein Data Bank, each passing the pipeline’s structural QC. Select “View in 3D” to rotate a model.</p></div>
+  const RT=['Domain','Region','Motif','Binding site','Active site','Functional site','Topological domain','Transmembrane','Intramembrane','Signal peptide','Coiled coil'];
+  const regionBlock=s=>{const rs=(D.regions||{})[s.pdb_entry_id]||[];
+    if(!rs.length)return `<p class="small muted">Functional regions appear here after the next weekly update.</p>`;
+    const ordered=[...rs].sort((a,b)=>(RT.indexOf(a.feature_type)-RT.indexOf(b.feature_type))||(a.pdb_start-b.pdb_start));
+    return `<div class="regions"><h3>Functional regions <span class="muted small">· ${ordered.length} from UniProt</span></h3>
+      <ul class="rlist">${ordered.map(r=>`<li><button class="rbtn" data-mol="${s.pdb_entry_id}" data-name="${esc(s.pathogen+' · '+s.protein)}" data-chain="${esc(r.pdb_chain)}" data-start="${r.pdb_start}" data-end="${r.pdb_end}" data-rname="${esc(r.feature_description)}" title="Highlight in 3D">
+        <span class="rtype rt-${esc(String(r.feature_type).toLowerCase().replace(/\s+/g,'-'))}">${esc(r.feature_type)}</span>
+        <span class="rname">${esc(r.feature_description)}</span>
+        <span class="rres mono">${esc(r.pdb_chain)} ${r.pdb_start===r.pdb_end?r.pdb_start:`${r.pdb_start}–${r.pdb_end}`}</span></button></li>`).join('')}</ul>
+      <p class="small muted">Residues shown in this structure’s numbering. Source: UniProt <span class="mono">${esc(ordered[0].uniprot_accession||'')}</span>.</p></div>`};
+  el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One reference structure per pathogen from the RCSB Protein Data Bank, each passing the pipeline’s structural QC. Each card lists the protein’s curated functional regions from UniProt, mapped onto that structure’s own residue numbering; select a region to highlight it in 3D.</p></div>
   <div class="grid">${D.structures.map(s=>`<article class="panel c4 scard">
     <figure class="sfig"><img loading="lazy" alt="${esc(s.protein)} (PDB ${s.pdb_entry_id}) structure image" src="${esc(s.image_url||`img/structures/${s.pdb_entry_id}.png`)}" data-alt="img/structures/${s.pdb_entry_id}.png" onerror="if(this.dataset.alt&&this.src.indexOf(this.dataset.alt)<0){this.src=this.dataset.alt}else{this.closest('figure').hidden=true}"></figure>
     <header><h2>${s.pathogen}</h2><a class="mono" href="${s.pdb_entry_url}" target="_blank" rel="noopener">PDB ${s.pdb_entry_id} ↗</a></header>
     <p style="font-weight:600">${esc(s.protein)}</p><p class="small muted">${esc(s.rcsb_title)}</p>
     <div class="kv small"><div><span class="label">Method</span><b style="font-family:var(--body);font-size:.82rem">${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')}</b></div><div><span class="label">Resolution</span><b>${fmt(s.resolution_a,2)} Å</b></div><div><span class="label">C-alpha atoms</span><b>${s.ca_atom_count.toLocaleString()}</b></div></div>
     <p class="small muted">UniProt <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc} · DOI <a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">10.2210/pdb${s.pdb_entry_id}/pdb</a></p>
+    ${regionBlock(s)}
     <button class="btn small" data-mol="${s.pdb_entry_id}" data-name="${esc(s.pathogen+' · '+s.protein)}">View in 3D</button></article>`).join('')}</div>
-  <p class="note">Images and coordinates: RCSB Protein Data Bank (Berman et al., 2000). 3D viewer: 3Dmol.js (Rego &amp; Koes, 2015). Reference structures give biological context only; they are not derived from wastewater samples.</p>
-  <dialog id="mol" class="moldlg"><div class="molhead"><b id="mol-t"></b><button class="btn small" id="mol-x">Close</button></div><div id="mol-v" class="molview"><p class="muted small" style="padding:16px">Loading 3D model…</p></div><p class="small muted" style="padding:10px 14px 12px">Drag to rotate · scroll or pinch to zoom · coordinates: RCSB PDB · <a id="mol-alt" href="#" target="_blank" rel="noopener">Open in RCSB 3D viewer ↗</a></p></dialog>`;
+  <article class="panel scope"><h2>About these annotations</h2>
+    <p class="small">Functional regions are imported unchanged from <a href="https://www.uniprot.org" target="_blank" rel="noopener">UniProtKB</a>’s curated feature table for the same protein each structure contains. Residue ranges are converted from UniProt numbering to the structure’s own author numbering using RCSB’s published sequence alignments, so a highlighted region sits where the depositors placed it. Regions UniProt lists but the structure does not resolve are left out rather than approximated.</p>
+    <p class="small">This is a reference and surveillance layer: NWGS Grid™ reproduces and cites published annotations alongside the structure they describe. It does not predict, score or rank anything about these regions, and it is not intended as design guidance. Every row carries its UniProt accession and evidence codes so any claim can be traced to its source.</p>
+    <p class="small muted">${D.regions_review==='pending_expert_review'?'⚠ Status: imported automatically, pending review by a structural biology collaborator. Treat residue ranges as provisional until that review is recorded here.':'Status: reviewed and validated by a structural biology collaborator.'}</p></article>
+  <p class="note">Images and coordinates: RCSB Protein Data Bank (Berman et al., 2000). Functional regions: UniProt Consortium, <i>Nucleic Acids Research</i> 2025. 3D viewer: 3Dmol.js (Rego &amp; Koes, 2015). Reference structures give biological context only; they are not derived from wastewater samples.</p>
+  <dialog id="mol" class="moldlg"><div class="molhead"><div><b id="mol-t"></b><span class="small muted" id="mol-r"></span></div><button class="btn small" id="mol-x">Close</button></div><div id="mol-v" class="molview"><p class="muted small" style="padding:16px">Loading 3D model…</p></div><p class="small muted" style="padding:10px 14px 12px">Drag to rotate · scroll or pinch to zoom · coordinates: RCSB PDB · <a id="mol-alt" href="#" target="_blank" rel="noopener">Open in RCSB 3D viewer ↗</a></p></dialog>`;
   const dlg=document.getElementById('mol');
   document.getElementById('mol-x').onclick=()=>dlg.close();
   el.addEventListener('click',async e=>{const b=e.target.closest('[data-mol]');if(!b)return;
-    const id=b.dataset.mol;document.getElementById('mol-t').textContent=`${b.dataset.name} (PDB ${id})`;document.getElementById('mol-alt').href=`https://www.rcsb.org/3d-view/${id}`;
+    const id=b.dataset.mol,reg=b.dataset.start?{chain:b.dataset.chain,start:+b.dataset.start,end:+b.dataset.end,name:b.dataset.rname}:null;
+    document.getElementById('mol-t').textContent=`${b.dataset.name} (PDB ${id})`;
+    document.getElementById('mol-r').textContent=reg?` — highlighting ${reg.name}, chain ${reg.chain} ${reg.start===reg.end?reg.start:`${reg.start}–${reg.end}`}`:'';
+    document.getElementById('mol-alt').href=`https://www.rcsb.org/3d-view/${id}`;
     const v=document.getElementById('mol-v');v.innerHTML='<p class="muted small" style="padding:16px">Loading 3D model…</p>';
     try{dlg.showModal()}catch(_){dlg.setAttribute('open','')}
     try{
@@ -669,9 +740,18 @@ structures(){
       const dark=matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.dataset.theme!=='light';
       const viewer=$3Dmol.createViewer(v,{backgroundColor:dark?'#131d33':'white'});
       viewer.addModel(txt,fmt);
-      viewer.setStyle({},{cartoon:{color:'spectrum'}});
-      viewer.setStyle({hetflag:true},{});
-      viewer.zoomTo();viewer.render();viewer.zoom(1.1,600);
+      if(reg){
+        viewer.setStyle({},{cartoon:{color:'#c9ced8',opacity:.55}});
+        viewer.setStyle({hetflag:true},{});
+        const sel={chain:reg.chain,resi:`${reg.start}-${reg.end}`};
+        viewer.setStyle(sel,{cartoon:{color:'#c49a4a'}});
+        viewer.addStyle(sel,{stick:{radius:.12,color:'#c49a4a'}});
+        viewer.zoomTo();viewer.render();viewer.zoomTo(sel,800);
+      }else{
+        viewer.setStyle({},{cartoon:{color:'spectrum'}});
+        viewer.setStyle({hetflag:true},{});
+        viewer.zoomTo();viewer.render();viewer.zoom(1.1,600);
+      }
     }catch(err){v.innerHTML=`<p class="small" style="padding:16px">The 3D model could not load in this browser. <a href="https://www.rcsb.org/3d-view/${id}" target="_blank" rel="noopener">Open it in the RCSB 3D viewer ↗</a></p>`}
   });
 },
@@ -729,31 +809,32 @@ about(){
   const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
   const site=location.protocol.startsWith('http')?location.origin+location.pathname:'https://victorialovefranklin.github.io/nwgs-grid-site/';
   const tnNow=(D.tn_county||[]).filter(c=>c.reporting_now).length;
-  el.innerHTML=`<figure class="banner"><img src="img/vlf-banner.jpg" alt="Victoria Love Franklin. Data · Technology · Research · Public Service" width="1400" height="349"></figure>
+  el.innerHTML=`<div class="head"><h1>About &amp; contact</h1><p class="muted">Who built NWGS Grid™, why, and how to reach her, cite the work or request a license.</p></div>
   <div class="grid aboutgrid">
   <figure class="panel c4 portrait"><img src="img/vlf-portrait.jpg" alt="Portrait of Victoria Love Franklin" width="1080" height="1439" loading="lazy"></figure>
-  <article class="panel c8 bio"><span class="label">About the developer</span>
-    <h1 style="font-size:1.9rem">Victoria Love Franklin, PSM, CPT</h1>
+  <article class="panel c8 bio"><h2>Victoria Love Franklin, PSM, CPT</h2>
     <p class="role">Developer · PhD Student, Data Science · Research Scholar</p>
-    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee, and a Ph.D. student in Data Science (Cybersecurity concentration) at Meharry Medical College. Her work spans five federal laboratories (Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine), as well as local government and industry.</p>
-    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance and designed the National Wastewater Genomics Smart Grid, the framework NWGS Grid™ grew from. She has since trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and AI.</p>
+    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened into Data Science with a cybersecurity concentration, while continuing to research <b>structural biology</b> — the protein-level side of the pathogens this system tracks. Her work spans five federal laboratories (Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine), as well as local government and industry.</p>
+    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance and designed the National Wastewater Genomics Smart Grid, the framework NWGS Grid™ grew from. She has since trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and AI. That biomedical and structural grounding is why NWGS Grid™ carries reference protein structures and their curated functional regions alongside the surveillance data.</p>
     <div class="controls">
       <a class="btn primary" href="${mail('NWGS Grid inquiry')}">Email Victoria</a>
       <a class="btn" href="https://victorialovefranklin.github.io/victoria-franklin-site/" target="_blank" rel="noopener">Personal website ↗</a>
       <a class="btn" href="https://github.com/victorialovefranklin" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
-    <p class="small muted mono" style="overflow-wrap:anywhere">${EMAIL}</p></article>
+    </article>
   </div>
   <div class="grid">
-  <article class="panel c7 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><span class="label">Why I built NWGS Grid™</span>
+  <article class="panel c7 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><h2>Why I built NWGS Grid™</h2>
     <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor.</p>
     <p>But that signal is spread across separate CDC datasets, clinical feeds and vulnerability indices. It changes every week, and it reaches some communities far better than others. I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses.</p>
     <p>That last question is personal. In my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.</p>
     <p class="sig">— Victoria</p></article>
-  <article class="panel c5"><span class="label">Credentials &amp; affiliations</span>
+  <article class="panel c5"><h2>Credentials &amp; affiliations</h2>
     <ul class="creds">
       <li><b>Member, Association of Public Health Laboratories (APHL)</b>, <a href="https://aphl.org/focus-areas/environmental-health/environmental-health-resources/wastewater-surveillance" target="_blank" rel="noopener">Wastewater Surveillance</a> community</li>
-      <li><b>Ph.D. student, Data Science</b> (Cybersecurity), Meharry Medical College, expected 2027 · Doctoral Research Scholar</li>
+      <li><b>Ph.D. student, Data Science</b> (Cybersecurity concentration), Meharry Medical College, expected 2027 · Doctoral Research Scholar</li>
+      <li><b>Biomedical Data Science</b> — doctoral training origin at Meharry Medical College; continuing research in <b>structural biology</b></li>
+      <li><b>Student Ambassador</b>, School of Applied Computational Sciences (SACS) Student Ambassador Program, Meharry Medical College · selected by invitation</li>
       <li><b>ORISE Genomic Epidemiology Fellow</b>, U.S. Air Force School of Aerospace Medicine (2024–2025)</li>
       <li><b>mNGS research trainee</b>, Chan Zuckerberg Biohub · Meharry Medical College (2026)</li>
       <li><b>Professional Science Master’s</b>, Applied Geospatial Information Systems, Tennessee State University</li>
@@ -764,7 +845,7 @@ about(){
     </ul></article>
   </div>
   <div class="grid">
-  <article class="panel c7"><span class="label">Work with NWGS Grid</span>
+  <article class="panel c7"><h2>Work with NWGS Grid</h2>
     <div class="opt"><h3>License request</h3><p class="small muted">Use of the code, pipeline, figures or data products in research, a product or a service.</p>
       ${SB?`<details><summary class="btn">Request a license</summary><form class="form" id="lic-form" style="margin-top:10px">
         <div class="row2"><label>Name<input id="lic-name" required maxlength="200" autocomplete="name"></label><label>Email<input id="lic-email" type="email" required maxlength="200" autocomplete="email" value="${esc(USER?.email||'')}"></label></div>
@@ -783,10 +864,10 @@ about(){
     <div class="opt"><h3>Research collaboration &amp; media</h3><p class="small muted">Talks, collaborations, data questions and interviews.</p>
       <a class="btn" href="${mail('NWGS Grid collaboration')}">Get in touch</a></div></article>
   <div class="c5 stackcol">
-  <article class="panel"><span class="label">How to cite</span>
+  <article class="panel"><h2>How to cite</h2>
     <p class="cite">Franklin, V. L. (${pulledYear}). <i>NWGS Grid™: National Wastewater Genomic Surveillance Grid</i> (data through ${dateFmt(R.data_as_of)}, ${esc(R.run_id)}) [Software and web dashboard]. ${esc(site)}</p>
     <p class="small muted">Numbers change every week as CDC updates its data. Cite the data-through date and run ID shown here, and use one weekly release for all numbers in a paper.</p></article>
-  <article class="panel"><span class="label">Copyright &amp; terms</span>
+  <article class="panel"><h2>Copyright &amp; terms</h2>
     <p class="small">© ${copyYears} Victoria Love Franklin. All rights reserved. The code, analysis, design, text, tables and figures may not be copied, modified or redistributed without written permission. Linking and scholarly citation with attribution are welcome.</p>
     <p class="small muted">Underlying data from CDC, CDC/ATSDR, the U.S. Census Bureau, NCBI and RCSB PDB remain subject to their providers’ terms. Maps use us-atlas, d3 and topojson (ISC licenses). For research and public-health information only; not medical advice. Not affiliated with or endorsed by CDC. NWGS Grid™ is a trademark of Victoria Love Franklin.</p></article>
   </div></div>`;
@@ -841,7 +922,7 @@ alerts(){
     document.getElementById('al-legend').innerHTML=`<div class="legend"><span>Counties at High:</span><span><i style="background:${col(1)}"></i>1</span>${max>2?`<span><i style="background:${col(Math.round((1+max)/2))}"></i>${Math.round((1+max)/2)}</span>`:''}<span><i style="background:${col(max)}"></i>${max}${max>1?'':''}</span><span><i style="background:${css('--nodata')}"></i>None</span></div>`;
     // summary
     const tot=d3.sum(Object.values(H),d=>d.total), top=states.slice(0,3);
-    document.getElementById('al-sum').innerHTML=`<span class="label">${P==='All'?'All three viruses':esc(P)}</span>
+    document.getElementById('al-sum').innerHTML=`<h2>${P==='All'?'All three viruses':esc(P)}</h2>
       <div class="sumrow"><div><span class="big">${tot}</span><span class="small muted">counties at High</span></div><div><span class="big">${states.length}</span><span class="small muted">states</span></div></div>
       ${top.length?`<p class="small">Most counties at High: ${top.map(s=>`<button class="linkbtn" data-st="${s}">${esc(STATE_NAMES[s])} (${H[s].total})</button>`).join(', ')}.</p>`:'<p class="small muted">No counties are at High right now.</p>'}
       <a class="btn" href="#myalerts" data-go="myalerts">Get email alerts</a>`;
@@ -875,7 +956,7 @@ alerts(){
     leg.innerHTML=legend([[col(1),'Sites with a detection: 1'],[col(maxD),String(maxD)],[css('--accent-soft'),'Tested, none detected'],[css('--nodata'),'No sites tested']]);
     const pos=Object.entries(byS).filter(([,v])=>v.det).sort((a,b)=>b[1].det-a[1].det);
     const tested=d3.sum(Object.values(byS),v=>v.tested),det=d3.sum(Object.values(byS),v=>v.det);
-    list.innerHTML=`<span class="label">${EP==='Influenza A(H5)'?'H5 bird flu':EP} · four weeks ending ${dateFmt(D.emerging_window_end)}</span>
+    list.innerHTML=`<h2>${EP==='Influenza A(H5)'?'H5 bird flu':EP}</h2><p class="small">Four weeks ending ${dateFmt(D.emerging_window_end)}</p>
       <div class="sumrow"><div><span class="big">${det}</span><span class="small muted">sites with a detection</span></div><div><span class="big">${pos.length}</span><span class="small muted">states</span></div></div>
       <p class="small muted">${tested.toLocaleString()} sites tested in ${Object.keys(byS).length} states.</p>
       ${pos.length?`<ul class="emlist">${pos.map(([s,v])=>`<li><b>${esc(STATE_NAMES[s]||s)}</b> <span class="muted small">${v.det} of ${v.tested} sites</span><div class="small">${v.counties.map(([n])=>esc(n.replace(/ (County|Parish|Borough|Census Area|Municipality)$/,''))).join(' · ')}</div></li>`).join('')}</ul>`:'<p class="small">No detections in this window.</p>'}`;
@@ -892,6 +973,78 @@ audit(){
   ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
   <article class="panel"><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
   ${D.audit.map(a=>{const phil=/PHIL/.test(a.component)&&/PARTIAL_IMAGES/.test(a.status);return `<tr><td class="lead">${esc(a.component)}</td><td class="status-${phil?'INFO':cls(a.status)}" style="white-space:nowrap;font-weight:600">${phil?'INFO · OPTIONAL':esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}${phil?'. Optional photos from CDC’s image library (PHIL), which blocks automated downloads; no analysis uses them.':''}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`}).join('')}</table></div></article>`;
+},
+
+glossary(){
+  const el=document.getElementById('v-glossary');
+  const G=[
+   ['Data & updates',[
+    ['latest-sample','Latest sample','The most recent date a wastewater sample was collected in this week’s CDC data. Samples take several days to be tested and reported, so it is usually a few days before the update date.'],
+    ['cdc-updated','CDC data updated','When CDC last refreshed its public wastewater datasets. NWGS Grid™ pulls them every Saturday morning (Central time) and rebuilds the site.'],
+    ['validated','Validated (checks passed)',`Every weekly run passes through ${R.n_pass+R.n_warning+R.n_fail} automated quality checks before anything is published: data parsing, county counts, pathogen independence, spatial and model audits, and cross-table consistency. “${R.n_pass} checks passed” means those checks found no problem. Warnings are listed on the Audit log with an explanation. If any check fails, the site keeps last week’s data instead of publishing.`],
+    ['run-id','Run ID','A label for one weekly snapshot of the data (for example run_20261009T1509Z). Every number on the site comes from the same run, so tables and charts always agree. Cite it with the data-through date.'],
+    ['window','Four-week window','Levels and alerts summarize the latest four weeks of samples, which smooths out single noisy samples.'],
+    ['release','Release (weekly archive)','A permanent, downloadable copy of a week’s tables, figures and log on GitHub, used to cite exact numbers later.']]],
+   ['Wastewater basics',[
+    ['nwss','NWSS','CDC’s National Wastewater Surveillance System, which collects test results from wastewater treatment plants across the U.S.'],
+    ['site','Site (sewershed)','A wastewater treatment plant or sampling point. Its sewershed is the area whose sewage flows to it; one site can serve several counties.'],
+    ['county-rep','Counties represented','Counties served by at least one reporting site.'],
+    ['concentration','Concentration (log)','The amount of a virus’s genetic material per volume of wastewater, put on a log scale because values vary over a huge range.'],
+    ['ed','ED visits (NSSP)','The share of emergency-department visits for COVID-19, flu or RSV, from CDC’s National Syndromic Surveillance Program. Used as the clinical comparison.']]],
+   ['Activity levels',[
+    ['z','Median site z (z-score)','How far a site’s recent level is from its own normal, in standard deviations. Each site is compared only with its own history, then the median is taken across a county’s or the nation’s sites. 0 is typical; +1 is one standard deviation above normal.'],
+    ['levels','Very Low · Low · Typical · Elevated · High','Very Low ≤ −1, Low ≤ −0.25, Typical ≤ 0.25, Elevated ≤ 1, High > 1 (median site z). They describe relative change, not case counts.'],
+    ['high-now','High now','Number of counties at High (z above 1) in the latest four weeks.'],
+    ['trend','Trend · change vs previous window','Increasing, Stable or Decreasing, based on how the national median z changed from the previous four weeks.']]],
+   ['Emerging pathogens',[
+    ['emerging','Emerging pathogens','H5 bird flu (avian influenza A(H5)), measles and mpox. CDC reports them as detected or not detected rather than as levels.'],
+    ['detection-rate','Share of sites with a detection','Of the sites that tested for a pathogen in a week, the percentage with at least one positive sample.'],
+    ['h5','H5 (avian influenza A(H5))','A bird-flu subtype. A wastewater detection can come from animal sources such as milk or birds, not only people.']]],
+   ['Timing & seasons',[
+    ['spearman','Spearman ρ (rho)','A correlation from −1 to 1 measuring how closely wastewater and ED visits rise and fall together. Above 0.7 is strong.'],
+    ['lag','Lag · same week · wastewater leads','The shift in weeks that best lines up wastewater with ED visits. Same week = 0; “wastewater leads by 1” means wastewater rose a week earlier.'],
+    ['fdr','FDR (false discovery rate)','A correction for running many statistical tests at once, so a few results don’t look significant just by chance.'],
+    ['season','Season · seasonal peak','A July–June respiratory season, and the week activity was highest within it.'],
+    ['lead-flag','Lead (weeks) · ⚑ flag','Weeks between the wastewater peak and the clinical peak. Positive = wastewater peaked first. ⚑ marks implausible leads, such as peaks falling in two different waves.']]],
+   ['Maps & clusters',[
+    ['morans','Moran’s I','A measure from −1 to 1 of whether neighboring counties have similar activity. Higher means stronger geographic clustering.'],
+    ['lisa','Spatial clusters (LISA)','High-High: a high county surrounded by high neighbors (a hotspot). Low-Low: a cold spot. High-Low and Low-High: outliers. Shown only when statistically significant.'],
+    ['coverage','Coverage · surveillance weeks','How many weeks a county has had usable wastewater data.'],
+    ['analysis-ready','Analysis-ready','A county with at least 52 qualifying weeks and at least 70% completeness over its active period.']]],
+   ['Equity',[
+    ['svi','SVI (Social Vulnerability Index)','CDC/ATSDR’s 0-to-1 ranking of how vulnerable a county is to health emergencies, based on income, housing, language, transportation and more. Higher = more vulnerable.'],
+    ['quartile','SVI quartile','Counties split into four equal groups by SVI, from lowest to highest vulnerability.'],
+    ['or','Odds ratio (OR) · 95% CI · p value','From a statistical model (GLM): OR below 1 means more vulnerable counties are less likely to have analysis-ready surveillance. The 95% CI is the plausible range; p below 0.05 is conventionally significant.']]],
+   ['Predictive models',[
+    ['r2','R² (held-out)','The share of week-to-week variation in ED visits a model explains on later weeks it never saw. 1 is perfect; below 0 is worse than guessing the average.'],
+    ['persistence','Clinical only (persistence)','A baseline that predicts next week’s ED visits from recent ED visits alone.'],
+    ['ww-only','Wastewater only · full model · gain','Wastewater only uses just wastewater features; the full (multimodal) model uses both. Gain is how much the full model improves on persistence.'],
+    ['shap','SHAP (top predictors)','A method that shows how much each input contributed to the model’s predictions.']]],
+   ['Protein structures & annotations',[
+    ['region','Functional region','A named stretch of a protein that does a particular job, such as a domain or a binding site. NWGS Grid™ imports these from UniProt rather than predicting them.'],
+    ['uniprot','UniProt / accession','The reference database of protein sequences and curated annotations. An accession such as P0DTC2 is one protein’s permanent identifier.'],
+    ['domain','Domain','A self-contained, independently folding part of a protein, usually with its own function.'],
+    ['binding-site','Binding site','Residues a protein uses to attach to another molecule, such as a receptor on a human cell.'],
+    ['residue','Residue · residue numbering','A residue is one amino-acid building block. Numbering counts along the protein chain, but a structure’s own (author) numbering can differ from UniProt’s, so ranges are converted before anything is highlighted.'],
+    ['chain','Chain','One protein molecule within a structure, labelled A, B, C and so on. A spike protein, for example, is three identical chains together.'],
+    ['evidence','Evidence codes','Short codes recording how an annotation was established, for example from experiment or by similarity to a studied protein.'],
+    ['mapped','Mapped · not in structure','Mapped means UniProt’s region lines up with residues this structure actually resolves. Regions the structure does not cover are left out rather than approximated.']]],
+   ['Genomics & structures',[
+    ['amr','AMR · ARG','Antimicrobial resistance and the antibiotic-resistance genes measured in wastewater.'],
+    ['ncbi','NCBI records · complete genomes','Public virus sequence records from NCBI Virus, and how many are full genomes. They are not sequences from these wastewater samples.'],
+    ['pdb','PDB entry · DOI','A reference 3D protein structure in the RCSB Protein Data Bank, with its permanent citation link.'],
+    ['resolution','Resolution (Å) · Cryo-EM · X-ray','How fine the structure’s detail is, in ångströms (smaller is sharper), and the lab method used to determine it.']]],
+   ['Audit log',[
+    ['status','PASS · WARNING · INFO · FAIL','PASS: no issue. WARNING: published, with a known limitation explained. INFO: optional item, no effect on results. FAIL: blocks publishing that week.']]]
+  ];
+  el.innerHTML=`<div class="head"><h1>Glossary</h1><p class="muted">Plain-language definitions of every term and label used on NWGS Grid™.</p></div>
+  <div class="controls"><label class="gsearch"><span class="sr">Search terms</span><input id="g-q" type="search" placeholder="Search terms, e.g. z-score, SVI, R²"></label></div>
+  <div id="g-list" class="glist">${G.map(([sec,items])=>`<article class="panel gsec"><h2>${sec}</h2><dl>${items.map(([id,term,def])=>`<div class="gitem" id="g-${id}"><dt>${term}</dt><dd>${def}</dd></div>`).join('')}</dl></article>`).join('')}</div>
+  <p class="note" id="g-none" hidden>No matching terms.</p>`;
+  const q=document.getElementById('g-q');
+  q.addEventListener('input',()=>{const s=q.value.trim().toLowerCase();let any=false;
+    el.querySelectorAll('.gsec').forEach(sec=>{let vis=0;sec.querySelectorAll('.gitem').forEach(it=>{const m=!s||it.textContent.toLowerCase().includes(s);it.hidden=!m;if(m)vis++});sec.hidden=!vis;if(vis)any=true});
+    document.getElementById('g-none').hidden=any});
 },
 
 methods(){
