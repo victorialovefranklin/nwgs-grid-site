@@ -651,18 +651,28 @@ structures(){
     <p class="small muted">UniProt <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc} · DOI <a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">10.2210/pdb${s.pdb_entry_id}/pdb</a></p>
     <button class="btn small" data-mol="${s.pdb_entry_id}" data-name="${esc(s.pathogen+' · '+s.protein)}">View in 3D</button></article>`).join('')}</div>
   <p class="note">Images and coordinates: RCSB Protein Data Bank (Berman et al., 2000). 3D viewer: 3Dmol.js (Rego &amp; Koes, 2015). Reference structures give biological context only; they are not derived from wastewater samples.</p>
-  <dialog id="mol" class="moldlg"><div class="molhead"><b id="mol-t"></b><button class="btn small" id="mol-x">Close</button></div><div id="mol-v" class="molview"><p class="muted small" style="padding:16px">Loading 3D model…</p></div><p class="small muted" style="padding:0 14px 12px">Drag to rotate · scroll or pinch to zoom · source: RCSB PDB</p></dialog>`;
+  <dialog id="mol" class="moldlg"><div class="molhead"><b id="mol-t"></b><button class="btn small" id="mol-x">Close</button></div><div id="mol-v" class="molview"><p class="muted small" style="padding:16px">Loading 3D model…</p></div><p class="small muted" style="padding:10px 14px 12px">Drag to rotate · scroll or pinch to zoom · coordinates: RCSB PDB · <a id="mol-alt" href="#" target="_blank" rel="noopener">Open in RCSB 3D viewer ↗</a></p></dialog>`;
   const dlg=document.getElementById('mol');
   document.getElementById('mol-x').onclick=()=>dlg.close();
   el.addEventListener('click',async e=>{const b=e.target.closest('[data-mol]');if(!b)return;
-    const id=b.dataset.mol;document.getElementById('mol-t').textContent=`${b.dataset.name} (PDB ${id})`;
+    const id=b.dataset.mol;document.getElementById('mol-t').textContent=`${b.dataset.name} (PDB ${id})`;document.getElementById('mol-alt').href=`https://www.rcsb.org/3d-view/${id}`;
     const v=document.getElementById('mol-v');v.innerHTML='<p class="muted small" style="padding:16px">Loading 3D model…</p>';
     try{dlg.showModal()}catch(_){dlg.setAttribute('open','')}
     try{
       if(!window.$3Dmol) await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/3dmol@2.4.0/build/3Dmol-min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
-      v.innerHTML='';const viewer=$3Dmol.createViewer(v,{backgroundColor:getComputedStyle(document.body).backgroundColor});
-      $3Dmol.download('pdb:'+id,viewer,{},()=>{viewer.setStyle({},{cartoon:{color:'spectrum'}});viewer.zoomTo();viewer.render()});
-    }catch(err){v.innerHTML=`<p class="small" style="padding:16px">The 3D viewer could not load here. <a href="https://www.rcsb.org/3d-view/${id}" target="_blank" rel="noopener">Open it on RCSB ↗</a></p>`}
+      // coordinates straight from RCSB: mmCIF first (every entry has it), legacy PDB format as a fallback
+      let txt=null,fmt='cif';
+      for(const [u,f] of [[`https://files.rcsb.org/download/${id}.cif`,'cif'],[`https://files.rcsb.org/download/${id}.pdb`,'pdb']]){
+        try{const r=await fetch(u);if(r.ok){txt=await r.text();fmt=f;break}}catch(_){}}
+      if(!txt) throw new Error('no coordinates');
+      v.innerHTML='';
+      const dark=matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.dataset.theme!=='light';
+      const viewer=$3Dmol.createViewer(v,{backgroundColor:dark?'#131d33':'white'});
+      viewer.addModel(txt,fmt);
+      viewer.setStyle({},{cartoon:{color:'spectrum'}});
+      viewer.setStyle({hetflag:true},{});
+      viewer.zoomTo();viewer.render();viewer.zoom(1.1,600);
+    }catch(err){v.innerHTML=`<p class="small" style="padding:16px">The 3D model could not load in this browser. <a href="https://www.rcsb.org/3d-view/${id}" target="_blank" rel="noopener">Open it in the RCSB 3D viewer ↗</a></p>`}
   });
 },
 
