@@ -6,7 +6,7 @@ on:
   workflow_dispatch:         # "Run workflow" button for manual runs
 
 permissions:
-  contents: read
+  contents: write     # lets the run publish a Release (the permanent archive)
   pages: write
   id-token: write
 
@@ -64,7 +64,8 @@ jobs:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           MPLBACKEND: Agg
           PYTHONUNBUFFERED: "1"
-        run: python pipeline/nwgs_pipeline.py
+        shell: bash
+        run: python pipeline/nwgs_pipeline.py 2>&1 | tee pipeline_log.txt
 
       - name: Export app data (stops here if validation fails or tables are from mixed runs)
         if: hashFiles('pipeline/nwgs_pipeline.py') != ''
@@ -87,8 +88,63 @@ jobs:
           path: |
             app_export/manifest.json
             app_export/*.csv
+            pipeline_log.txt
+            /content/NWGS_GRID/outputs/tables/
           if-no-files-found: ignore
           retention-days: 90
+
+      - name: Archive this run as a permanent GitHub Release
+        if: success() && hashFiles('pipeline/nwgs_pipeline.py') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CREDIT_LINE: "Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar"
+        shell: bash
+        run: |
+          RUN_ID=$(python -c "import json;print(json.load(open('app_export/manifest.json'))['run_id'])")
+          AS_OF=$(python -c "import json;print(json.load(open('app_export/manifest.json'))['data_as_of'])")
+          GATE=$(python -c "import json;print(json.load(open('app_export/manifest.json'))['gate_status'])")
+          TAG="${RUN_ID}-r${{ github.run_number }}"
+          mkdir -p release
+          (cd /content/NWGS_GRID/outputs && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_tables.zip" tables)
+          (cd /content/NWGS_GRID/outputs && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_figures.zip" . -x 'tables/*')
+          (cd app_export && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_app_export.zip" .)
+          cp app_export/manifest.json "release/${RUN_ID}_manifest.json"
+          cp pipeline_log.txt "release/${RUN_ID}_pipeline_log.txt"
+          ls -la release
+          {
+            echo "Frozen snapshot from the weekly NWGS Grid™ run."
+            echo
+            echo "**Prepared by ${CREDIT_LINE}**"
+            echo
+            echo "Contact, license requests and feedback: victorialovefranklin@gmail.com"
+            echo
+            echo "- Run ID: \`${RUN_ID}\`"
+            echo "- Data through: ${AS_OF}"
+            echo "- Validation gate: ${GATE}"
+            echo "- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo "Cite tables and figures from one release only; CDC data changes every week."
+            echo
+            echo "**How to cite:** Franklin, V. L. (${AS_OF:0:4}). *NWGS Grid™: National Wastewater Genomic Surveillance Grid* (data through ${AS_OF}, release ${TAG}) [Software and dataset]. ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG}"
+            echo
+            echo "Copyright © 2026 Victoria Love Franklin. All rights reserved. No reuse without written permission; see LICENSE. Underlying CDC, Census, NCBI and RCSB data remain subject to their providers' terms."
+          } > release/notes.md
+          cp LICENSE release/LICENSE.txt
+          gh release create "$TAG" release/*.zip release/*.json release/*.txt \
+            --title "Data through ${AS_OF} (${RUN_ID})" --notes-file release/notes.md --target "$GITHUB_SHA"
+
+      - name: Email saved alerts (Supabase)
+        if: success() && hashFiles('pipeline/nwgs_pipeline.py') != ''
+        continue-on-error: true      # an email problem never blocks the site update
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        shell: bash
+        run: |
+          RUN_ID=$(python -c "import json;print(json.load(open('app_export/manifest.json'))['run_id'])")
+          export RELEASE_TAG="${RUN_ID}-r${{ github.run_number }}"
+          python scripts/send_alerts.py app_export
 
       - uses: actions/upload-pages-artifact@v3
         with:

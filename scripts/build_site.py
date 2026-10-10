@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
 Build the static NWGS Grid site from one app export.
+Author: Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
+
 
     python3 scripts/build_site.py <EXPORT_DIR> <SITE_DIR>
 
@@ -17,6 +20,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "site_src" / "template.html"
 TOPO = ROOT / "site_src" / "counties-albers-10m.json"
+SUPA = ROOT / "site_src" / "supabase.json"   # public project URL + publishable key (safe to publish)
 
 
 def R(x, n=3):
@@ -89,8 +93,14 @@ def main(export_dir, site_dir):
     data = json.dumps(D, separators=(",", ":"), allow_nan=False)
     (out / "data.json").write_text(data)
     html = TEMPLATE.read_text().replace("__DATA__", data.replace("</", "<\\/")).replace("__TOPO__", TOPO.read_text())
+    html = html.replace("__SUPA__", SUPA.read_text() if SUPA.exists() else "null")
     page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+            '<meta name="author" content="Victoria Love Franklin">'
+            '<meta name="copyright" content="© 2026 Victoria Love Franklin. All rights reserved.">'
+            '<meta name="description" content="NWGS Grid™: weekly validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties. By Victoria Love Franklin.">'
+            '<meta property="og:title" content="NWGS Grid™ — National Wastewater Genomic Surveillance">'
+            '<meta property="og:description" content="Weekly wastewater surveillance dashboard by Victoria Love Franklin, Developer · PhD Student, Data Science · Research Scholar.">'
             '<style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + html + "</body></html>")
     (out / "index.html").write_text(page)
     print(f"Built {out/'index.html'} ({len(page)/1e6:.2f} MB), run {D['run']['run_id']}, data through {D['run']['data_as_of']}")

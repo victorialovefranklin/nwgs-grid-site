@@ -1,5 +1,5 @@
 # Site build and export
-pandas>=2.2,<3
+pandas>=2.2,<3   # pipeline was written for pandas 2 (Colab); pandas 3 breaks it
 numpy>=1.26
 
 # Pipeline (nwgs_pipeline.py v5.20)

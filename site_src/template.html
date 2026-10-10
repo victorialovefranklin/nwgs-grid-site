@@ -1,4 +1,4 @@
-<title>NWGS Grid</title>
+<title>NWGS Grid™ · Victoria Love Franklin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
@@ -48,6 +48,30 @@ p{margin:0}
 .nav button:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .nav .count{font:500 .72rem var(--mono);color:var(--hi)}
 .rail .foot{margin-top:auto;font-size:.72rem;color:var(--muted);padding:0 8px}
+.sitefoot{margin-top:12px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.78rem;color:var(--muted)}
+.acct{margin-left:auto}
+.acct button{all:unset;cursor:pointer;font-size:.82rem;color:var(--accent);font-weight:600}
+.acct button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.form{display:grid;gap:10px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--muted)}
+.form input,.form select,.form textarea{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:7px 9px;min-width:0}
+.form textarea{min-height:90px;resize:vertical}
+.form input:focus,.form select:focus,.form textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.msg{font-size:.84rem;padding:8px 10px;border-radius:var(--r);border:1px solid var(--line)}
+.msg.ok{border-color:var(--ok);color:var(--ok)} .msg.err{border-color:var(--hi);color:var(--hi)}
+button.btn{cursor:pointer;font-family:inherit}
+button.btn[disabled]{opacity:.6;cursor:default}
+.btn.small{padding:4px 9px;font-size:.78rem}
+details>summary.btn{list-style:none}
+details>summary.btn::-webkit-details-marker{display:none}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);text-decoration:none;font-size:.86rem;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.opt:last-child{border-bottom:none}
+.opt details{align-self:stretch}
+.cite{font-size:.84rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;overflow-wrap:anywhere}
 
 .main{min-width:0;padding-block:20px 48px;padding-inline:28px;display:flex;flex-direction:column;gap:22px}
 .status{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
@@ -151,7 +175,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   <aside class="rail">
     <div class="brand"><b>NWGS <span>Grid</span></b><small>National Wastewater Genomic Surveillance</small></div>
     <nav class="nav" id="nav" aria-label="Views"></nav>
-    <div class="foot">Static build from the weekly pipeline export. Prototype for nwgsgrid.com.</div>
+    <div class="foot">© <span class="cy">2026</span> Victoria Love Franklin<br>NWGS Grid™ · All rights reserved</div>
   </aside>
   <main class="main">
     <div class="status" id="status"></div>
@@ -164,8 +188,16 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-genomics" hidden></section>
     <section class="view" id="v-structures" hidden></section>
     <section class="view" id="v-alerts" hidden></section>
+    <section class="view" id="v-myalerts" hidden></section>
     <section class="view" id="v-audit" hidden></section>
     <section class="view" id="v-methods" hidden></section>
+    <section class="view" id="v-about" hidden></section>
+    <footer class="sitefoot">
+      <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
+      <span>Developer · PhD Student, Data Science · Research Scholar</span>
+      <span class="footmail"></span>
+      <span>NWGS Grid™ · <a href="#about" data-go="about">About, contact &amp; how to cite</a></span>
+    </footer>
   </main>
 </div>
 <div id="tip" role="tooltip"></div>
@@ -174,9 +206,12 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script type="application/json" id="data">__DATA__</script>
 <script type="application/json" id="topo">__TOPO__</script>
+<script type="application/json" id="supa">__SUPA__</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const D = JSON.parse(document.getElementById('data').textContent);
 const TOPO = JSON.parse(document.getElementById('topo').textContent);
+const EMAIL = ['victorialovefranklin','gmail.com'].join('@');
 const ROUTINE = ['SARS-CoV-2','RSV','Influenza A'];
 const EMERGING = ['Influenza A(H5)','Measles','Mpox'];
 const LEVELS = ['Very Low','Low','Typical','Elevated','High'];
@@ -304,7 +339,7 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['predictive','Predictive models'],['equity','Coverage & equity'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['audit','Audit log'],['methods','Methods & sources']];
+const VIEWS=[['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['predictive','Predictive models'],['equity','Coverage & equity'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['about','About & contact']];
 const built={};
 const nav=document.getElementById('nav');
 const highAlerts=D.alerts.filter(a=>a.severity==='high').length;
@@ -316,20 +351,25 @@ function go(v,push=true){
   nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'page':'false'));
   if(!built[v]){RENDER[v]();built[v]=true}
   if(push&&location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(e){}}
-  try{localStorage.setItem('nwgs_view',v)}catch(e){}
+  try{localStorage.setItem('nwgs_view',v);if(v!=='about')localStorage.setItem('nwgs_last',v)}catch(e){}
   window.scrollTo(0,0);
 }
 document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a){e.preventDefault();go(a.dataset.go)}});
 
 /* ---------- status strip ---------- */
 const R=D.run;
+const pulledYear=new Date(R.data_pulled_utc).getUTCFullYear();
+const copyYears=pulledYear>2026?`2026–${pulledYear}`:'2026';
+document.querySelectorAll('.cy').forEach(e=>e.textContent=copyYears);
+document.querySelectorAll('.footmail').forEach(e=>e.innerHTML=`<a href="mailto:${EMAIL}">${EMAIL}</a>`);
 const gateCls=R.gate_status==='PASS'?'ok':R.gate_status==='BLOCKED'?'bad':'warn';
 document.getElementById('status').innerHTML=
   `<span>Data through <b class="num" style="color:var(--ink)">${dateFmt(R.data_as_of)}</b></span>
    <span>Pulled <span class="num">${new Date(R.data_pulled_utc).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}</span></span>
    <span>Updated weekly from CDC NWSS</span>
    <button class="pill ${gateCls}" data-go="audit"><i></i>Validation: ${R.n_pass} pass · ${R.n_warning} warnings · ${R.n_fail} fail</button>
-   ${R.consistency_ok?'':'<button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button>'}`;
+   ${R.consistency_ok?'':'<button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button>'}
+   <span id="acct" class="acct"></span>`;
 
 const S = Object.fromEntries(D.summary.map(s=>[s.pathogen,s]));
 const ser = p => D.trend[p].map(([w,z])=>[new Date(w),z]);
@@ -520,6 +560,109 @@ structures(){
   <p class="note">Reference structures give biological context only; they are not derived from wastewater samples.</p>`;
 },
 
+myalerts(){
+  const el=document.getElementById('v-myalerts');
+  const head=`<div class="head"><h1>My alerts</h1><p class="muted">Get an email when wastewater activity in a state or county you follow reaches Elevated or High. Checked every week after the data update.</p></div>`;
+  if(!SB){el.innerHTML=head+`<article class="panel"><p>Accounts are not available right now. Please try again later or <a href="mailto:${EMAIL}">email Victoria</a>.</p></article>`;return}
+  if(!USER){
+    el.innerHTML=head+`<article class="panel" style="max-width:520px"><h2>Sign in</h2>
+      <p class="small muted">No password needed. Enter your email and we’ll send you a sign-in link. Open it in this same browser.</p>
+      <form class="form" id="si-form"><label>Email<input type="email" id="si-email" required autocomplete="email" placeholder="you@example.org"></label>
+      <div><button class="btn primary" type="submit" id="si-btn">Email me a sign-in link</button></div><p class="msg" id="si-msg" hidden></p></form>
+      <p class="note">Your email is used only for sign-in and the alerts you choose. You can delete your alerts at any time.</p></article>`;
+    document.getElementById('si-form').onsubmit=async e=>{e.preventDefault();const b=document.getElementById('si-btn'),m=document.getElementById('si-msg');b.disabled=true;
+      try{localStorage.setItem('nwgs_view','myalerts')}catch(_){}
+      const redirect=location.protocol.startsWith('http')?location.origin+location.pathname:undefined;
+      const {error}=await SB.auth.signInWithOtp({email:document.getElementById('si-email').value.trim(),options:{emailRedirectTo:redirect}});
+      b.disabled=false;formMsg(m,!error,error?`Could not send the link: ${error.message}`:'Check your inbox for the sign-in link. It can take a minute; check spam too.')};
+    return}
+  const states=Object.keys(STATE_NAMES).filter(s=>Object.values(D.names).some(n=>n[1]===s)).sort((a,b)=>STATE_NAMES[a].localeCompare(STATE_NAMES[b]));
+  el.innerHTML=head+`<div class="grid">
+    <article class="panel c5"><h2>Add an alert</h2>
+      <form class="form" id="ar-form">
+        <label>Pathogen<select id="ar-p">${ROUTINE.map(p=>`<option>${p}</option>`).join('')}</select></label>
+        <div class="row2"><label>Area<select id="ar-type"><option value="state">Whole state</option><option value="county">One county</option></select></label>
+          <label>State<select id="ar-st">${states.map(s=>`<option value="${s}"${s==='TN'?' selected':''}>${esc(STATE_NAMES[s])}</option>`).join('')}</select></label></div>
+        <label id="ar-cty-l" hidden>County (with wastewater sites)<select id="ar-cty"></select></label>
+        <label>Email me when activity is<select id="ar-lv"><option value="High">High</option><option value="Elevated">Elevated or High</option></select></label>
+        <div><button class="btn primary" type="submit" id="ar-btn">Add alert</button></div><p class="msg" id="ar-msg" hidden></p>
+      </form></article>
+    <article class="panel c7"><header><h2>Your alerts</h2><span class="small muted">${esc(USER.email)}</span></header><div id="ar-list"><p class="muted small">Loading…</p></div>
+      <p class="note">Emails go out after each weekly update when a rule matches, at most once per rule per week.</p></article></div>`;
+  const ctySel=document.getElementById('ar-cty'),stSel=document.getElementById('ar-st'),typeSel=document.getElementById('ar-type');
+  const fillCty=()=>{const s=stSel.value;ctySel.innerHTML=Object.entries(D.names).filter(([,n])=>n[1]===s).sort((a,b)=>a[1][0].localeCompare(b[1][0])).map(([f,n])=>`<option value="${f}">${esc(n[0])}</option>`).join('')};
+  stSel.onchange=fillCty;typeSel.onchange=()=>{document.getElementById('ar-cty-l').hidden=typeSel.value!=='county'};fillCty();
+  async function load(){const box=document.getElementById('ar-list');
+    const {data,error}=await SB.from('alert_rules').select('*').order('created_at');
+    if(error){box.innerHTML=`<p class="msg err">Could not load your alerts: ${esc(error.message)}</p>`;return}
+    if(!data.length){box.innerHTML='<p class="muted small">No alerts yet. Add one on the left.</p>';return}
+    box.innerHTML=`<div class="tbl"><table class="stack"><tr><th>Pathogen</th><th>Area</th><th>Level</th><th>Right now</th><th></th></tr>${data.map(r=>`<tr><td class="lead nw">${esc(r.pathogen)}</td><td data-l="Area">${esc(r.area_label)}</td><td data-l="Level" class="nw">${r.min_level==='High'?'High':'Elevated+'}</td><td data-l="Right now" class="small">${esc(levelNow(r))}${r.active?'':' · paused'}</td><td class="nw"><button class="btn small" data-act="toggle" data-id="${r.id}" data-on="${r.active}">${r.active?'Pause':'Resume'}</button> <button class="btn small" data-act="del" data-id="${r.id}">Delete</button></td></tr>`).join('')}</table></div>`}
+  document.getElementById('ar-list').onclick=async e=>{const b=e.target.closest('button[data-act]');if(!b)return;b.disabled=true;
+    const id=+b.dataset.id;const q=b.dataset.act==='del'?SB.from('alert_rules').delete().eq('id',id):SB.from('alert_rules').update({active:b.dataset.on!=='true'}).eq('id',id);
+    const {error}=await q;if(error)alert(error.message);load()};
+  document.getElementById('ar-form').onsubmit=async e=>{e.preventDefault();const m=document.getElementById('ar-msg'),b=document.getElementById('ar-btn');b.disabled=true;
+    const t=typeSel.value,code=t==='state'?stSel.value:ctySel.value;
+    const label=t==='state'?STATE_NAMES[code]:`${D.names[code][0]}, ${D.names[code][1]}`;
+    const {error}=await SB.from('alert_rules').insert({pathogen:document.getElementById('ar-p').value,area_type:t,area_code:code,area_label:label,min_level:document.getElementById('ar-lv').value});
+    b.disabled=false;formMsg(m,!error,error?(/duplicate/.test(error.message)?'You already have this alert.':error.message):`Alert added: ${label}.`);if(!error)load()};
+  load();
+},
+
+about(){
+  const el=document.getElementById('v-about');
+  const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
+  const site=location.protocol.startsWith('http')?location.origin+location.pathname:'https://victorialovefranklin.github.io/nwgs-grid-site/';
+  el.innerHTML=`<div class="head"><h1>About &amp; contact</h1><p class="muted">Who built NWGS Grid™, how to reach her, and how to cite or license the work.</p></div>
+  <div class="grid">
+  <article class="panel c7"><span class="label">About the developer</span>
+    <h2>Victoria Love Franklin</h2>
+    <p class="small" style="font-weight:600">Developer · PhD Student, Data Science · Research Scholar</p>
+    <p>Victoria Love Franklin created NWGS Grid™ and built every part of it: the surveillance pipeline, the validation checks, the weekly automation and this site.</p>
+    <p class="small">Her research combines wastewater, emergency-department and social-vulnerability data to measure how well U.S. public-health surveillance reaches communities, from national trends down to Tennessee counties.</p>
+    <div class="controls">
+      <a class="btn primary" href="${mail('NWGS Grid inquiry')}">Email Victoria</a>
+      <a class="btn" href="https://github.com/victorialovefranklin" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+    <p class="small muted mono">${EMAIL}</p></article>
+  <article class="panel c5"><span class="label">Work with NWGS Grid</span>
+    <div class="opt"><h3>License request</h3><p class="small muted">Use of the code, pipeline, figures or data products in research, a product or a service.</p>
+      ${SB?`<details><summary class="btn">Request a license</summary><form class="form" id="lic-form" style="margin-top:10px">
+        <div class="row2"><label>Name<input id="lic-name" required maxlength="200" autocomplete="name"></label><label>Email<input id="lic-email" type="email" required maxlength="200" autocomplete="email" value="${esc(USER?.email||'')}"></label></div>
+        <div class="row2"><label>Organization<input id="lic-org" maxlength="200" autocomplete="organization"></label><label>Intended use<select id="lic-use"><option>Research</option><option>Commercial</option><option>Teaching</option><option>Public health practice</option><option>Other</option></select></label></div>
+        <label>Which parts (code, pipeline, figures, data products)<input id="lic-parts" maxlength="500"></label>
+        <label>Details and timeline<textarea id="lic-msg" maxlength="5000"></textarea></label>
+        <div><button class="btn primary" type="submit">Send request</button></div><p class="msg" id="lic-out" hidden></p></form></details>`
+      :`<a class="btn" href="${mail('NWGS Grid license request','Name:\nOrganization:\nIntended use (research / commercial / teaching):\nWhich parts (code, pipeline, figures, data products):\nTimeline:\n')}">Request a license</a>`}</div>
+    <div class="opt"><h3>Beta feedback</h3><p class="small muted">Something wrong, unclear or missing? Feedback goes straight to the developer.</p>
+      ${SB?`<details><summary class="btn">Send feedback</summary><form class="form" id="fb-form" style="margin-top:10px">
+        <label>Page<select id="fb-page">${VIEWS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}<option value="other">Other</option></select></label>
+        <label>What happened, or what would help?<textarea id="fb-msg" required minlength="3" maxlength="5000"></textarea></label>
+        <label>Your email (optional, if you’d like a reply)<input id="fb-email" type="email" maxlength="200" value="${esc(USER?.email||'')}"></label>
+        <div><button class="btn primary" type="submit">Send feedback</button></div><p class="msg" id="fb-out" hidden></p></form></details>`
+      :`<a class="btn" href="${mail('NWGS Grid beta feedback',`Page:\nWhat I expected:\nWhat I saw:\n\n(Data run ${R.run_id}, data through ${R.data_as_of})`)}">Send feedback</a>`}</div>
+    <div class="opt"><h3>Research collaboration &amp; media</h3><p class="small muted">Talks, collaborations, data questions and interviews.</p>
+      <a class="btn" href="${mail('NWGS Grid collaboration')}">Get in touch</a></div></article>
+  </div>
+  <div class="grid">
+  <article class="panel c7"><span class="label">How to cite</span>
+    <p class="cite">Franklin, V. L. (${pulledYear}). <i>NWGS Grid™: National Wastewater Genomic Surveillance Grid</i> (data through ${dateFmt(R.data_as_of)}, ${esc(R.run_id)}) [Software and web dashboard]. ${esc(site)}</p>
+    <p class="small muted">Numbers change every week as CDC updates its data. Cite the data-through date and run ID shown here, and use one weekly release for all numbers in a paper.</p></article>
+  <article class="panel c5"><span class="label">Copyright &amp; terms</span>
+    <p class="small">© ${copyYears} Victoria Love Franklin. All rights reserved. The code, analysis, design, text, tables and figures may not be copied, modified or redistributed without written permission. Linking and scholarly citation with attribution are welcome.</p>
+    <p class="small muted">Underlying data from CDC, CDC/ATSDR, the U.S. Census Bureau, NCBI and RCSB PDB remain subject to their providers’ terms. Maps use us-atlas, d3 and topojson (ISC licenses). For research and public-health information only; not medical advice. Not affiliated with or endorsed by CDC. NWGS Grid™ is a trademark of Victoria Love Franklin.</p></article>
+  </div>`;
+  const lic=document.getElementById('lic-form');
+  if(lic) lic.onsubmit=async e=>{e.preventDefault();const out=document.getElementById('lic-out'),b=lic.querySelector('button');b.disabled=true;
+    const v=id=>document.getElementById(id).value.trim();
+    const {error}=await SB.from('license_requests').insert({name:v('lic-name'),email:v('lic-email'),organization:v('lic-org')||null,intended_use:v('lic-use'),parts:v('lic-parts')||null,message:v('lic-msg')||null,user_id:USER?.id||null});
+    b.disabled=false;formMsg(out,!error,error?`Could not send: ${error.message}. You can also email ${EMAIL}.`:'Thank you. Your request was sent to Victoria, who will reply by email.');if(!error)lic.reset()};
+  const fb=document.getElementById('fb-form');
+  if(fb){let last='dashboard';try{last=localStorage.getItem('nwgs_last')||'dashboard'}catch(_){}fb.querySelector('#fb-page').value=last;
+    fb.onsubmit=async e=>{e.preventDefault();const out=document.getElementById('fb-out'),b=fb.querySelector('button');b.disabled=true;
+    const {error}=await SB.from('feedback').insert({page:document.getElementById('fb-page').value,message:document.getElementById('fb-msg').value.trim(),email:document.getElementById('fb-email').value.trim()||null,run_id:R.run_id,user_id:USER?.id||null});
+    b.disabled=false;formMsg(out,!error,error?`Could not send: ${error.message}. You can also email ${EMAIL}.`:'Thank you. Your feedback was sent.');if(!error)document.getElementById('fb-msg').value=''}}
+},
+
 alerts(){
   const el=document.getElementById('v-alerts');
   const groups=[['high','High county activity'],['moderate','Trends and detections'],['info','Coverage']];
@@ -544,22 +687,43 @@ methods(){
   <article class="panel"><header><h2>Data sources</h2><span class="small muted">frozen snapshot, pulled ${new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></header>
   <div class="tbl"><table><tr><th>Pathogen</th><th>Dataset</th><th>ID</th><th class="n">Rows</th></tr>${D.sources.map(s=>`<tr><td>${s.pathogen}</td><td>${esc(s.dataset_name)}</td><td><a class="mono" href="${s.source_url}" target="_blank" rel="noopener">${s.dataset_id}</a></td><td class="n">${s.rows.toLocaleString()}</td></tr>`).join('')}</table></div>
   <p class="small muted">Also used: CDC NSSP emergency-department visits, CDC/ATSDR Social Vulnerability Index, U.S. Census TIGER/Line, NCBI Virus, RCSB Protein Data Bank.</p></article>
-  <div class="grid"><article class="panel c6"><h2>Measures</h2><ul class="small" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+  <div class="grid"><article class="panel c12"><h2>Measures</h2><ul class="small" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
     <li><b>Activity level</b> — within-site z-score of log concentration, median across a county’s sites for the latest 4 weeks. Very Low ≤ −1, Low ≤ −0.25, Typical ≤ 0.25, Elevated ≤ 1, High &gt; 1.</li>
     <li><b>Analysis-ready</b> — at least 52 qualifying weeks and at least 70% completeness across the active span.</li>
     <li><b>Timing</b> — Spearman correlation between state wastewater and ED activity at lags of 0–6 weeks, FDR-corrected; best lag reported.</li>
     <li><b>Seasonal peaks</b> — complete July–June seasons only; leads near season boundaries are flagged.</li>
     <li><b>Clusters</b> — global and local Moran’s I, k=6 nearest neighbours, EPSG:5070, permutation inference.</li>
-    <li><b>Models</b> — random forest and gradient boosting vs. clinical persistence on a chronological holdout; ablation, wastewater-only benchmark and SHAP.</li></ul></article>
-  <article class="panel c6"><h2>About this version</h2><p class="small">This is a static build: one HTML page generated from the weekly pipeline export, with no server or database. It is rebuilt every Saturday after CDC’s weekly NWSS refresh, and only when no validation check fails.</p>
-    <p class="small">Sign-in, saved alert rules and data uploads need a backend and are not part of this public site.</p>
-    <p class="small muted">Victoria Love Franklin · Meharry Medical College · NWGS Grid™</p></article></div>`;
+    <li><b>Models</b> — random forest and gradient boosting vs. clinical persistence on a chronological holdout; ablation, wastewater-only benchmark and SHAP.</li></ul></article></div>
+  <p class="note">The site is one static page generated from the weekly pipeline export. It is rebuilt every Saturday after CDC’s weekly NWSS refresh, and only when no validation check fails.</p>`;
 }
 };
 
 function alertRow(a){return `<div class="alert"><span class="bar sev-${a.severity}"></span><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="meta"><b style="color:var(--ink)">${esc(a.alert_type)}</b>${a.pathogen?`<span>${esc(a.pathogen)}</span>`:''}${a.geography?`<span>${esc(a.geography)}</span>`:''}</div><p class="small">${isoTxt(a.message)}</p></div></div>`}
 
+/* ---------- accounts (Supabase) ---------- */
+const SUPA_CFG = JSON.parse(document.getElementById('supa').textContent||'null');
+let SB=null, USER=null;
+try{ if(SUPA_CFG&&window.supabase) SB=window.supabase.createClient(SUPA_CFG.url,SUPA_CFG.publishableKey,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true}}) }catch(e){SB=null}
+const STATE_NAMES=Object.fromEntries(statesFeat.map(f=>[STATE_FIPS[f.id],f.properties.name]).filter(([k])=>k));
+const RANK={'Very Low':0,'Low':1,'Typical':2,'Elevated':3,'High':4};
+function drawAcct(){const el=document.getElementById('acct');if(!el)return;
+  if(!SB){el.innerHTML='';return}
+  el.innerHTML=USER?`<span class="small">${esc(USER.email)}</span> · <button id="acct-out">Sign out</button>`:`<button data-go="myalerts">Sign in</button>`;
+  const o=document.getElementById('acct-out');if(o)o.onclick=async()=>{await SB.auth.signOut()}}
+function rerender(v){delete built[v];if(!document.getElementById('v-'+v).hidden){RENDER[v]();built[v]=true}}
+if(SB){
+  SB.auth.onAuthStateChange((ev,session)=>{const u=session?.user||null;const changed=(u?.id||null)!==(USER?.id||null);USER=u;drawAcct();
+    if(ev==='SIGNED_IN'&&/[?&]code=/.test(location.search)){try{history.replaceState(null,'',location.pathname+location.hash)}catch(e){}}
+    if(changed){setTimeout(()=>{rerender('myalerts');rerender('about')},0)}});
+}
+const formMsg=(el,ok,text)=>{el.className='msg '+(ok?'ok':'err');el.textContent=text;el.hidden=false};
+function levelNow(rule){const a=D.activity[rule.pathogen]||{};
+  if(rule.area_type==='county'){const v=a[rule.area_code];return v?`${level(v[0])} now (z ${fmt(v[0])})`:'No recent data'}
+  const hits=Object.entries(a).filter(([f,v])=>D.names[f]?.[1]===rule.area_code&&RANK[level(v[0])]>=RANK[rule.min_level]).length;
+  return hits?`${hits} ${hits>1?'counties':'county'} at ${rule.min_level==='High'?'High':'Elevated or High'} now`:'None at that level now'}
+
 /* ---------- boot ---------- */
+drawAcct();
 let start=location.hash.slice(1);
 if(!start){try{start=localStorage.getItem('nwgs_view')||''}catch(e){}}
 go(start||'dashboard',false);

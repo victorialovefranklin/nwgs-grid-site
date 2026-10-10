@@ -2,7 +2,10 @@
 """
 NWGS Grid(TM) - app export step
 ================================
-Turns one pipeline run's output tables into Base44-ready entity files.
+Author: Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
+
+Turns one pipeline run's output tables into the site's data files.
 
     python3 nwgs_app_export.py <TABLE_DIR> <OUT_DIR> [--allow-mixed-runs]
 
@@ -12,7 +15,7 @@ What it does
   2. Check: cross-table consistency (e.g. Table07 county counts must match
             Table13). Mismatches mean tables came from different runs; the
             export stops unless --allow-mixed-runs is passed.
-  3. Build: one CSV + one JSON array per Base44 entity, every row stamped with
+  3. Build: one CSV + one JSON array per data entity, every row stamped with
             run_id and data_as_of. Drops local file paths and internal columns.
   4. Derive: activity categories (same thresholds as the pipeline's
             categorize_activity_z) and data-driven alerts.
@@ -365,7 +368,9 @@ def main(table_dir, out_dir, allow_mixed=False):
 
     # ---- 5. write -----------------------------------------------------------
     manifest = {"run_id": run_id, "data_as_of": data_as_of, "data_pulled_utc": pulled.isoformat(),
-                "gate_status": gate, "consistency_checks": checks, "entities": {}}
+                "gate_status": gate, "consistency_checks": checks, "entities": {},
+                "author": "Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar",
+                "copyright": "Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE."}
     payload = {}
     for name, df in ents.items():
         df = clean(df)

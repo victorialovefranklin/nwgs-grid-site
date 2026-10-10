@@ -2,7 +2,8 @@
 
 """
 NWGS Grid™ MASTER REPRODUCIBLE PIPELINE v5.20
-Author: Victoria Love Franklin
+Author: Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 Generated: 2026-09-14 (v5.20 revision)
 Validated locally: Python syntax; full live-data rerun required for regenerated results
 

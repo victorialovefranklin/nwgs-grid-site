@@ -10,9 +10,15 @@ Before the first automated run, check four things in the script:
    `requirements.txt` instead.
 2. **Paths.** The workflow creates `/content/NWGS_GRID` exactly like Colab, so existing paths work.
    Tables must end up in `/content/NWGS_GRID/outputs/tables`.
-3. **API keys.** Read them from the environment, never type them into the script:
-   `SOCRATA_APP_TOKEN = os.environ.get("SOCRATA_APP_TOKEN")`
-   (and `NCBI_API_KEY` the same way if the script uses one).
+3. **API keys.** Read them from the environment, never type them into the script.
+   data.cdc.gov issues an API Key ID + Key Secret, used as HTTP Basic auth on every request:
+   ```python
+   KEY_ID, KEY_SECRET = os.environ.get("SOCRATA_KEY_ID"), os.environ.get("SOCRATA_KEY_SECRET")
+   auth = (KEY_ID, KEY_SECRET) if KEY_ID and KEY_SECRET else None
+   requests.get(url, params=params, auth=auth, timeout=120)
+   ```
+   (An older-style `SOCRATA_APP_TOKEN` also works if you have one, sent as the `X-App-Token` header.
+   `NCBI_API_KEY` is read the same way if the script uses one.)
 4. **Input files.** Already in `static_inputs/` (copied to `/content/NWGS_GRID/data/`):
    `SVI_2022_US_COUNTY.csv` and `US_Wastewater_AMR_ARG_2024.csv`.
    The TIGER/Line 2025 county shapefile (`tl_2025_us_county.*`, ~130 MB) is too big for GitHub,

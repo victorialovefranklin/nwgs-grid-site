@@ -1,0 +1,38 @@
+NWGS Grid™ (National Wastewater Genomic Surveillance Grid)
+Copyright © 2026 Victoria Love Franklin. All rights reserved.
+
+Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+
+PROPRIETARY. NO LICENSE IS GRANTED.
+
+This repository and the website built from it (https://victorialovefranklin.github.io/nwgs-grid-site/),
+including the source code, analysis pipeline, validation and export logic, site design, text,
+tables, figures and documentation (together, "the Work"), are the property of
+Victoria Love Franklin.
+
+Without prior written permission from Victoria Love Franklin, you may not copy, modify,
+distribute, publish, sublicense, sell, or create derivative works from the Work, in whole or
+in part, or use it to provide a product or service.
+
+The Work is publicly viewable on GitHub. Viewing it, and any limited rights GitHub's Terms of
+Service give other GitHub users (such as viewing and forking within GitHub), do not grant any
+other right or license.
+
+Permitted without asking: linking to the Work, and citing it in scholarly or journalistic work
+with attribution (see CITATION.cff).
+
+License and permission requests: Victoria Love Franklin, victorialovefranklin@gmail.com
+(subject line "NWGS Grid license request"), or https://github.com/victorialovefranklin.
+
+Third-party material, which this notice does not cover:
+- Public data from the U.S. Centers for Disease Control and Prevention (NWSS, NSSP, PLACES),
+  CDC/ATSDR Social Vulnerability Index, U.S. Census Bureau TIGER/Line, NCBI Virus and the
+  RCSB Protein Data Bank remain subject to their providers' terms.
+- d3 (ISC License), topojson-client (ISC License) and us-atlas (ISC License; see
+  site_src/us-atlas-LICENSE.txt) are used under their own licenses.
+
+NWGS Grid™ is a trademark of Victoria Love Franklin.
+
+DISCLAIMER: The Work is provided "as is", without warranty of any kind. It is for research and
+public-health information only and is not medical advice or a basis for clinical decisions.
+It is not affiliated with or endorsed by CDC or any other data provider.

@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use or refer to NWGS Grid, please cite it as below. Copyright © 2026 Victoria Love Franklin. All rights reserved; see LICENSE."
+type: software
+title: "NWGS Grid™: National Wastewater Genomic Surveillance Grid"
+abstract: "Weekly, validated multimodal wastewater surveillance of SARS-CoV-2, influenza A, RSV, H5, measles and mpox from CDC NWSS data, with wastewater-clinical alignment, spatial clustering, coverage equity and predictive modeling."
+authors:
+  - given-names: "Victoria Love"
+    family-names: "Franklin"
+    affiliation: "Developer · PhD Student, Data Science · Research Scholar"
+    email: "victorialovefranklin@gmail.com"
+repository-code: "https://github.com/victorialovefranklin/nwgs-grid-site"
+url: "https://victorialovefranklin.github.io/nwgs-grid-site/"
+keywords:
+  - wastewater surveillance
+  - public health
+  - SARS-CoV-2
+  - influenza
+  - RSV
+  - data science
