@@ -76,6 +76,8 @@ jobs:
         run: cp -r sample_export app_export
 
       - name: Build site
+        env:
+          NWGS_STRUCTURE_DIR: /content/NWGS_GRID/outputs/pathogen_intelligence/protein_structures
         run: |
           python scripts/build_site.py app_export site
           cp site_src/CNAME site/ 2>/dev/null || true

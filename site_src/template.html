@@ -1,53 +1,66 @@
 <title>NWGS Grid™ · Victoria Love Franklin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: lab console — fixed left rail of views, a run-status strip across the top, data panels in a 12-col grid */
 :root{
-  --bg:#f3f5f4; --surface:#ffffff; --ink:#13222a; --muted:#56686d; --line:#d6dedc;
-  --accent:#146a66; --accent-ink:#ffffff; --accent-soft:#dcecea; --nodata:#e2e7e6; --typ:#f2f4f3; --typ-line:#b9c4c1;
+  /* NWGS Grid™ brand (Victoria Love Franklin signature palette): navy, wine, gold on paper */
+  --navy:#14213a; --navy-2:#1c2c4c; --wine:#6e1f2b; --gold:#c49a4a; --gold-soft:#f0cf8f; --paper:#fbf8f3; --cream:#f7f1e8;
+  --bg:#f7f3ec; --surface:#ffffff; --ink:#14213a; --muted:#5b6070; --line:#e2dccf;
+  --accent:#1c2c4c; --accent-ink:#ffffff; --accent-soft:#e7ebf3; --link:#1c2c4c;
+  --rail-bg:#14213a; --rail-ink:#f7f1e8; --rail-muted:#b8bfcc; --rail-hover:rgba(247,241,232,.08); --rail-active:rgba(196,154,74,.2);
+  --nodata:#e6e1d8; --typ:#f3f0ea; --typ-line:#bdb5a6; --hi-soft:#f5cdc6;
   --vl:#2166ac; --lo:#67a9cf; --el:#ef8a62; --hi:#b2182b; --warn:#b4630f; --ok:#2e7d4f;
-  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
-  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --r:6px;
+  --r:8px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0e1618; --surface:#152024; --ink:#e3ecea; --muted:#94a7aa; --line:#29393d;
-  --accent:#5db7af; --accent-ink:#0e1618; --accent-soft:#1b3332; --nodata:#273336; --typ:#8e9a98; --typ-line:#8e9a98;
+  --bg:#0c1424; --surface:#131d33; --ink:#f2ece2; --muted:#a9b0c0; --line:#27324b;
+  --accent:#e0bd74; --accent-ink:#14213a; --accent-soft:#25304a; --link:#f0cf8f;
+  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18);
+  --nodata:#283247; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2630;
   --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0e1618; --surface:#152024; --ink:#e3ecea; --muted:#94a7aa; --line:#29393d;
-  --accent:#5db7af; --accent-ink:#0e1618; --accent-soft:#1b3332; --nodata:#273336; --typ:#8e9a98; --typ-line:#8e9a98;
+  --bg:#0c1424; --surface:#131d33; --ink:#f2ece2; --muted:#a9b0c0; --line:#27324b;
+  --accent:#e0bd74; --accent-ink:#14213a; --accent-soft:#25304a; --link:#f0cf8f;
+  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18);
+  --nodata:#283247; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2630;
   --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased}
-a{color:var(--accent)}
-h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:.005em;text-wrap:balance;margin:0}
-h1{font-size:1.85rem;line-height:1.15}
+a{color:var(--link);text-decoration-color:color-mix(in srgb,var(--gold) 70%,transparent);text-underline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.005em;text-wrap:balance;margin:0;font-optical-sizing:auto}
+h1{font-size:2rem;line-height:1.12}
 h2{font-size:1.25rem}
-h3{font-size:1rem;font-weight:600}
-p{margin:0}
+h3{font-size:1rem;font-weight:600;font-family:var(--body)}
+p{margin:0;text-wrap:pretty}
+li{text-wrap:pretty}
 .num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
 .small{font-size:.82rem}
 .label{font:600 .7rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 
-.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100%}
-.rail{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;border-right:1px solid var(--line);background:var(--surface);padding:20px 14px;display:flex;flex-direction:column;gap:18px}
-.brand{display:flex;flex-direction:column;gap:2px;padding:0 8px}
-.brand b{font:700 1.35rem/1 var(--display);letter-spacing:.01em}
-.brand b span{color:var(--accent)}
-.brand small{color:var(--muted);font-size:.75rem}
+.app{display:grid;grid-template-columns:228px minmax(0,1fr);min-height:100%}
+.rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--rail-bg);color:var(--rail-ink);padding:22px 14px;display:flex;flex-direction:column;gap:20px;border-top:3px solid var(--gold)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px;text-decoration:none;color:inherit}
+.brand svg{flex:none}
+.brand .wm{display:flex;flex-direction:column;gap:3px}
+.brand b{font:700 1.4rem/1 var(--display);letter-spacing:.005em;color:var(--rail-ink)}
+.brand b span{color:var(--gold)}
+.brand b sup{font:500 .55rem var(--body);color:var(--rail-muted);margin-left:1px}
+.brand small{color:var(--rail-muted);font-size:.72rem;line-height:1.3}
+.menubtn{display:none}
 .nav{display:flex;flex-direction:column;gap:2px}
-.nav button{all:unset;cursor:pointer;padding:7px 10px;border-radius:var(--r);font-size:.9rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
-.nav button:hover{color:var(--ink);background:var(--bg)}
-.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--ink);font-weight:600}
-.nav button:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.nav .count{font:500 .72rem var(--mono);color:var(--hi)}
-.rail .foot{margin-top:auto;font-size:.72rem;color:var(--muted);padding:0 8px}
+.nav button{all:unset;cursor:pointer;padding:8px 10px 8px 12px;border-radius:6px;font-size:.9rem;color:var(--rail-muted);display:flex;justify-content:space-between;align-items:center;border-left:3px solid transparent}
+.nav button:hover{color:var(--rail-ink);background:var(--rail-hover)}
+.nav button[aria-current="page"]{background:var(--rail-active);color:var(--rail-ink);font-weight:600;border-left-color:var(--gold)}
+.nav button:focus-visible,button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.nav .count{font:500 .72rem var(--mono);color:var(--gold-soft);background:rgba(196,154,74,.16);padding:1px 7px;border-radius:999px}
+.rail .foot{margin-top:auto;font-size:.72rem;color:var(--rail-muted);padding:0 8px;line-height:1.5}
 .sitefoot{margin-top:12px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.78rem;color:var(--muted)}
 .acct{margin-left:auto}
 .acct button{all:unset;cursor:pointer;font-size:.82rem;color:var(--accent);font-weight:600}
@@ -66,15 +79,51 @@ button.btn[disabled]{opacity:.6;cursor:default}
 details>summary.btn{list-style:none}
 details>summary.btn::-webkit-details-marker{display:none}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);text-decoration:none;font-size:.86rem;font-weight:500}
-.btn:hover{border-color:var(--accent)}
+.btn:hover{border-color:var(--gold)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .opt{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
 .opt:last-child{border-bottom:none}
 .opt details{align-self:stretch}
+.stackcol{display:flex;flex-direction:column;gap:16px;min-width:0}
+.sumrow{display:flex;gap:28px}.sumrow div{display:flex;flex-direction:column;gap:4px}
+.linkbtn{all:unset;cursor:pointer;color:var(--link);text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:2px}
+.linkbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.selectwrap select{font:inherit;font-size:.86rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px 10px;max-width:100%}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.statecards{display:flex;flex-direction:column;gap:12px}
+.statecards .grid{align-items:stretch}
+.filterbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.9rem}
+.statecard .pblock{display:flex;flex-direction:column;gap:3px}
+.statecard .ptitle{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:7px}
+.statecard .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.statecard .btn{align-self:flex-start;margin-top:auto}
+.statecard{height:100%}
+.banner{margin:0;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#e9eef6}
+.banner img{display:block;width:100%;height:auto;aspect-ratio:1400/349;object-fit:cover;object-position:left center}
+.portrait{padding:0;overflow:hidden;margin:0}
+.portrait img{display:block;width:100%;height:100%;aspect-ratio:3/4;object-fit:cover;object-position:center 20%}
+.role{font-weight:600;color:var(--wine)}
+.why .lede{font:500 1.2rem/1.45 var(--display);color:var(--ink)}
+.why .sig{font:italic 500 1.05rem var(--display);color:var(--muted)}
+.creds{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:.88rem}
+.creds li::marker{color:var(--gold)}
+.refs{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:.86rem}
+.refs li{overflow-wrap:anywhere}
+.refs li::marker{color:var(--gold);font-weight:600}
+.scard .sfig{margin:-18px -20px 4px;border-bottom:1px solid var(--line);background:#fff;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border-radius:var(--r) var(--r) 0 0;overflow:hidden}
+.scard .sfig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.scard .btn{align-self:flex-start}
+.moldlg{width:min(900px,94vw);padding:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.moldlg::backdrop{background:rgba(12,20,36,.6)}
+.molhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.molview{position:relative;width:100%;height:min(70vh,560px)}
+.emlist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto}
+.emlist li{border-top:1px solid var(--line);padding-top:8px}
 .cite{font-size:.84rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;overflow-wrap:anywhere}
 
 .main{min-width:0;padding-block:20px 48px;padding-inline:28px;display:flex;flex-direction:column;gap:22px}
-.status{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
+.status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
+.status .opt-s{white-space:nowrap}
 .pill{display:inline-flex;align-items:center;gap:6px;font:500 .74rem var(--body);padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:var(--surface);white-space:nowrap}
 .pill i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .pill.warn i{background:var(--warn)} .pill.ok i{background:var(--ok)} .pill.bad i{background:var(--hi)}
@@ -82,10 +131,12 @@ details>summary.btn::-webkit-details-marker{display:none}
 
 .view{display:flex;flex-direction:column;gap:20px}
 .view[hidden]{display:none}
-.head{display:flex;flex-direction:column;gap:6px;max-width:72ch}
+.head{display:flex;flex-direction:column;gap:8px;max-width:68ch}
+.head p{text-wrap:balance;font-size:1rem}
+.head .eyebrow{font:600 .72rem/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
 .c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}.c3{grid-column:span 3}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;min-width:0;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 2px rgba(20,33,58,.04)}
 .panel.flat{background:transparent;border:none;padding:0}
 .panel header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 
@@ -93,7 +144,7 @@ details>summary.btn::-webkit-details-marker{display:none}
 .card-p .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .chip{display:inline-flex;align-items:center;gap:6px;font:600 .72rem var(--body);letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;border:1px solid transparent}
 .chip.sw{width:12px;height:12px;padding:0;border-radius:3px}
-.big{font:600 2rem/1 var(--display);font-variant-numeric:tabular-nums}
+.big{font:600 2rem/1 var(--display);font-variant-numeric:lining-nums tabular-nums}
 .kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .kv div{display:flex;flex-direction:column;gap:2px}
 .kv b{font:500 .95rem var(--mono)}
@@ -145,7 +196,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 .alert .bar{border-radius:2px}
 .alert .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.76rem;color:var(--muted)}
 .sev-high{background:var(--hi)} .sev-moderate{background:var(--warn)} .sev-info{background:var(--accent)}
-.status-PASS{color:var(--ok)} .status-WARN{color:var(--warn)} .status-FAIL{color:var(--hi)}
+.status-INFO{color:var(--muted)} .status-PASS{color:var(--ok)} .status-WARN{color:var(--warn)} .status-FAIL{color:var(--hi)}
 
 .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
@@ -157,23 +208,43 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 #tip{position:fixed;pointer-events:none;z-index:20;background:var(--ink);color:var(--bg);font-size:.78rem;line-height:1.35;padding:7px 9px;border-radius:5px;max-width:240px;opacity:0;transition:opacity .08s}
 #tip b{font-weight:600}
 
-@media (max-width:1100px){.c8,.c7,.c6,.c5,.c4{grid-column:span 12}.c3{grid-column:span 6}}
-@media (max-width:820px){
+@media (max-width:1100px){
+  .app{grid-template-columns:200px minmax(0,1fr)}
+  .main{padding-inline:22px}
+  .c8,.c7,.c6,.c5{grid-column:span 12}.c4,.c3{grid-column:span 6}
+  .c4.solo{grid-column:span 12}
+  .brand b{font-size:1.15rem}
+  .aboutgrid .portrait{grid-column:span 4}.aboutgrid .bio{grid-column:span 8}
+}
+@media (max-width:760px){
+  .portrait img{aspect-ratio:4/5;max-height:440px}
+  .aboutgrid .portrait,.aboutgrid .bio{grid-column:span 12}
   .app{grid-template-columns:minmax(0,1fr)}
-  .rail{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:10;flex-direction:column;gap:10px;padding:12px 16px;border-right:none;border-bottom:1px solid var(--line)}
+  .rail{position:sticky;top:0;height:auto;max-height:100vh;z-index:30;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-top-width:3px}
+  .brand b{font-size:1.2rem}
+  .brand small{display:none}
+  .menubtn{display:inline-flex;align-items:center;gap:8px;all:unset;cursor:pointer;color:var(--rail-ink);font:600 .86rem var(--body);padding:7px 12px;border:1px solid rgba(247,241,232,.25);border-radius:999px}
+  .menubtn{display:inline-flex}
+  .menubtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .nav{display:none;flex-basis:100%;padding:6px 0 10px;max-height:calc(100vh - 70px);overflow-y:auto}
+  .rail.open .nav{display:flex}
+  .nav button{font-size:1rem;padding:11px 12px}
   .rail .foot{display:none}
-  .nav{flex-direction:row;overflow-x:auto;scrollbar-width:none}
-  .nav button{white-space:nowrap}
-  .main{padding-inline:16px}
-  .c3{grid-column:span 12}
-  h1{font-size:1.5rem}
+  .main{padding-inline:16px;padding-top:14px;gap:18px}
+  .c8,.c7,.c6,.c5,.c4,.c3{grid-column:span 12}
+  h1{font-size:1.6rem}
+  .status{font-size:.78rem;gap:6px 12px}
+  .status .opt-s{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
 <div class="app">
   <aside class="rail">
-    <div class="brand"><b>NWGS <span>Grid</span></b><small>National Wastewater Genomic Surveillance</small></div>
+    <a class="brand" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid home">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="none" stroke="#c49a4a" stroke-width="1.6"/><g fill="#c49a4a"><rect x="7" y="7" width="4.5" height="4.5" rx="1"/><rect x="12.75" y="7" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="18.5" y="7" width="4.5" height="4.5" rx="1"/><rect x="7" y="12.75" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="12.75" y="12.75" width="4.5" height="4.5" rx="1" fill="#f7f1e8"/><rect x="18.5" y="12.75" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="7" y="18.5" width="4.5" height="4.5" rx="1"/><rect x="12.75" y="18.5" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="18.5" y="18.5" width="4.5" height="4.5" rx="1"/></g></svg>
+      <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomic Surveillance</small></span></a>
+    <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="nav"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
     <nav class="nav" id="nav" aria-label="Views"></nav>
     <div class="foot">© <span class="cy">2026</span> Victoria Love Franklin<br>NWGS Grid™ · All rights reserved</div>
   </aside>
@@ -219,7 +290,7 @@ const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).
 const LV = {'Very Low':'--vl','Low':'--lo','Typical':'--typ','Elevated':'--el','High':'--hi'};
 const level = z => z==null?null : z<=-1?'Very Low': z<=-0.25?'Low': z<=0.25?'Typical': z<=1?'Elevated':'High';
 const lvColor = l => l? css(LV[l]) : css('--nodata');
-const fmt = (x,d=2) => x==null||isNaN(x)?'—':Number(x).toFixed(d);
+const fmt = (x,d=2) => {if(x==null||isNaN(x))return '—';const s=Number(x).toFixed(d);return /^-0(\.0+)?$/.test(s)?s.slice(1):s};
 const pct = (x,d=1) => x==null?'—':(x*100).toFixed(d)+'%';
 const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pFmt = p => p==null||isNaN(p)?'—': p<0.001?'< 0.001': p<0.01?Number(p).toFixed(3):Number(p).toFixed(2);
@@ -270,7 +341,7 @@ const cname = f => {const n=D.names[f];return n?`${esc(n[0])}, ${esc(n[1])}`:`Co
 /* ---------- charts ---------- */
 function lineChart(el, series, o={}){
   el.innerHTML='';
-  const W=Math.min(o.w||720,Math.max(340,el.clientWidth||0)),H=Math.min(o.h||220,Math.max(190,W*.6)),m={t:10,r:14,b:24,l:o.left||38};
+  const W=Math.max(300,el.clientWidth||o.w||720),H=Math.min(o.h||220,Math.max(180,W*.58)),m={t:10,r:14,b:24,l:o.left||38};
   const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
   const all=series.flatMap(s=>s.values);
   const x=d3.scaleUtc().domain(d3.extent(all,d=>d[0])).range([m.l,W-m.r]);
@@ -279,7 +350,7 @@ function lineChart(el, series, o={}){
   if(o.bands){const b=[[-99,-1,'--vl'],[-1,-.25,'--lo'],[.25,1,'--el'],[1,99,'--hi']];
     b.forEach(([a,c,col])=>{const y0=y(Math.max(a,y.domain()[0])),y1=y(Math.min(c,y.domain()[1]));if(y0>y1)svg.append('rect').attr('x',m.l).attr('width',W-m.l-m.r).attr('y',y1).attr('height',y0-y1).attr('fill',css(col)).attr('opacity',.09)})}
   svg.append('g').attr('class','gridl').attr('transform',`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(o.yticks||5).tickSize(-(W-m.l-m.r)).tickFormat(o.yfmt||d3.format('.1f'))).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('text').attr('x',-6));
-  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x).ticks(o.xticks||6).tickSizeOuter(0));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x).ticks(Math.max(2,Math.min(o.xticks||6,Math.floor(W/110)))).tickSizeOuter(0));
   if(o.zero) svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',css('--muted')).attr('stroke-dasharray','2 3');
   series.forEach(s=>{
     if(s.area){svg.append('path').datum(s.values).attr('fill',s.color).attr('opacity',.12).attr('d',d3.area().x(d=>x(d[0])).y0(y(Math.max(0,y.domain()[0]))).y1(d=>y(d[1])).curve(d3.curveMonotoneX))}
@@ -297,7 +368,7 @@ function lineChart(el, series, o={}){
     .on('mouseleave',()=>{g.style('display','none');hideTip()});
 }
 function spark(el, vals, color, o={}){
-  const W=260,H=54; el.innerHTML='';
+  const W=Math.max(180,el.clientWidth||260),H=54; el.innerHTML='';
   const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('aria-hidden','true');
   const x=d3.scaleLinear().domain([0,vals.length-1]).range([2,W-4]);
   const ext=d3.extent(vals); const y=d3.scaleLinear().domain(o.dom||[Math.min(ext[0],-1),Math.max(ext[1],1)]).range([H-3,3]);
@@ -307,7 +378,7 @@ function spark(el, vals, color, o={}){
   svg.append('circle').attr('cx',x(vals.length-1)).attr('cy',y(vals[vals.length-1])).attr('r',3).attr('fill',color);
 }
 function hbars(el, rows, o={}){
-  el.innerHTML='';const W=Math.max(260,Math.min(o.w||520,el.clientWidth||o.w||520)),bh=o.bh||20,gap=6,m={l:o.left||140,r:54};
+  el.innerHTML='';const W=Math.max(260,Math.min(760,el.clientWidth||o.w||520)),bh=o.bh||20,gap=6,m={l:o.left||140,r:54};
   const H=rows.length*(bh+gap)+4;const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
   const x=d3.scaleLinear().domain([o.min??0,o.max??d3.max(rows,r=>r.v)]).range([m.l,W-m.r]);
   rows.forEach((r,i)=>{const yy=i*(bh+gap)+2;
@@ -319,12 +390,12 @@ function hbars(el, rows, o={}){
   if(x.domain()[0]<0) svg.append('line').attr('x1',x(0)).attr('x2',x(0)).attr('y1',0).attr('y2',H).attr('stroke',css('--muted'));
 }
 function groupedBars(el, groups, keys, colors, o={}){
-  el.innerHTML='';const W=Math.min(o.w||640,Math.max(340,el.clientWidth||0)),H=o.h||240,m={t:12,r:10,b:28,l:40};
+  el.innerHTML='';const W=Math.max(320,el.clientWidth||o.w||640),H=o.h||240,m={t:16,r:10,b:30,l:40};
   const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
   const x0=d3.scaleBand().domain(groups.map(g=>g.name)).range([m.l,W-m.r]).padding(.25);
   const x1=d3.scaleBand().domain(keys).range([0,x0.bandwidth()]).padding(.08);
   const vals=groups.flatMap(g=>keys.map(k=>g[k]));
-  const y=d3.scaleLinear().domain([Math.min(0,d3.min(vals)),o.max??Math.max(1,d3.max(vals))]).nice().range([H-m.b,m.t]);
+  const y=d3.scaleLinear().domain([Math.min(0,d3.min(vals)*1.35),o.max??Math.max(1,d3.max(vals))]).nice().range([H-m.b,m.t]);
   svg.append('g').attr('class','gridl').attr('transform',`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W-m.l-m.r)).tickFormat(o.yfmt||d3.format('.1f'))).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('text').attr('x',-6));
   svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x0).tickSize(0)).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('text').attr('dy','1.1em').style('fill',css('--ink')).style('font-size','13px'));
   svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',css('--muted'));
@@ -341,10 +412,14 @@ const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['
 /* ---------- routing ---------- */
 const VIEWS=[['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['predictive','Predictive models'],['equity','Coverage & equity'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['about','About & contact']];
 const built={};
+let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
 const highAlerts=D.alerts.filter(a=>a.severity==='high').length;
 nav.innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}">${l}${k==='alerts'?`<span class="count">${D.alerts.length}</span>`:''}</button>`).join('');
 nav.addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)});
+const rail=document.querySelector('.rail'),menubtn=document.getElementById('menubtn');
+menubtn.addEventListener('click',()=>{const o=rail.classList.toggle('open');menubtn.setAttribute('aria-expanded',o)});
+let lastW=innerWidth,rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(Math.abs(innerWidth-lastW)<40)return;lastW=innerWidth;Object.keys(built).forEach(k=>delete built[k]);const v=location.hash.slice(1)||'dashboard';if(VIEWS.some(x=>x[0]===v)){RENDER[v]();built[v]=true}},200)});
 function go(v,push=true){
   if(!VIEWS.some(x=>x[0]===v))v='dashboard';
   VIEWS.forEach(([k])=>{document.getElementById('v-'+k).hidden=k!==v});
@@ -352,6 +427,7 @@ function go(v,push=true){
   if(!built[v]){RENDER[v]();built[v]=true}
   if(push&&location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(e){}}
   try{localStorage.setItem('nwgs_view',v);if(v!=='about')localStorage.setItem('nwgs_last',v)}catch(e){}
+  rail.classList.remove('open');menubtn.setAttribute('aria-expanded','false');
   window.scrollTo(0,0);
 }
 document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a){e.preventDefault();go(a.dataset.go)}});
@@ -364,10 +440,9 @@ document.querySelectorAll('.cy').forEach(e=>e.textContent=copyYears);
 document.querySelectorAll('.footmail').forEach(e=>e.innerHTML=`<a href="mailto:${EMAIL}">${EMAIL}</a>`);
 const gateCls=R.gate_status==='PASS'?'ok':R.gate_status==='BLOCKED'?'bad':'warn';
 document.getElementById('status').innerHTML=
-  `<span>Data through <b class="num" style="color:var(--ink)">${dateFmt(R.data_as_of)}</b></span>
-   <span>Pulled <span class="num">${new Date(R.data_pulled_utc).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}</span></span>
-   <span>Updated weekly from CDC NWSS</span>
-   <button class="pill ${gateCls}" data-go="audit"><i></i>Validation: ${R.n_pass} pass · ${R.n_warning} warnings · ${R.n_fail} fail</button>
+  `<span>Latest sample <b style="color:var(--ink)">${dateFmt(D.latest_sample||R.data_as_of)}</b></span>
+   <span class="opt-s">CDC data updated ${new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · refreshed every Saturday</span>
+   <button class="pill ${gateCls}" data-go="audit" title="${R.n_pass} pass · ${R.n_warning} warnings · ${R.n_fail} fail"><i></i>Validated: ${R.n_pass} checks passed${R.n_fail?` · ${R.n_fail} failed`:''}</button>
    ${R.consistency_ok?'':'<button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button>'}
    <span id="acct" class="acct"></span>`;
 
@@ -552,12 +627,28 @@ genomics(){
 
 structures(){
   const el=document.getElementById('v-structures');
-  el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One representative reference structure per pathogen from the RCSB Protein Data Bank, all passing the pipeline’s structural QC.</p></div>
-  <div class="grid">${D.structures.map(s=>`<article class="panel c4"><header><h2>${s.pathogen}</h2><a class="mono" href="${s.pdb_entry_url}" target="_blank" rel="noopener">${s.pdb_entry_id} ↗</a></header>
+  el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One reference structure per pathogen from the RCSB Protein Data Bank, each passing the pipeline’s structural QC. Select “View in 3D” to rotate a model.</p></div>
+  <div class="grid">${D.structures.map(s=>`<article class="panel c4 scard">
+    <figure class="sfig"><img loading="lazy" alt="${esc(s.protein)} (PDB ${s.pdb_entry_id}) structure image" src="${esc(s.image_url||`img/structures/${s.pdb_entry_id}.png`)}" data-alt="img/structures/${s.pdb_entry_id}.png" onerror="if(this.dataset.alt&&this.src.indexOf(this.dataset.alt)<0){this.src=this.dataset.alt}else{this.closest('figure').hidden=true}"></figure>
+    <header><h2>${s.pathogen}</h2><a class="mono" href="${s.pdb_entry_url}" target="_blank" rel="noopener">PDB ${s.pdb_entry_id} ↗</a></header>
     <p style="font-weight:600">${esc(s.protein)}</p><p class="small muted">${esc(s.rcsb_title)}</p>
     <div class="kv small"><div><span class="label">Method</span><b style="font-family:var(--body);font-size:.82rem">${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')}</b></div><div><span class="label">Resolution</span><b>${fmt(s.resolution_a,2)} Å</b></div><div><span class="label">C-alpha atoms</span><b>${s.ca_atom_count.toLocaleString()}</b></div></div>
-    <p class="small muted">UniProt: <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc}</p></article>`).join('')}</div>
-  <p class="note">Reference structures give biological context only; they are not derived from wastewater samples.</p>`;
+    <p class="small muted">UniProt <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc} · DOI <a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">10.2210/pdb${s.pdb_entry_id}/pdb</a></p>
+    <button class="btn small" data-mol="${s.pdb_entry_id}" data-name="${esc(s.pathogen+' · '+s.protein)}">View in 3D</button></article>`).join('')}</div>
+  <p class="note">Images and coordinates: RCSB Protein Data Bank (Berman et al., 2000). 3D viewer: 3Dmol.js (Rego &amp; Koes, 2015). Reference structures give biological context only; they are not derived from wastewater samples.</p>
+  <dialog id="mol" class="moldlg"><div class="molhead"><b id="mol-t"></b><button class="btn small" id="mol-x">Close</button></div><div id="mol-v" class="molview"><p class="muted small" style="padding:16px">Loading 3D model…</p></div><p class="small muted" style="padding:0 14px 12px">Drag to rotate · scroll or pinch to zoom · source: RCSB PDB</p></dialog>`;
+  const dlg=document.getElementById('mol');
+  document.getElementById('mol-x').onclick=()=>dlg.close();
+  el.addEventListener('click',async e=>{const b=e.target.closest('[data-mol]');if(!b)return;
+    const id=b.dataset.mol;document.getElementById('mol-t').textContent=`${b.dataset.name} (PDB ${id})`;
+    const v=document.getElementById('mol-v');v.innerHTML='<p class="muted small" style="padding:16px">Loading 3D model…</p>';
+    try{dlg.showModal()}catch(_){dlg.setAttribute('open','')}
+    try{
+      if(!window.$3Dmol) await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/3dmol@2.4.0/build/3Dmol-min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+      v.innerHTML='';const viewer=$3Dmol.createViewer(v,{backgroundColor:getComputedStyle(document.body).backgroundColor});
+      $3Dmol.download('pdb:'+id,viewer,{},()=>{viewer.setStyle({},{cartoon:{color:'spectrum'}});viewer.zoomTo();viewer.render()});
+    }catch(err){v.innerHTML=`<p class="small" style="padding:16px">The 3D viewer could not load here. <a href="https://www.rcsb.org/3d-view/${id}" target="_blank" rel="noopener">Open it on RCSB ↗</a></p>`}
+  });
 },
 
 myalerts(){
@@ -582,7 +673,7 @@ myalerts(){
       <form class="form" id="ar-form">
         <label>Pathogen<select id="ar-p">${ROUTINE.map(p=>`<option>${p}</option>`).join('')}</select></label>
         <div class="row2"><label>Area<select id="ar-type"><option value="state">Whole state</option><option value="county">One county</option></select></label>
-          <label>State<select id="ar-st">${states.map(s=>`<option value="${s}"${s==='TN'?' selected':''}>${esc(STATE_NAMES[s])}</option>`).join('')}</select></label></div>
+          <label>State<select id="ar-st">${states.map(s=>`<option value="${s}"${s===(PRESET_STATE||'TN')?' selected':''}>${esc(STATE_NAMES[s])}</option>`).join('')}</select></label></div>
         <label id="ar-cty-l" hidden>County (with wastewater sites)<select id="ar-cty"></select></label>
         <label>Email me when activity is<select id="ar-lv"><option value="High">High</option><option value="Elevated">Elevated or High</option></select></label>
         <div><button class="btn primary" type="submit" id="ar-btn">Add alert</button></div><p class="msg" id="ar-msg" hidden></p>
@@ -591,7 +682,7 @@ myalerts(){
       <p class="note">Emails go out after each weekly update when a rule matches, at most once per rule per week.</p></article></div>`;
   const ctySel=document.getElementById('ar-cty'),stSel=document.getElementById('ar-st'),typeSel=document.getElementById('ar-type');
   const fillCty=()=>{const s=stSel.value;ctySel.innerHTML=Object.entries(D.names).filter(([,n])=>n[1]===s).sort((a,b)=>a[1][0].localeCompare(b[1][0])).map(([f,n])=>`<option value="${f}">${esc(n[0])}</option>`).join('')};
-  stSel.onchange=fillCty;typeSel.onchange=()=>{document.getElementById('ar-cty-l').hidden=typeSel.value!=='county'};fillCty();
+  stSel.onchange=fillCty;typeSel.onchange=()=>{document.getElementById('ar-cty-l').hidden=typeSel.value!=='county'};fillCty();PRESET_STATE='';
   async function load(){const box=document.getElementById('ar-list');
     const {data,error}=await SB.from('alert_rules').select('*').order('created_at');
     if(error){box.innerHTML=`<p class="msg err">Could not load your alerts: ${esc(error.message)}</p>`;return}
@@ -612,19 +703,43 @@ about(){
   const el=document.getElementById('v-about');
   const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
   const site=location.protocol.startsWith('http')?location.origin+location.pathname:'https://victorialovefranklin.github.io/nwgs-grid-site/';
-  el.innerHTML=`<div class="head"><h1>About &amp; contact</h1><p class="muted">Who built NWGS Grid™, how to reach her, and how to cite or license the work.</p></div>
-  <div class="grid">
-  <article class="panel c7"><span class="label">About the developer</span>
-    <h2>Victoria Love Franklin</h2>
-    <p class="small" style="font-weight:600">Developer · PhD Student, Data Science · Research Scholar</p>
-    <p>Victoria Love Franklin created NWGS Grid™ and built every part of it: the surveillance pipeline, the validation checks, the weekly automation and this site.</p>
-    <p class="small">Her research combines wastewater, emergency-department and social-vulnerability data to measure how well U.S. public-health surveillance reaches communities, from national trends down to Tennessee counties.</p>
+  const tnNow=(D.tn_county||[]).filter(c=>c.reporting_now).length;
+  el.innerHTML=`<figure class="banner"><img src="img/vlf-banner.jpg" alt="Victoria Love Franklin. Data · Technology · Research · Public Service" width="1400" height="349"></figure>
+  <div class="grid aboutgrid">
+  <figure class="panel c4 portrait"><img src="img/vlf-portrait.jpg" alt="Portrait of Victoria Love Franklin" width="1080" height="1439" loading="lazy"></figure>
+  <article class="panel c8 bio"><span class="label">About the developer</span>
+    <h1 style="font-size:1.9rem">Victoria Love Franklin, PSM, CPT</h1>
+    <p class="role">Developer · PhD Student, Data Science · Research Scholar</p>
+    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee, and a Ph.D. student in Data Science (Cybersecurity concentration) at Meharry Medical College. Her work spans five federal laboratories (Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine), as well as local government and industry.</p>
+    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance and designed the National Wastewater Genomics Smart Grid, the framework NWGS Grid™ grew from. She has since trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and AI.</p>
     <div class="controls">
       <a class="btn primary" href="${mail('NWGS Grid inquiry')}">Email Victoria</a>
+      <a class="btn" href="https://victorialovefranklin.github.io/victoria-franklin-site/" target="_blank" rel="noopener">Personal website ↗</a>
       <a class="btn" href="https://github.com/victorialovefranklin" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
-    <p class="small muted mono">${EMAIL}</p></article>
-  <article class="panel c5"><span class="label">Work with NWGS Grid</span>
+    <p class="small muted mono" style="overflow-wrap:anywhere">${EMAIL}</p></article>
+  </div>
+  <div class="grid">
+  <article class="panel c7 why"><span class="label">Why I built NWGS Grid™</span>
+    <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor.</p>
+    <p>But that signal is spread across separate CDC datasets, clinical feeds and vulnerability indices. It changes every week, and it reaches some communities far better than others. I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses.</p>
+    <p>That last question is personal. In my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.</p>
+    <p class="sig">— Victoria</p></article>
+  <article class="panel c5"><span class="label">Credentials &amp; affiliations</span>
+    <ul class="creds">
+      <li><b>Member, Association of Public Health Laboratories (APHL)</b>, <a href="https://aphl.org/focus-areas/environmental-health/environmental-health-resources/wastewater-surveillance" target="_blank" rel="noopener">Wastewater Surveillance</a> community</li>
+      <li><b>Ph.D. student, Data Science</b> (Cybersecurity), Meharry Medical College, expected 2027 · Doctoral Research Scholar</li>
+      <li><b>ORISE Genomic Epidemiology Fellow</b>, U.S. Air Force School of Aerospace Medicine (2024–2025)</li>
+      <li><b>mNGS research trainee</b>, Chan Zuckerberg Biohub · Meharry Medical College (2026)</li>
+      <li><b>Professional Science Master’s</b>, Applied Geospatial Information Systems, Tennessee State University</li>
+      <li>Member, Water Environment Federation · Clean Water Professionals of Kentucky &amp; Tennessee</li>
+      <li>APHL ID Lab Con 2027: three NWGS Grid abstracts submitted (one oral, two posters)</li>
+      <li>“Using GIS and Metagenomics to Enhance Wastewater Surveillance,” Network of Wastewater-Based Epidemiology (2025)</li>
+      <li>Featured, Wiley’s Index of Inspiring Black Scientists (2026) · First Place Research Award, Meharry SACS Research Day (2025)</li>
+    </ul></article>
+  </div>
+  <div class="grid">
+  <article class="panel c7"><span class="label">Work with NWGS Grid</span>
     <div class="opt"><h3>License request</h3><p class="small muted">Use of the code, pipeline, figures or data products in research, a product or a service.</p>
       ${SB?`<details><summary class="btn">Request a license</summary><form class="form" id="lic-form" style="margin-top:10px">
         <div class="row2"><label>Name<input id="lic-name" required maxlength="200" autocomplete="name"></label><label>Email<input id="lic-email" type="email" required maxlength="200" autocomplete="email" value="${esc(USER?.email||'')}"></label></div>
@@ -642,15 +757,14 @@ about(){
       :`<a class="btn" href="${mail('NWGS Grid beta feedback',`Page:\nWhat I expected:\nWhat I saw:\n\n(Data run ${R.run_id}, data through ${R.data_as_of})`)}">Send feedback</a>`}</div>
     <div class="opt"><h3>Research collaboration &amp; media</h3><p class="small muted">Talks, collaborations, data questions and interviews.</p>
       <a class="btn" href="${mail('NWGS Grid collaboration')}">Get in touch</a></div></article>
-  </div>
-  <div class="grid">
-  <article class="panel c7"><span class="label">How to cite</span>
+  <div class="c5 stackcol">
+  <article class="panel"><span class="label">How to cite</span>
     <p class="cite">Franklin, V. L. (${pulledYear}). <i>NWGS Grid™: National Wastewater Genomic Surveillance Grid</i> (data through ${dateFmt(R.data_as_of)}, ${esc(R.run_id)}) [Software and web dashboard]. ${esc(site)}</p>
     <p class="small muted">Numbers change every week as CDC updates its data. Cite the data-through date and run ID shown here, and use one weekly release for all numbers in a paper.</p></article>
-  <article class="panel c5"><span class="label">Copyright &amp; terms</span>
+  <article class="panel"><span class="label">Copyright &amp; terms</span>
     <p class="small">© ${copyYears} Victoria Love Franklin. All rights reserved. The code, analysis, design, text, tables and figures may not be copied, modified or redistributed without written permission. Linking and scholarly citation with attribution are welcome.</p>
     <p class="small muted">Underlying data from CDC, CDC/ATSDR, the U.S. Census Bureau, NCBI and RCSB PDB remain subject to their providers’ terms. Maps use us-atlas, d3 and topojson (ISC licenses). For research and public-health information only; not medical advice. Not affiliated with or endorsed by CDC. NWGS Grid™ is a trademark of Victoria Love Franklin.</p></article>
-  </div>`;
+  </div></div>`;
   const lic=document.getElementById('lic-form');
   if(lic) lic.onsubmit=async e=>{e.preventDefault();const out=document.getElementById('lic-out'),b=lic.querySelector('button');b.disabled=true;
     const v=id=>document.getElementById(id).value.trim();
@@ -665,10 +779,84 @@ about(){
 
 alerts(){
   const el=document.getElementById('v-alerts');
-  const groups=[['high','High county activity'],['moderate','Trends and detections'],['info','Coverage']];
-  el.innerHTML=`<div class="head"><h1>Alerts</h1><p class="muted">Generated from this run’s data. Nothing on this page is written by hand.</p></div>
-  ${groups.map(([s,t])=>{const a=D.alerts.filter(x=>x.severity===s);return a.length?`<article class="panel"><header><h2>${t}</h2><span class="small muted">${a.length}</span></header><div>${a.map(alertRow).join('')}</div></article>`:''}).join('')}
-  <p class="note">Rules: county z-score above 1.0 in the latest four weeks; national trend marked Increasing; an emerging pathogen detected at more than twice its 8-week median share of sites; Tennessee reporting coverage.</p>`;
+  let P='All', ST=ALERT_STATE||'';
+  const pathogens=P=>P==='All'?ROUTINE:[P];
+  // High counties per state, from this run's county activity (same rule as the weekly alerts: z > 1)
+  const highBy=()=>{const out={};pathogens(P).forEach(p=>Object.entries(D.activity[p]||{}).forEach(([f,v])=>{if(v[0]>1&&D.names[f]){const s=D.names[f][1];(out[s]??={total:0,by:{}});out[s].total++;(out[s].by[p]??=[]).push([D.names[f][0],v[0]])}}));return out};
+  const other=D.alerts.filter(a=>a.severity!=='high');
+  el.innerHTML=`<div class="head"><h1>Alerts</h1><p class="muted">Where wastewater activity is High (z&nbsp;>&nbsp;1) in the four weeks ending ${dateFmt(D.activity_end)}. Click a state on the map or choose one below.</p></div>
+  <div class="controls"><div class="seg" id="al-p">${['All',...ROUTINE].map(p=>`<button aria-pressed="${p==='All'}" data-p="${p}">${p==='All'?'All three':p}</button>`).join('')}</div>
+    <label class="selectwrap"><span class="sr">State</span><select id="al-st"></select></label></div>
+  <div class="grid">
+    <article class="panel c8"><div class="mapbox" id="al-map"></div><div id="al-legend"></div></article>
+    <div class="c4 stackcol"><article class="panel" id="al-sum"></article>${other.length?`<article class="panel"><h2>National signals</h2><div>${other.map(alertRow).join('')}</div></article>`:''}</div>
+  </div>
+  <div id="al-list" class="statecards"></div>
+  <p class="note">Same rule as the weekly email alerts: a county is High when its median site z-score over the latest four weeks is above 1.0.</p>
+  <div class="head" style="margin-top:12px"><span class="eyebrow">Emerging pathogens</span><h2 style="font-size:1.5rem">Where H5 bird flu, measles and mpox were detected</h2><p class="muted">CDC tests these as detected / not detected. A site counts as positive if any sample tested positive in the latest four weeks.</p></div>
+  <div class="controls"><div class="seg" id="em-p">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p==='Influenza A(H5)'?'H5 bird flu':p}</button>`).join('')}</div></div>
+  <div class="grid"><article class="panel c8"><div class="mapbox" id="em-map"></div><div id="em-legend"></div></article><article class="panel c4" id="em-list"></article></div>`;
+  const sel=document.getElementById('al-st');
+  function draw(){
+    const H=highBy(), max=Math.max(1,d3.max(Object.values(H),d=>d.total)||1);
+    const col=d3.scaleLinear().domain([1,max]).range([css('--hi-soft'),css('--hi')]).interpolate(d3.interpolateRgb);
+    const states=Object.keys(H).sort((a,b)=>H[b].total-H[a].total||STATE_NAMES[a].localeCompare(STATE_NAMES[b]));
+    sel.innerHTML=`<option value="">All states (${states.length} with High counties)</option>`+Object.keys(STATE_NAMES).sort((a,b)=>STATE_NAMES[a].localeCompare(STATE_NAMES[b])).map(s=>`<option value="${s}"${s===ST?' selected':''}>${esc(STATE_NAMES[s])}${H[s]?` — ${H[s].total} High`:''}</option>`).join('');
+    // map
+    const box=document.getElementById('al-map');box.innerHTML='';
+    const svg=d3.select(box).append('svg').attr('viewBox','0 0 975 610').attr('role','img').attr('aria-label','States by number of counties at High');
+    svg.append('g').selectAll('path').data(statesFeat).join('path').attr('d',path).attr('class','st')
+      .attr('fill',d=>{const s=STATE_FIPS[d.id],h=H[s];return h?col(h.total):css('--nodata')})
+      .attr('stroke',d=>STATE_FIPS[d.id]===ST?css('--gold'):css('--surface')).attr('stroke-width',d=>STATE_FIPS[d.id]===ST?3:1)
+      .style('cursor','pointer')
+      .on('mouseenter',(e,d)=>{const s=STATE_FIPS[d.id],h=H[s];showTip(e,`<b>${esc(d.properties.name)}</b><div>${h?`${h.total} ${h.total>1?'counties':'county'} at High`:'No counties at High'}</div>${h?Object.entries(h.by).map(([p,c])=>`<div>${p}: ${c.length}</div>`).join(''):''}`)})
+      .on('mousemove',moveTip).on('mouseleave',hideTip)
+      .on('click',(e,d)=>{const s=STATE_FIPS[d.id];ST=ST===s?'':s;draw();if(ST&&innerWidth<1100)document.getElementById('al-list').scrollIntoView({behavior:'smooth',block:'start'})});
+    svg.selectAll('path.st').filter(d=>STATE_FIPS[d.id]===ST).raise();
+    document.getElementById('al-legend').innerHTML=`<div class="legend"><span>Counties at High:</span><span><i style="background:${col(1)}"></i>1</span>${max>2?`<span><i style="background:${col(Math.round((1+max)/2))}"></i>${Math.round((1+max)/2)}</span>`:''}<span><i style="background:${col(max)}"></i>${max}${max>1?'':''}</span><span><i style="background:${css('--nodata')}"></i>None</span></div>`;
+    // summary
+    const tot=d3.sum(Object.values(H),d=>d.total), top=states.slice(0,3);
+    document.getElementById('al-sum').innerHTML=`<span class="label">${P==='All'?'All three viruses':esc(P)}</span>
+      <div class="sumrow"><div><span class="big">${tot}</span><span class="small muted">counties at High</span></div><div><span class="big">${states.length}</span><span class="small muted">states</span></div></div>
+      ${top.length?`<p class="small">Most counties at High: ${top.map(s=>`<button class="linkbtn" data-st="${s}">${esc(STATE_NAMES[s])} (${H[s].total})</button>`).join(', ')}.</p>`:'<p class="small muted">No counties are at High right now.</p>'}
+      <a class="btn" href="#myalerts" data-go="myalerts">Get email alerts</a>`;
+    // state cards
+    const show=ST?[ST]:states;
+    document.getElementById('al-list').innerHTML=(ST?`<div class="filterbar"><span>Showing <b>${esc(STATE_NAMES[ST])}</b></span><button class="btn small" id="al-clear">Show all states</button></div>`:'')+
+      (show.length?`<div class="grid">${show.map(s=>{const h=H[s];return `<article class="panel c4 statecard"><header><h2>${esc(STATE_NAMES[s])}</h2><span class="small muted">${h?`${h.total} at High`:'none at High'}</span></header>
+        ${h?Object.entries(h.by).map(([p,c])=>`<div class="pblock"><div class="ptitle"><span class="dot" style="background:var(--hi)"></span>${p} <span class="muted small">· ${c.length} ${c.length>1?'counties':'county'}</span></div><p class="small">${c.sort((a,b)=>b[1]-a[1]).map(([n,z])=>`${esc(n.replace(/ (County|Parish|Borough|Census Area|Municipality)$/,''))} <span class="muted mono">${fmt(z,1)}</span>`).join(' · ')}</p></div>`).join(''):`<p class="small muted">No counties with wastewater sites are at High for ${P==='All'?'these viruses':esc(P)} right now.</p>`}
+        <button class="btn small" data-alertme="${s}">Alert me for ${esc(STATE_NAMES[s])}</button></article>`}).join('')}</div>`:'<p class="muted">No counties are at High right now.</p>');
+  }
+  el.querySelector('#al-p').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;P=b.dataset.p;el.querySelectorAll('#al-p button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
+  sel.addEventListener('change',()=>{ST=sel.value;draw()});
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-st],#al-clear,[data-alertme]');if(!b)return;
+    if(b.id==='al-clear'){ST='';draw();return}
+    if(b.dataset.st){ST=b.dataset.st;draw();return}
+    if(b.dataset.alertme){PRESET_STATE=b.dataset.alertme;delete built.myalerts;go('myalerts')}});
+  draw();
+  // ---- emerging pathogens by state ----
+  let EP=EMERGING[0];
+  function drawEm(){
+    const box=document.getElementById('em-map'),list=document.getElementById('em-list'),leg=document.getElementById('em-legend');
+    const EC=D.emerging_county&&D.emerging_county[EP];
+    if(!EC){box.innerHTML='';leg.innerHTML='';list.innerHTML=`<p class="small muted">State-level detections appear after the next weekly update. National trends are on the <a href="#dashboard" data-go="dashboard">dashboard</a>.</p>`;return}
+    const byS={};Object.entries(EC).forEach(([f,[tested,det,last]])=>{const n=D.names[f];if(!n)return;const s=n[1];(byS[s]??={tested:0,det:0,counties:[]});byS[s].tested+=tested;byS[s].det+=det;if(det>0)byS[s].counties.push([n[0],det,last])});
+    const maxD=Math.max(1,d3.max(Object.values(byS),d=>d.det)||1);
+    const col=d3.scaleLinear().domain([1,maxD]).range([css('--gold-soft'),css('--warn')]).interpolate(d3.interpolateRgb);
+    box.innerHTML='';const svg=d3.select(box).append('svg').attr('viewBox','0 0 975 610').attr('role','img').attr('aria-label',`${EP} detections by state`);
+    svg.append('g').selectAll('path').data(statesFeat).join('path').attr('d',path).attr('stroke',css('--surface')).attr('stroke-width',1)
+      .attr('fill',d=>{const s=byS[STATE_FIPS[d.id]];return !s?css('--nodata'):s.det?col(s.det):css('--accent-soft')})
+      .on('mouseenter',(e,d)=>{const s=byS[STATE_FIPS[d.id]];showTip(e,`<b>${esc(d.properties.name)}</b><div>${s?`${s.det} of ${s.tested} tested sites with a detection`:'No sites tested'}</div>`)}).on('mousemove',moveTip).on('mouseleave',hideTip);
+    leg.innerHTML=legend([[col(1),'Sites with a detection: 1'],[col(maxD),String(maxD)],[css('--accent-soft'),'Tested, none detected'],[css('--nodata'),'No sites tested']]);
+    const pos=Object.entries(byS).filter(([,v])=>v.det).sort((a,b)=>b[1].det-a[1].det);
+    const tested=d3.sum(Object.values(byS),v=>v.tested),det=d3.sum(Object.values(byS),v=>v.det);
+    list.innerHTML=`<span class="label">${EP==='Influenza A(H5)'?'H5 bird flu':EP} · four weeks ending ${dateFmt(D.emerging_window_end)}</span>
+      <div class="sumrow"><div><span class="big">${det}</span><span class="small muted">sites with a detection</span></div><div><span class="big">${pos.length}</span><span class="small muted">states</span></div></div>
+      <p class="small muted">${tested.toLocaleString()} sites tested in ${Object.keys(byS).length} states.</p>
+      ${pos.length?`<ul class="emlist">${pos.map(([s,v])=>`<li><b>${esc(STATE_NAMES[s]||s)}</b> <span class="muted small">${v.det} of ${v.tested} sites</span><div class="small">${v.counties.map(([n])=>esc(n.replace(/ (County|Parish|Borough|Census Area|Municipality)$/,''))).join(' · ')}</div></li>`).join('')}</ul>`:'<p class="small">No detections in this window.</p>'}`;
+  }
+  el.querySelector('#em-p').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;EP=b.dataset.p;el.querySelectorAll('#em-p button').forEach(x=>x.setAttribute('aria-pressed',x===b));drawEm()});
+  drawEm();
 },
 
 audit(){
@@ -678,15 +866,28 @@ audit(){
   <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono">${R.n_pass} pass · ${R.n_warning} warn · ${R.n_fail} fail</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
   ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
   <article class="panel"><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
-  ${D.audit.map(a=>`<tr><td class="lead">${esc(a.component)}</td><td class="status-${cls(a.status)}" style="white-space:nowrap;font-weight:600">${esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`).join('')}</table></div></article>`;
+  ${D.audit.map(a=>{const phil=/PHIL/.test(a.component)&&/PARTIAL_IMAGES/.test(a.status);return `<tr><td class="lead">${esc(a.component)}</td><td class="status-${phil?'INFO':cls(a.status)}" style="white-space:nowrap;font-weight:600">${phil?'INFO · OPTIONAL':esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}${phil?'. Optional photos from CDC’s image library (PHIL), which blocks automated downloads; no analysis uses them.':''}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`}).join('')}</table></div></article>`;
 },
 
 methods(){
   const el=document.getElementById('v-methods');
-  el.innerHTML=`<div class="head"><h1>Methods & sources</h1><p class="muted">How the numbers on this site are made.</p></div>
-  <article class="panel"><header><h2>Data sources</h2><span class="small muted">frozen snapshot, pulled ${new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></header>
-  <div class="tbl"><table><tr><th>Pathogen</th><th>Dataset</th><th>ID</th><th class="n">Rows</th></tr>${D.sources.map(s=>`<tr><td>${s.pathogen}</td><td>${esc(s.dataset_name)}</td><td><a class="mono" href="${s.source_url}" target="_blank" rel="noopener">${s.dataset_id}</a></td><td class="n">${s.rows.toLocaleString()}</td></tr>`).join('')}</table></div>
-  <p class="small muted">Also used: CDC NSSP emergency-department visits, CDC/ATSDR Social Vulnerability Index, U.S. Census TIGER/Line, NCBI Virus, RCSB Protein Data Bank.</p></article>
+  const acc=new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  el.innerHTML=`<div class="head"><h1>Methods &amp; sources</h1><p class="muted">How the numbers on this site are made, and every dataset and tool they come from.</p></div>
+  <article class="panel"><header><h2>Data sources &amp; references</h2><span class="small muted">accessed ${acc}</span></header>
+  <ol class="refs">
+    ${D.sources.map(s=>`<li>Centers for Disease Control and Prevention. <i>${esc(s.dataset_name)}</i> [dataset <span class="mono">${s.dataset_id}</span>]. National Wastewater Surveillance System (NWSS). data.cdc.gov; updated ${dateFmt(String(s.updated_utc).slice(0,10))}; ${s.rows.toLocaleString()} rows. <a href="${s.source_url}" target="_blank" rel="noopener">${s.source_url.replace('https://','')}</a></li>`).join('')}
+    <li>Centers for Disease Control and Prevention. <i>NSSP Emergency Department Visit Trajectories by State and Sub State Regions: COVID-19, Flu, RSV, Combined</i> [dataset <span class="mono">rdmq-nq56</span>]. National Syndromic Surveillance Program. <a href="https://data.cdc.gov/d/rdmq-nq56" target="_blank" rel="noopener">data.cdc.gov/d/rdmq-nq56</a></li>
+    <li>Centers for Disease Control and Prevention. <i>PLACES: Local Data for Better Health, County Data</i> [dataset <span class="mono">swc5-untb</span>]. County health context measures. <a href="https://data.cdc.gov/d/swc5-untb" target="_blank" rel="noopener">data.cdc.gov/d/swc5-untb</a></li>
+    <li>Centers for Disease Control and Prevention / Agency for Toxic Substances and Disease Registry / Geospatial Research, Analysis, and Services Program. <i>CDC/ATSDR Social Vulnerability Index 2022 Database, US (county)</i>. <a href="https://www.atsdr.cdc.gov/place-health/php/svi/" target="_blank" rel="noopener">atsdr.cdc.gov/place-health/php/svi</a></li>
+    <li>U.S. Census Bureau. <i>2025 TIGER/Line Shapefiles: Counties</i>. <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target="_blank" rel="noopener">census.gov TIGER/Line</a></li>
+    <li><i>U.S. wastewater antimicrobial-resistance gene (ARG) detections, 2024</i> [file US_Wastewater_AMR_ARG_2024.csv]. Used for the resistance-gene panels. Full source citation pending.</li>
+    <li>National Center for Biotechnology Information. <i>NCBI Virus</i> and <i>NCBI Datasets API v2</i>. National Library of Medicine. <a href="https://www.ncbi.nlm.nih.gov/datasets/" target="_blank" rel="noopener">ncbi.nlm.nih.gov/datasets</a></li>
+    <li>Berman HM, Westbrook J, Feng Z, et al. The Protein Data Bank. <i>Nucleic Acids Research</i>. 2000;28(1):235–242. RCSB PDB entries ${D.structures.map(s=>`<a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">${s.pdb_entry_id}</a>`).join(', ')}. <a href="https://www.rcsb.org" target="_blank" rel="noopener">rcsb.org</a></li>
+    <li>Bostock M. <i>us-atlas</i>: U.S. state and county boundaries in TopoJSON, derived from U.S. Census Bureau cartographic boundary files. ISC License. <a href="https://github.com/topojson/us-atlas" target="_blank" rel="noopener">github.com/topojson/us-atlas</a></li>
+    <li>Bostock M, Ogievetsky V, Heer J. D³: Data-Driven Documents. <i>IEEE Transactions on Visualization and Computer Graphics</i>. 2011;17(12):2301–2309. Also used: topojson-client (ISC).</li>
+    <li>Rego N, Koes D. 3Dmol.js: molecular visualization with WebGL. <i>Bioinformatics</i>. 2015;31(8):1322–1324.</li>
+  </ol>
+  <p class="small muted">All CDC, Census, NCBI and RCSB data are public and remain subject to their providers’ terms. NWGS Grid™ is not affiliated with or endorsed by CDC.</p></article>
   <div class="grid"><article class="panel c12"><h2>Measures</h2><ul class="small" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
     <li><b>Activity level</b> — within-site z-score of log concentration, median across a county’s sites for the latest 4 weeks. Very Low ≤ −1, Low ≤ −0.25, Typical ≤ 0.25, Elevated ≤ 1, High &gt; 1.</li>
     <li><b>Analysis-ready</b> — at least 52 qualifying weeks and at least 70% completeness across the active span.</li>

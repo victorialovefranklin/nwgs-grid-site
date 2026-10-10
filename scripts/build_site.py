@@ -11,6 +11,7 @@ EXPORT_DIR is the output of scripts/nwgs_app_export.py.
 Writes SITE_DIR/index.html (data and county map embedded) and SITE_DIR/data.json.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -30,6 +31,29 @@ def R(x, n=3):
 def recs(df, drop=("run_id", "data_as_of")):
     df = df.drop(columns=[c for c in drop if c in df.columns])
     return json.loads(df.replace({np.nan: None}).to_json(orient="records"))
+
+
+def D_summary_latest(ps):
+    """Most recent sample date across pathogens (the analysis window can end later than the last sample)."""
+    s = pd.to_datetime(ps.get("latest_observation"), errors="coerce").dropna() if "latest_observation" in ps else pd.Series(dtype="datetime64[ns]")
+    return s.max() if len(s) else None
+
+
+def copy_assets(out):
+    """Copy site images, and (when the pipeline ran here) small copies of its rendered protein structures."""
+    import shutil
+    img = ROOT / "site_src" / "img"
+    if img.exists():
+        shutil.copytree(img, out / "img", dirs_exist_ok=True)
+    sdir = os.getenv("NWGS_STRUCTURE_DIR")
+    if sdir and Path(sdir).exists():
+        from PIL import Image
+        dest = out / "img" / "structures"
+        dest.mkdir(parents=True, exist_ok=True)
+        for f in Path(sdir).glob("ProteinStructure_*.png"):
+            im = Image.open(f).convert("RGB")
+            im.thumbnail((640, 640))
+            im.save(dest / (f.stem.replace("ProteinStructure_", "") + ".png"), optimize=True)
 
 
 def main(export_dir, site_dir):
@@ -57,6 +81,19 @@ def main(export_dir, site_dir):
     D["activity"] = {p: {f: [R(z), int(n)] for f, z, n in zip(q.county_fips, q.activity_z, q.n_sites)}
                      for p, q in ca.groupby("pathogen")}
     D["activity_end"] = ca.activity_end_week.max()
+    ec_path = Path(export_dir) / "EmergingCounty.csv"
+    if ec_path.exists():
+        ec = pd.read_csv(ec_path, dtype={"county_fips": str})
+        ec["county_fips"] = ec["county_fips"].str.zfill(5)
+        for f, n, s in zip(ec.county_fips, ec.county_name, ec.state_code):
+            if isinstance(n, str) and f not in names:
+                names[f] = [n, s]
+        D["emerging_county"] = {p: {f: [int(t), int(d), (str(l)[:10] if isinstance(l, str) else None)]
+                                    for f, t, d, l in zip(q.county_fips, q.n_sites_tested, q.n_sites_detected, q.last_detected_week)}
+                                for p, q in ec.groupby("pathogen")}
+        D["emerging_window_end"] = str(ec.window_end_week.max())[:10]
+    else:
+        D["emerging_county"] = None
 
     cl = r("CountyCluster")
     D["clusters"] = {p: dict(zip(q.county_fips, q.lisa_cluster)) for p, q in cl.groupby("pathogen")}
@@ -82,7 +119,9 @@ def main(export_dir, site_dir):
     gr = r("GenomicRecord")
     D["genomic_hosts"] = {p: q.host.fillna("Not reported").value_counts().head(4).to_dict() for p, q in gr.groupby("pathogen")}
     D["genomic_places"] = {p: q.geographic_location.fillna("Not reported").value_counts().head(4).to_dict() for p, q in gr.groupby("pathogen")}
-    D["structures"] = recs(r("ProteinStructure").drop(columns=["image_url"], errors="ignore"))
+    D["structures"] = recs(r("ProteinStructure"))
+    latest = D_summary_latest(r("PathogenSummary"))
+    D["latest_sample"] = str(latest.date()) if latest is not None else None
     D["tn_county"] = recs(r("TennesseeCounty"))
     D["tn_align"] = recs(r("TennesseeAlignment"))
     D["tn_equity"] = recs(r("TennesseeEquity"))
@@ -103,6 +142,7 @@ def main(export_dir, site_dir):
             '<meta property="og:description" content="Weekly wastewater surveillance dashboard by Victoria Love Franklin, Developer · PhD Student, Data Science · Research Scholar.">'
             '<style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + html + "</body></html>")
     (out / "index.html").write_text(page)
+    copy_assets(out)
     print(f"Built {out/'index.html'} ({len(page)/1e6:.2f} MB), run {D['run']['run_id']}, data through {D['run']['data_as_of']}")
 
 

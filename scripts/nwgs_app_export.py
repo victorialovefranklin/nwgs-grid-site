@@ -187,6 +187,15 @@ def main(table_dir, out_dir, allow_mixed=False):
     ents["CountyActivity"] = ca[["pathogen", "county_fips", "county_name", "state_code", "activity_z",
                                  "level", "n_sites", "n_records", "activity_end_week"]]
 
+    # EmergingCounty (Table07c, v5.21+; optional so older runs still export)
+    t07c = find(table_dir, "Table07c_Recent_County_Emerging_Detections", required=False)
+    if t07c is not None and len(t07c):
+        ec = t07c.copy()
+        ec["county_fips"] = fips5(ec["county_fips"])
+        ec = ec.merge(lookup[["county_fips", "county_name", "state_code"]], on="county_fips", how="left")
+        ents["EmergingCounty"] = ec[["pathogen", "county_fips", "county_name", "state_code", "n_sites_tested",
+                                     "n_sites_detected", "last_detected_week", "window_end_week"]]
+
     # CountyCluster (Table08 LISA)
     cl = t08.copy()
     cl["county_fips"] = fips5(cl["county_fips"])

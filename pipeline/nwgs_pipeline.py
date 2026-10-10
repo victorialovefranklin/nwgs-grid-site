@@ -2498,6 +2498,38 @@ def latest_county_activity(h):
     return county_activity
 
 
+def recent_emerging_by_county(h):
+    """
+    v5.21: where emerging pathogens (H5, measles, mpox) were detected recently.
+    Same detection rule as national_emerging_series() (a site-week is positive if
+    any valid target record is detected), summarized per county over the latest
+    RECENT_ACTIVITY_WEEKS weeks so the app can map detections by state.
+    """
+    emerging = h[h["pathogen_group"].eq("emerging")].copy()
+    if emerging.empty:
+        return pd.DataFrame()
+    if "emerging_detection_positive" not in emerging.columns:
+        emerging = add_emerging_detection_flags(emerging)
+    emerging = explode_multicounty_for_coverage(emerging)
+    valid = emerging[emerging["emerging_detection_known"].fillna(False)].dropna(subset=["county_fips", "week_end", "site_id"])
+    if valid.empty:
+        return pd.DataFrame()
+    latest = valid["week_end"].max()
+    start = latest - pd.Timedelta(weeks=RECENT_ACTIVITY_WEEKS - 1)
+    recent = valid[(valid["week_end"] >= start) & (valid["week_end"] <= latest)]
+    site_week = (recent.groupby(["pathogen", "county_fips", "site_id", "week_end"])
+                       .agg(detected=("emerging_detection_positive", "max")).reset_index())
+    site = site_week.groupby(["pathogen", "county_fips", "site_id"]).agg(any_detect=("detected", "max")).reset_index()
+    out = (site.groupby(["pathogen", "county_fips"])
+               .agg(n_sites_tested=("site_id", "nunique"), n_sites_detected=("any_detect", "sum")).reset_index())
+    last_pos = (site_week[site_week["detected"].fillna(False).astype(bool)]
+                .groupby(["pathogen", "county_fips"])["week_end"].max().rename("last_detected_week").reset_index())
+    out = out.merge(last_pos, on=["pathogen", "county_fips"], how="left")
+    out["n_sites_detected"] = out["n_sites_detected"].astype(int)
+    out["window_end_week"] = latest
+    return out
+
+
 def plot_activity_maps(tiger, activity):
     if activity.empty:
         return
@@ -6389,6 +6421,11 @@ def main():
     print("\n[9/19] Building redesigned pathogen activity maps...")
     activity = latest_county_activity(wastewater)
     save_df(activity, TABLE_DIR / "Table07_Recent_County_Pathogen_Activity.csv")
+    try:
+        emerging_county = recent_emerging_by_county(wastewater)
+        save_df(emerging_county, TABLE_DIR / "Table07c_Recent_County_Emerging_Detections.csv")
+    except Exception as exc:  # optional app layer; never blocks the run
+        print(f"[WARN] Table07c emerging detections by county skipped: {exc}")
     plot_coverage_map(tiger, coverage)
     plot_activity_maps(tiger, activity)
     plot_tennessee_maps(tiger, activity)
