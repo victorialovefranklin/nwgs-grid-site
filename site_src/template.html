@@ -102,6 +102,19 @@ th{font:600 .7rem var(--body);letter-spacing:.07em;text-transform:uppercase;colo
 td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
 tr:last-child td{border-bottom:none}
+.nw{white-space:nowrap}
+.tight th{white-space:normal;vertical-align:bottom}
+th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
+@media (max-width:600px){
+  table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:100%}
+  table.stack tr:first-child{display:none}
+  table.stack tr{padding:10px 0;border-bottom:1px solid var(--line)}
+  table.stack tr:last-child{border-bottom:none}
+  table.stack td{border:none;padding:2px 0;max-width:none!important;text-align:left}
+  table.stack td[data-l]::before{content:attr(data-l);display:block;font:600 .66rem/1.6 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  table.stack td.lead{font-weight:600}
+  table.stack td[data-l]{display:inline-block;width:auto;margin-right:22px;vertical-align:top}
+}
 
 .alert{display:grid;grid-template-columns:4px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .alert:last-child{border-bottom:none}
@@ -174,6 +187,14 @@ const lvColor = l => l? css(LV[l]) : css('--nodata');
 const fmt = (x,d=2) => x==null||isNaN(x)?'—':Number(x).toFixed(d);
 const pct = (x,d=1) => x==null?'—':(x*100).toFixed(d)+'%';
 const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pFmt = p => p==null||isNaN(p)?'—': p<0.001?'< 0.001': p<0.01?Number(p).toFixed(3):Number(p).toFixed(2);
+const isoTxt = s => esc(s).replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g,(m)=>dateFmt(m));
+const FEAT = f => {let m;
+  if(f==='wastewater_index')return 'Wastewater, this week';
+  if((m=f.match(/^ww_lag(\d+)$/)))return `Wastewater, ${m[1]} wk before`;
+  if((m=f.match(/^clinical_lag(\d+)$/)))return `ED visits, ${m[1]} wk before`;
+  if(f==='n_sites')return 'Number of sites';
+  return f.replace(/_/g,' ')};
 const dateFmt = s => s? new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
 const STATE_FIPS = {'01':'AL','02':'AK','04':'AZ','05':'AR','06':'CA','08':'CO','09':'CT','10':'DE','11':'DC','12':'FL','13':'GA','15':'HI','16':'ID','17':'IL','18':'IN','19':'IA','20':'KS','21':'KY','22':'LA','23':'ME','24':'MD','25':'MA','26':'MI','27':'MN','28':'MS','29':'MO','30':'MT','31':'NE','32':'NV','33':'NH','34':'NJ','35':'NM','36':'NY','37':'NC','38':'ND','39':'OH','40':'OK','41':'OR','42':'PA','44':'RI','45':'SC','46':'SD','47':'TN','48':'TX','49':'UT','50':'VT','51':'VA','53':'WA','54':'WV','55':'WI','56':'WY'};
 
@@ -214,7 +235,7 @@ const cname = f => {const n=D.names[f];return n?`${esc(n[0])}, ${esc(n[1])}`:`Co
 /* ---------- charts ---------- */
 function lineChart(el, series, o={}){
   el.innerHTML='';
-  const W=o.w||720,H=o.h||220,m={t:10,r:14,b:24,l:o.left||38};
+  const W=Math.min(o.w||720,Math.max(340,el.clientWidth||0)),H=Math.min(o.h||220,Math.max(190,W*.6)),m={t:10,r:14,b:24,l:o.left||38};
   const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
   const all=series.flatMap(s=>s.values);
   const x=d3.scaleUtc().domain(d3.extent(all,d=>d[0])).range([m.l,W-m.r]);
@@ -251,7 +272,7 @@ function spark(el, vals, color, o={}){
   svg.append('circle').attr('cx',x(vals.length-1)).attr('cy',y(vals[vals.length-1])).attr('r',3).attr('fill',color);
 }
 function hbars(el, rows, o={}){
-  el.innerHTML='';const W=o.w||520,bh=o.bh||20,gap=6,m={l:o.left||140,r:54};
+  el.innerHTML='';const W=Math.max(260,Math.min(o.w||520,el.clientWidth||o.w||520)),bh=o.bh||20,gap=6,m={l:o.left||140,r:54};
   const H=rows.length*(bh+gap)+4;const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
   const x=d3.scaleLinear().domain([o.min??0,o.max??d3.max(rows,r=>r.v)]).range([m.l,W-m.r]);
   rows.forEach((r,i)=>{const yy=i*(bh+gap)+2;
@@ -263,14 +284,15 @@ function hbars(el, rows, o={}){
   if(x.domain()[0]<0) svg.append('line').attr('x1',x(0)).attr('x2',x(0)).attr('y1',0).attr('y2',H).attr('stroke',css('--muted'));
 }
 function groupedBars(el, groups, keys, colors, o={}){
-  el.innerHTML='';const W=o.w||640,H=o.h||240,m={t:12,r:10,b:28,l:40};
+  el.innerHTML='';const W=Math.min(o.w||640,Math.max(340,el.clientWidth||0)),H=o.h||240,m={t:12,r:10,b:28,l:40};
   const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
   const x0=d3.scaleBand().domain(groups.map(g=>g.name)).range([m.l,W-m.r]).padding(.25);
   const x1=d3.scaleBand().domain(keys).range([0,x0.bandwidth()]).padding(.08);
   const vals=groups.flatMap(g=>keys.map(k=>g[k]));
   const y=d3.scaleLinear().domain([Math.min(0,d3.min(vals)),o.max??Math.max(1,d3.max(vals))]).nice().range([H-m.b,m.t]);
   svg.append('g').attr('class','gridl').attr('transform',`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W-m.l-m.r)).tickFormat(o.yfmt||d3.format('.1f'))).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('text').attr('x',-6));
-  svg.append('g').attr('class','axis').attr('transform',`translate(0,${y(0)})`).call(d3.axisBottom(x0).tickSize(0)).call(g=>g.selectAll('text').attr('dy','1.3em').style('fill',css('--ink')).style('font-size','12px'));
+  svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x0).tickSize(0)).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('text').attr('dy','1.1em').style('fill',css('--ink')).style('font-size','13px'));
+  svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',css('--muted'));
   groups.forEach(g=>keys.forEach((k,i)=>{const v=g[k];const yy=y(Math.max(0,v)),h=Math.abs(y(v)-y(0));
     svg.append('rect').attr('x',x0(g.name)+x1(k)).attr('y',yy).attr('width',x1.bandwidth()).attr('height',Math.max(1,h)).attr('fill',colors[i]).attr('rx',2)
       .on('mouseenter',e=>showTip(e,`<b>${esc(g.name)}</b><div>${esc(o.labels?o.labels[i]:k)}: <b>${fmt(v,3)}</b></div>`)).on('mousemove',moveTip).on('mouseleave',hideTip);
@@ -293,7 +315,7 @@ function go(v,push=true){
   VIEWS.forEach(([k])=>{document.getElementById('v-'+k).hidden=k!==v});
   nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'page':'false'));
   if(!built[v]){RENDER[v]();built[v]=true}
-  if(push&&location.hash!=='#'+v)history.replaceState(null,'','#'+v);
+  if(push&&location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(e){}}
   try{localStorage.setItem('nwgs_view',v)}catch(e){}
   window.scrollTo(0,0);
 }
@@ -386,24 +408,24 @@ analytics(){
     <div class="seg" id="a-lagp">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
     <div class="mapbox" id="a-lagmap"></div>${legend([['var(--accent)','Same week'],['var(--el)','Wastewater leads'],['var(--nodata)','Not significant or no data']])}</article>
   <article class="panel c5"><header><h2>By pathogen</h2><span class="small muted">best lag per state</span></header>
-    <div class="tbl"><table><tr><th>Pathogen</th><th class="n">Same week</th><th class="n">WW leads</th><th class="n">Median ρ</th><th class="n">Significant</th></tr>
-    ${ROUTINE.map(p=>{const s=lagSum(p);return `<tr><td>${p}</td><td class="n">${s.sync}/${s.n}</td><td class="n">${s.lead}</td><td class="n">${fmt(s.rho)}</td><td class="n">${s.sig}/${s.n}</td></tr>`}).join('')}</table></div>
+    <div class="tbl"><table class="tight"><tr><th>Pathogen</th><th class="n">Same week</th><th class="n">WW leads</th><th class="n">Median <span class="nocase">ρ</span></th><th class="n">FDR sig.</th></tr>
+    ${ROUTINE.map(p=>{const s=lagSum(p);return `<tr><td class="nw">${p}</td><td class="n">${s.sync}/${s.n}</td><td class="n">${s.lead}</td><td class="n">${fmt(s.rho)}</td><td class="n">${s.sig}/${s.n}</td></tr>`}).join('')}</table></div>
     <p class="note">Most states peak in the same week in wastewater and clinical data. Leads, where present, are almost always one week. Significance uses FDR-corrected Spearman tests.</p></article>
   </div>
   <div class="grid">
   <article class="panel c7"><header><h2>National seasonal peaks</h2><span class="small muted">complete July–June seasons</span></header>
-    <div class="tbl"><table><tr><th>Pathogen</th><th>Season</th><th>Wastewater peak</th><th>Clinical peak</th><th class="n">Lead (wk)</th><th class="n">Peak z</th></tr>
-    ${D.seasonal.map(s=>`<tr><td>${s.pathogen}</td><td class="mono">${s.season}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td><td class="n">${fmt(s.ww_peak_magnitude_z)}</td></tr>`).join('')}</table></div>
+    <div class="tbl"><table class="tight"><tr><th>Pathogen</th><th>Season</th><th>Wastewater peak</th><th>Clinical peak</th><th class="n">Lead (wk)</th><th class="n">Peak z</th></tr>
+    ${D.seasonal.map(s=>`<tr><td class="nw">${s.pathogen}</td><td class="mono nw">${s.season}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td><td class="n">${fmt(s.ww_peak_magnitude_z)}</td></tr>`).join('')}</table></div>
     <p class="note">Positive lead = wastewater peaked first. At state level, ${D.state_seasons.flagged} of ${D.state_seasons.n} eligible state-seasons are flagged for implausible leads (${D.state_seasons.by.map(b=>`${b.pathogen} ${b.flagged}`).join(', ')}).</p></article>
   <article class="panel c5"><header><h2>Emerging pathogens</h2><div class="seg" id="a-em">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p.replace('Influenza A(H5)','H5')}</button>`).join('')}</div></header>
     <div class="chart" id="a-emc"></div><p class="note">Weekly share of tested sites with a detection. Weeks with fewer than 20 sites are hidden.</p></article>
   </div>`;
   let P='SARS-CoV-2';
-  const drawT=()=>lineChart(document.getElementById('a-trend'),[{name:P,values:ser(P),color:css('--accent'),area:false}],{bands:true,zero:true,h:240});
+  const drawT=()=>lineChart(document.getElementById('a-trend'),[{name:P,values:ser(P),color:css('--accent'),area:false}],{bands:true,zero:true,w:900,h:260});
   const drawLag=p=>{const by=Object.fromEntries(D.statelag.filter(x=>x.pathogen===p).map(x=>[x.state_code,x]));
     stateMap(document.getElementById('a-lagmap'),st=>{const r=by[st];return !r||!r.significant_fdr?css('--nodata'):r.lag_weeks>0?css('--el'):css('--accent')},
       (st,name)=>{const r=by[st];return r?`<b>${esc(name)}</b><div>${r.relationship}${r.lag_weeks?` by ${r.lag_weeks} wk`:''}</div><div>ρ = ${fmt(r.spearman_r)} · ${r.paired_weeks} weeks</div>${r.significant_fdr?'':'<div>Not significant after FDR</div>'}`:`<b>${esc(name)}</b><div>No qualifying data</div>`})};
-  const drawEm=p=>lineChart(document.getElementById('a-emc'),[{name:p,values:D.emerging[p].filter(d=>d[2]>=20).map(d=>[new Date(d[0]),d[1]]),color:css('--warn'),area:true}],{ymin:0,yfmt:d3.format('.0%'),tipfmt:v=>pct(v),h:230,left:42,xticks:4});
+  const drawEm=p=>lineChart(document.getElementById('a-emc'),[{name:p,values:D.emerging[p].filter(d=>d[2]>=20).map(d=>[new Date(d[0]),d[1]]),color:css('--warn'),area:true}],{ymin:0,ymax:Math.max(.01,d3.max(D.emerging[p].filter(d=>d[2]>=20),d=>d[1])*1.15),yfmt:d3.format('.0%'),tipfmt:v=>pct(v),w:440,h:260,left:40,xticks:4});
   const seg=(id,fn)=>el.querySelector(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll(id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.p)});
   seg('#a-path',p=>{P=p;drawT()});seg('#a-lagp',drawLag);seg('#a-em',drawEm);
   drawT();drawLag('SARS-CoV-2');drawEm('Influenza A(H5)');
@@ -412,17 +434,24 @@ analytics(){
 predictive(){
   const el=document.getElementById('v-predictive');
   const M=Object.fromEntries(D.models.map(m=>[m.pathogen,m]));
+  const interp=m=>{const w=m.wastewater_only_r2,g=m.gain_over_persistence;
+    const solo=w<=0?`On its own, wastewater did not predict ED visits in the test period (R² ${fmt(w,2)}).`
+      :`On its own, wastewater explains about ${Math.round(w*100)}% of the week-to-week variation in ED visits (R² ${fmt(w,2)}).`;
+    const add=g>=0.02?`Added to recent ED data, it raises R² by ${fmt(g,3)}.`
+      :w>0?`Most of that signal overlaps with last week’s ED value, so adding it to the model changes R² by only ${g>0?'+':''}${fmt(g,3)}.`
+      :`Adding it to the model changes R² by only ${g>0?'+':''}${fmt(g,3)}.`;
+    return solo+' '+add};
   el.innerHTML=`<div class="head"><h1>Predictive models</h1><p class="muted">Does wastewater help predict emergency-department burden? Each model was trained on earlier weeks and tested on a later held-out period.</p></div>
   <article class="panel"><header><h2>Held-out accuracy (R²)</h2></header><div class="chart" id="p-bars"></div>
   ${legend([['var(--muted)','Clinical history only (persistence)'],['var(--el)','Wastewater only'],['var(--accent)','Full multimodal model']])}</article>
   <div class="grid">${ROUTINE.map(p=>{const m=M[p];return `<article class="panel c4"><header><h2>${p}</h2><span class="small mono">${m.best_model}</span></header>
     <p style="font-weight:600">${esc(m.plain_language)}</p>
     <div class="kv small"><div><span class="label">Full R²</span><b>${fmt(m.full_model_r2,3)}</b></div><div><span class="label">Clinical only</span><b>${fmt(m.clinical_persistence_r2,3)}</b></div><div><span class="label">Gain</span><b>${m.gain_over_persistence>0?'+':''}${fmt(m.gain_over_persistence,3)}</b></div></div>
-    <p class="small muted">${esc(m.interpretation)}</p>
-    <span class="label">Top features (mean |SHAP|)</span><div class="chart" id="p-shap-${p.replace(/\W/g,'')}"></div></article>`}).join('')}</div>
+    <p class="small muted">${interp(m)}</p>
+    <span class="label">Top predictors (mean |SHAP|)</span><div class="chart" id="p-shap-${p.replace(/\W/g,'')}"></div></article>`}).join('')}</div>
   <p class="note">Wastewater features (orange) are often strongly correlated with last week’s clinical value (r up to 0.77), so a small SHAP rank inside the full model can understate wastewater’s standalone signal. That is why the wastewater-only model is shown separately.</p>`;
-  groupedBars(document.getElementById('p-bars'),ROUTINE.map(p=>({name:p,a:M[p].clinical_persistence_r2,b:M[p].wastewater_only_r2,c:M[p].full_model_r2})),['a','b','c'],[css('--muted'),css('--el'),css('--accent')],{labels:['Clinical only','Wastewater only','Full model'],valueLabels:true,max:1,h:260});
-  ROUTINE.forEach(p=>hbars(document.getElementById('p-shap-'+p.replace(/\W/g,'')),D.shap.filter(s=>s.pathogen===p).slice(0,8).map(s=>({label:s.feature,v:s.mean_abs_shap,color:/^(ww_|wastewater)/.test(s.feature)?css('--el'):css('--muted')})),{left:120,w:420,bh:16,fmt:v=>v<.01?v.toExponential(1):v.toFixed(2)}));
+  groupedBars(document.getElementById('p-bars'),ROUTINE.map(p=>({name:p,a:M[p].clinical_persistence_r2,b:M[p].wastewater_only_r2,c:M[p].full_model_r2})),['a','b','c'],[css('--muted'),css('--el'),css('--accent')],{labels:['Clinical only','Wastewater only','Full model'],valueLabels:true,max:1,w:1000,h:300});
+  ROUTINE.forEach(p=>hbars(document.getElementById('p-shap-'+p.replace(/\W/g,'')),D.shap.filter(s=>s.pathogen===p).slice(0,8).map(s=>({label:FEAT(s.feature),v:s.mean_abs_shap,color:/^(ww_|wastewater)/.test(s.feature)?css('--el'):css('--muted')})),{left:150,w:360,bh:18,fmt:v=>v<.01?v.toFixed(3):v.toFixed(2)}));
 },
 
 equity(){
@@ -434,7 +463,7 @@ equity(){
     <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
   <article class="panel c7"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
     <p style="font-size:1.05rem;font-weight:600;max-width:60ch">${line}</p>
-    <div class="statgrid"><div class="stat"><span class="label">Odds ratio per 0.10 SVI</span><span class="big">${fmt(g.glm_odds_ratio,3)}</span></div><div class="stat"><span class="label">95% CI</span><span class="big" style="font-size:1.4rem">${fmt(g.glm_or_95ci_low,3)}–${fmt(g.glm_or_95ci_high,3)}</span></div><div class="stat"><span class="label">p value</span><span class="big" style="font-size:1.4rem">${g.glm_p_value.toExponential(2)}</span></div></div>
+    <div class="statgrid"><div class="stat"><span class="label">Odds ratio per 0.10 SVI</span><span class="big">${fmt(g.glm_odds_ratio,3)}</span></div><div class="stat"><span class="label">95% CI</span><span class="big" style="font-size:1.4rem">${fmt(g.glm_or_95ci_low,3)}–${fmt(g.glm_or_95ci_high,3)}</span></div><div class="stat"><span class="label">p value</span><span class="big" style="font-size:1.4rem">${pFmt(g.glm_p_value)}</span></div></div>
     <div class="mapbox" id="e-map"></div>${legend([['var(--accent)','Analysis-ready'],['var(--lo)','Observed, not ready'],['var(--nodata)','No surveillance']])}
     <p class="note">Analysis-ready = at least 52 qualifying weeks and at least 70% completeness across the active span. Association, not cause.</p></article></div>`;
   hbars(document.getElementById('e-bars'),D.equity.map(q=>({label:q.svi_quartile.replace(' vulnerability',''),v:q.pct_analysis_ready})),{min:0,max:100,left:110,w:440,fmt:v=>v.toFixed(1)+'%'});
@@ -450,16 +479,16 @@ tennessee(){
   el.innerHTML=`<div class="head"><h1>Tennessee</h1><p class="muted">How much of Tennessee’s 95 counties CDC wastewater surveillance reaches, and how it has changed.</p></div>
   <div class="statgrid"><div class="stat"><span class="label">Ever monitored</span><span class="big">${obs.length}<span class="small muted"> / 95</span></span></div><div class="stat"><span class="label">Analysis-ready</span><span class="big">${ready.length}<span class="small muted"> / 95</span></span></div><div class="stat"><span class="label">Reporting now</span><span class="big" style="color:var(--hi)">${now.length}<span class="small muted"> / 95</span></span><span class="small muted">${now.map(c=>c.county_name).join(' and ')}</span></div></div>
   <div class="grid"><article class="panel c7"><div class="mapbox" id="t-map"></div>${legend(Object.entries(ST).map(([k,v])=>[css(v),k]))}</article>
-  <article class="panel c5"><header><h2>Monitored counties</h2></header><div class="tbl"><table><tr><th>County</th><th class="n">Weeks</th><th>Last season</th><th>Status</th></tr>
-  ${obs.map(c=>`<tr><td>${esc(c.county_name)}</td><td class="n">${c.surveillance_weeks}</td><td class="mono">${c.last_season_with_data??'—'}</td><td><span class="chip sw" style="background:${css(ST[c.status])}"></span> ${c.status}</td></tr>`).join('')}</table></div></article></div>
+  <article class="panel c5"><header><h2>Monitored counties</h2></header><div class="tbl"><table class="stack"><tr><th>County</th><th class="n">Weeks</th><th>Last season</th><th>Status</th></tr>
+  ${obs.map(c=>`<tr><td class="lead">${esc(c.county_name)}</td><td class="n" data-l="Weeks">${c.surveillance_weeks}</td><td class="mono" data-l="Last season">${c.last_season_with_data??'—'}</td><td data-l="Status"><span style="display:inline-flex;gap:6px;align-items:baseline"><span class="chip sw" style="background:${css(ST[c.status])};flex:none"></span><span>${c.status}</span></span></td></tr>`).join('')}</table></div></article></div>
   <div class="grid"><article class="panel c4"><header><h2>Wastewater vs. ED</h2><span class="small muted">same-week Spearman ρ</span></header>
     <div class="chart" id="t-rho"></div></article>
   <article class="panel c8"><header><h2>Seasonal peaks</h2><span class="small muted">seasons meeting coverage criteria</span></header>
-    <div class="tbl"><table><tr><th>Pathogen</th><th>Season</th><th class="n">Ready counties</th><th>WW peak</th><th>ED peak</th><th class="n">Lead</th></tr>
-    ${D.tn_seasonal.filter(s=>s.eligible_for_tennessee_seasonal_inference).map(s=>`<tr><td>${s.pathogen}</td><td class="mono">${s.season}</td><td class="n">${s.season_ready_counties}/${s.observed_counties}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td></tr>`).join('')}</table></div>
-    <p class="callout">⚑ SARS-CoV-2 has summer and winter waves. In flagged seasons the clinical peak was the August wave and the wastewater peak the December wave, so the −18 weeks compares two different waves rather than measuring a lag.</p></article></div>
+    <div class="tbl"><table class="tight"><tr><th>Pathogen</th><th>Season</th><th class="n">Ready counties</th><th>WW peak</th><th>ED peak</th><th class="n">Lead</th></tr>
+    ${D.tn_seasonal.filter(s=>s.eligible_for_tennessee_seasonal_inference).map(s=>`<tr><td class="nw">${s.pathogen}</td><td class="mono nw">${s.season}</td><td class="n">${s.season_ready_counties}/${s.observed_counties}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td></tr>`).join('')}</table></div>
+    ${D.tn_seasonal.some(s=>s.eligible_for_tennessee_seasonal_inference&&s.implausible_lead_flag)?'<p class="callout">⚑ Flagged leads are not real lags. SARS-CoV-2 has summer and winter waves, and in these seasons the wastewater and clinical peaks fell in different waves.</p>':''}</article></div>
   <article class="panel"><header><h2>Equity</h2><span class="small muted">exploratory, unadjusted</span></header>
-    <p>Odds ratio per 0.10 SVI: <b class="num">${fmt(q.glm_odds_ratio_per_0_10_svi,2)}</b> (95% CI <span class="num">${fmt(q.glm_or_95ci_low,2)}–${fmt(q.glm_or_95ci_high,2)}</span>), p = <span class="num">${fmt(q.glm_p_value,3)}</span>. Readiness by quartile: ${D.tn_equity.map(x=>`${x.svi_quartile} ${fmt(x.pct_analysis_ready,1)}%`).join(' · ')}.</p>
+    <p>Odds ratio per 0.10 SVI: <b class="num">${fmt(q.glm_odds_ratio_per_0_10_svi,2)}</b> (95% CI <span class="num">${fmt(q.glm_or_95ci_low,2)}–${fmt(q.glm_or_95ci_high,2)}</span>), p = <span class="num">${pFmt(q.glm_p_value)}</span>. Readiness by quartile: ${D.tn_equity.map(x=>`${x.svi_quartile} ${fmt(x.pct_analysis_ready,1)}%`).join(' · ')}.</p>
     <p class="note">With only ${ready.length} analysis-ready counties, this cannot show whether coverage is equitable. Counts reflect CDC NWSS public data; counties may be monitored by other programs.</p></article>`;
   countyMap(document.getElementById('t-map'),f=>css(ST[byF[f]?.status||'No CDC NWSS data']),f=>{const c=byF[f];return c?`<b>${esc(c.county_name)} County</b><div>${c.status}</div>${c.surveillance_weeks?`<div>${c.surveillance_weeks} weeks · last season ${c.last_season_with_data}</div>`:''}`:''},{filter:d=>d.id.startsWith('47'),fit:true,label:'Tennessee counties map'});
   hbars(document.getElementById('t-rho'),D.tn_align.map(a=>({label:a.pathogen,v:a.spearman_rho_same_week})),{min:0,max:1,left:84,w:280,bh:22,fmt:v=>v.toFixed(2)});
@@ -472,8 +501,8 @@ genomics(){
   <div class="grid"><article class="panel c6"><header><h2>Resistance genes in wastewater</h2><span class="small muted">share of sites with detection</span></header><div class="chart" id="g-amr"></div></article>
   <article class="panel c6"><header><h2>Mean detection by state</h2></header><div class="mapbox" id="g-map"></div>
     <div class="legend"><span>Lower</span><i style="background:linear-gradient(90deg,var(--accent-soft),var(--accent));width:90px"></i><span>Higher</span><span><i style="background:var(--nodata)"></i>No sites</span></div></article></div>
-  <article class="panel"><header><h2>NCBI virus genome records</h2></header><div class="tbl"><table><tr><th>Pathogen</th><th class="n">Records</th><th class="n">With collection date</th><th class="n">Complete genomes</th><th>Main hosts</th><th>Main locations</th></tr>
-  ${D.genomic.map(g=>`<tr><td>${g.pathogen}</td><td class="n">${g.records}</td><td class="n">${g.dated_collection}</td><td class="n">${g.complete_genome_records}</td><td class="small">${Object.entries(D.genomic_hosts[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td><td class="small">${Object.entries(D.genomic_places[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td></tr>`).join('')}</table></div>
+  <article class="panel"><header><h2>NCBI virus genome records</h2></header><div class="tbl"><table class="stack"><tr><th>Pathogen</th><th class="n">Records</th><th class="n">With collection date</th><th class="n">Complete genomes</th><th>Main hosts</th><th>Main locations</th></tr>
+  ${D.genomic.map(g=>`<tr><td class="lead nw">${g.pathogen}</td><td class="n" data-l="Records">${g.records.toLocaleString()}</td><td class="n" data-l="With collection date">${g.dated_collection.toLocaleString()}</td><td class="n" data-l="Complete genomes">${g.complete_genome_records.toLocaleString()}</td><td class="small" data-l="Main hosts">${Object.entries(D.genomic_hosts[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td><td class="small" data-l="Main locations">${Object.entries(D.genomic_places[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td></tr>`).join('')}</table></div>
   <p class="note">Most recent records from NCBI Virus per pathogen. These are public sequence records, not sequences from the wastewater samples.</p></article>`;
   hbars(document.getElementById('g-amr'),[...D.amr].sort((a,b)=>b.detection_rate_pct-a.detection_rate_pct).map(a=>({label:`${a.target} · ${a.amr_class}`,v:a.detection_rate_pct})),{min:0,max:100,left:170,w:520,bh:17,fmt:v=>v.toFixed(0)+'%'});
   const by=Object.fromEntries(D.amr_state.map(s=>[s.state_code,s]));const ext=d3.extent(D.amr_state,s=>s.mean_detection_rate_pct);
@@ -486,7 +515,7 @@ structures(){
   el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One representative reference structure per pathogen from the RCSB Protein Data Bank, all passing the pipeline’s structural QC.</p></div>
   <div class="grid">${D.structures.map(s=>`<article class="panel c4"><header><h2>${s.pathogen}</h2><a class="mono" href="${s.pdb_entry_url}" target="_blank" rel="noopener">${s.pdb_entry_id} ↗</a></header>
     <p style="font-weight:600">${esc(s.protein)}</p><p class="small muted">${esc(s.rcsb_title)}</p>
-    <div class="kv small"><div><span class="label">Method</span><b style="font-family:var(--body);font-size:.82rem">${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')}</b></div><div><span class="label">Resolution</span><b>${fmt(s.resolution_a,2)} Å</b></div><div><span class="label">Cα atoms</span><b>${s.ca_atom_count.toLocaleString()}</b></div></div>
+    <div class="kv small"><div><span class="label">Method</span><b style="font-family:var(--body);font-size:.82rem">${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')}</b></div><div><span class="label">Resolution</span><b>${fmt(s.resolution_a,2)} Å</b></div><div><span class="label">C-alpha atoms</span><b>${s.ca_atom_count.toLocaleString()}</b></div></div>
     <p class="small muted">UniProt: <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc}</p></article>`).join('')}</div>
   <p class="note">Reference structures give biological context only; they are not derived from wastewater samples.</p>`;
 },
@@ -505,8 +534,8 @@ audit(){
   el.innerHTML=`<div class="head"><h1>Audit log</h1><p class="muted">Every validation check from this run. The app only updates when no check fails.</p></div>
   <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono">${R.n_pass} pass · ${R.n_warning} warn · ${R.n_fail} fail</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
   ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
-  <article class="panel"><div class="tbl"><table><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
-  ${D.audit.map(a=>`<tr><td>${esc(a.component)}</td><td class="status-${cls(a.status)}" style="white-space:nowrap;font-weight:600">${esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;word-break:break-word">${esc(a.detail)}</td><td class="small muted">${esc(a.source)}</td></tr>`).join('')}</table></div></article>`;
+  <article class="panel"><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
+  ${D.audit.map(a=>`<tr><td class="lead">${esc(a.component)}</td><td class="status-${cls(a.status)}" style="white-space:nowrap;font-weight:600">${esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`).join('')}</table></div></article>`;
 },
 
 methods(){
@@ -522,13 +551,13 @@ methods(){
     <li><b>Seasonal peaks</b> — complete July–June seasons only; leads near season boundaries are flagged.</li>
     <li><b>Clusters</b> — global and local Moran’s I, k=6 nearest neighbours, EPSG:5070, permutation inference.</li>
     <li><b>Models</b> — random forest and gradient boosting vs. clinical persistence on a chronological holdout; ablation, wastewater-only benchmark and SHAP.</li></ul></article>
-  <article class="panel c6"><h2>About this version</h2><p class="small">This is a static build: one HTML page generated from the weekly pipeline export, with no server or database. It covers every public view of the Base44 app.</p>
-    <p class="small">Account features need a backend and are not included: sign-in, saved alert rules with email, user admin, and the data-upload pages. License requests and beta feedback can link to an external form.</p>
+  <article class="panel c6"><h2>About this version</h2><p class="small">This is a static build: one HTML page generated from the weekly pipeline export, with no server or database. It is rebuilt every Saturday after CDC’s weekly NWSS refresh, and only when no validation check fails.</p>
+    <p class="small">Sign-in, saved alert rules and data uploads need a backend and are not part of this public site.</p>
     <p class="small muted">Victoria Love Franklin · Meharry Medical College · NWGS Grid™</p></article></div>`;
 }
 };
 
-function alertRow(a){return `<div class="alert"><span class="bar sev-${a.severity}"></span><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="meta"><b style="color:var(--ink)">${esc(a.alert_type)}</b>${a.pathogen?`<span>${esc(a.pathogen)}</span>`:''}${a.geography?`<span>${esc(a.geography)}</span>`:''}</div><p class="small">${esc(a.message)}</p></div></div>`}
+function alertRow(a){return `<div class="alert"><span class="bar sev-${a.severity}"></span><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="meta"><b style="color:var(--ink)">${esc(a.alert_type)}</b>${a.pathogen?`<span>${esc(a.pathogen)}</span>`:''}${a.geography?`<span>${esc(a.geography)}</span>`:''}</div><p class="small">${isoTxt(a.message)}</p></div></div>`}
 
 /* ---------- boot ---------- */
 let start=location.hash.slice(1);
