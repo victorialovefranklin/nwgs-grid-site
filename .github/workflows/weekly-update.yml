@@ -20,7 +20,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +63,7 @@ jobs:
           SOCRATA_KEY_SECRET: ${{ secrets.SOCRATA_KEY_SECRET }}
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           MPLBACKEND: Agg
+          PYTHONUNBUFFERED: "1"
         run: python pipeline/nwgs_pipeline.py
 
       - name: Export app data (stops here if validation fails or tables are from mixed runs)
@@ -95,7 +96,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

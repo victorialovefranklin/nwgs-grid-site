@@ -1,5 +1,5 @@
 # Site build and export
-pandas>=2.1
+pandas>=2.2,<3
 numpy>=1.26
 
 # Pipeline (nwgs_pipeline.py v5.20)
