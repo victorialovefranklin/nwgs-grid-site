@@ -2,16 +2,19 @@
 pandas>=2.1
 numpy>=1.26
 
-# Pipeline (check against the imports at the top of nwgs_pipeline.py and add anything missing)
+# Pipeline (nwgs_pipeline.py v5.20)
 requests
 scipy
 statsmodels
 scikit-learn
 shap
 matplotlib
+pillow
 geopandas
 shapely
 pyproj
+pyogrio
 libpysal
 esda
 pyarrow
+openpyxl

@@ -50,9 +50,14 @@ jobs:
           unzip -o -q /tmp/tl_2025_us_county.zip -d "$NWGS_ROOT/data/"
           ls -la "$NWGS_ROOT/data/"
 
+      - name: Set the data window to end on today's date
+        run: echo "NWGS_STUDY_END=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
+
       - name: Run surveillance pipeline
         if: hashFiles('pipeline/nwgs_pipeline.py') != ''
         env:
+          NWGS_PROJECT_ROOT: /content/NWGS_GRID
+          NWGS_STATIC_ROOT: /content/NWGS_GRID/data
           SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
           SOCRATA_KEY_ID: ${{ secrets.SOCRATA_KEY_ID }}
           SOCRATA_KEY_SECRET: ${{ secrets.SOCRATA_KEY_SECRET }}
