@@ -41,6 +41,15 @@ jobs:
           # Files the pipeline does not download itself (SVI, TIGER, AMR, etc.)
           if [ -d static_inputs ]; then cp -r static_inputs/. "$NWGS_ROOT/data/"; fi
 
+      - name: Download Census TIGER/Line 2025 counties (too large for GitHub, ~130 MB)
+        if: hashFiles('pipeline/nwgs_pipeline.py') != ''
+        run: |
+          curl -fsSL --retry 3 -A "Mozilla/5.0 (NWGS Grid weekly build)" \
+            -o /tmp/tl_2025_us_county.zip \
+            https://www2.census.gov/geo/tiger/TIGER2025/COUNTY/tl_2025_us_county.zip
+          unzip -o -q /tmp/tl_2025_us_county.zip -d "$NWGS_ROOT/data/"
+          ls -la "$NWGS_ROOT/data/"
+
       - name: Run surveillance pipeline
         if: hashFiles('pipeline/nwgs_pipeline.py') != ''
         env:
