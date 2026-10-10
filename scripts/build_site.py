@@ -133,6 +133,65 @@ def main(export_dir, site_dir):
     else:
         D["regions"] = {}
         D["regions_review"] = None
+    # ------------------------------------------------------------
+    # Surveillance-gap analytics (pipeline section 21c / export v5.22+).
+    # Every one is optional. A missing table yields None, and the view
+    # says plainly that the layer has not populated yet rather than
+    # rendering an empty chart that looks like a finding of zero.
+    # ------------------------------------------------------------
+    def opt(name, cols=None, how="records"):
+        p = Path(export_dir) / f"{name}.csv"
+        if not p.exists():
+            return None
+        try:
+            df = pd.read_csv(p, low_memory=False)
+        except Exception as exc:
+            print(f"[WARN] {name}.csv unreadable ({exc}); view will report it as unavailable.")
+            return None
+        if not len(df):
+            return None
+        if cols:
+            df = df[[c for c in cols if c in df.columns]]
+        return recs(df) if how == "records" else json.loads(
+            df.replace({np.nan: None}).to_json(orient="records"))[0]
+
+    D["leadtime"] = opt("LeadTime", [
+        "pathogen", "state_code", "shedding_lead_weeks", "reporting_lag_weeks",
+        "operational_lead_weeks", "usable", "lead_supported", "interpretation",
+        "spearman_r", "spearman_p_fdr", "paired_weeks", "last_sample_week", "dataset_updated"])
+    D["leadtime_national"] = opt("LeadTimeNational")
+    D["attrition_sites"] = opt("AttritionSite", [
+        "site_id", "state_code", "county_fips", "county_name", "first_week", "last_week",
+        "n_weeks", "population_served", "weeks_since_last", "status", "went_dormant_week",
+        "lifespan_weeks", "as_of_week", "dormant_threshold_weeks"])
+    D["attrition_yearly"] = opt("AttritionYearly")
+    D["attrition_vuln"] = opt("AttritionVulnerability")
+    D["forecast_board"] = opt("ForecastScore")
+    D["forecast_records"] = opt("ForecastRecord")
+    D["representativeness"] = opt("Representativeness", [
+        "county_fips", "county_name", "state_code", "n_sites", "sewer_population",
+        "county_population", "sewer_share", "sewershed_crosses_county", "svi",
+        "state_monitored_svi", "svi_gap", "representativeness", "representativeness_tier"])
+    D["rep_national"] = opt("RepresentativenessNational", how="first")
+    D["assay_targets"] = opt("AssayTarget")
+    D["global_coverage"] = opt("GlobalCoverage", [
+        "country", "iso3", "sewer_connected_pct", "income_group", "population",
+        "observable_population", "unobservable_population", "has_open_feed",
+        "open_machine_readable_feed", "feed_rows_ingested", "feed_status"])
+    D["global_income"] = opt("GlobalCoverageIncome")
+    # Per-county representativeness keyed for the map layer.
+    if D["representativeness"]:
+        D["rep_by_fips"] = {str(x["county_fips"]).zfill(5): [R(x.get("representativeness")),
+                                                             R(x.get("sewer_share")),
+                                                             int(x.get("n_sites") or 0)]
+                            for x in D["representativeness"]}
+        for x in D["representativeness"]:
+            f = str(x["county_fips"]).zfill(5)
+            if f not in names and isinstance(x.get("county_name"), str):
+                names[f] = [x["county_name"], x.get("state_code")]
+    else:
+        D["rep_by_fips"] = None
+
     latest = D_summary_latest(r("PathogenSummary"))
     D["latest_sample"] = str(latest.date()) if latest is not None else None
     D["tn_county"] = recs(r("TennesseeCounty"))

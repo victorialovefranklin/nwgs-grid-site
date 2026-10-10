@@ -205,6 +205,87 @@ def main(table_dir, out_dir, allow_mixed=False):
         ents["EmergingCounty"] = ec[["pathogen", "county_fips", "county_name", "state_code", "n_sites_tested",
                                      "n_sites_detected", "last_detected_week", "window_end_week"]]
 
+    # ------------------------------------------------------------
+    # Surveillance-gap analytics (pipeline section 21c, v5.22+).
+    # All optional: a run produced before 21c existed still exports.
+    # ------------------------------------------------------------
+
+    # LeadTime (Table21/21b) - shedding vs reporting vs operational lead
+    t21 = find(table_dir, "Table21_LeadTime_Decomposition", required=False)
+    if t21 is not None and len(t21):
+        keep = ["pathogen", "state_code", "shedding_lead_weeks", "reporting_lag_weeks",
+                "operational_lead_weeks", "usable", "lead_supported", "interpretation",
+                "spearman_r", "spearman_p_fdr", "paired_weeks", "dataset_id",
+                "last_sample_week", "dataset_updated"]
+        ents["LeadTime"] = t21[[c for c in keep if c in t21.columns]]
+    t21b = find(table_dir, "Table21b_LeadTime_National", required=False)
+    if t21b is not None and len(t21b):
+        ents["LeadTimeNational"] = t21b
+
+    # Attrition (Table22/22b/22c) - which sites went dark, when, and where
+    t22 = find(table_dir, "Table22_Coverage_Attrition_Sites", required=False)
+    if t22 is not None and len(t22):
+        at = t22.copy()
+        if "county_fips" in at.columns:
+            at["county_fips"] = at["county_fips"].astype("string").str.zfill(5)
+            at = at.merge(lookup[["county_fips", "county_name", "state_code"]].rename(
+                columns={"state_code": "lookup_state"}), on="county_fips", how="left")
+            at["state_code"] = at["state_code"].fillna(at.pop("lookup_state"))
+        keep = ["site_id", "state_code", "county_fips", "county_name", "first_week", "last_week",
+                "n_weeks", "n_pathogens", "population_served", "weeks_since_last", "status",
+                "went_dormant_week", "lifespan_weeks", "as_of_week", "dormant_threshold_weeks"]
+        ents["AttritionSite"] = at[[c for c in keep if c in at.columns]]
+    t22b = find(table_dir, "Table22b_Coverage_Attrition_Yearly", required=False)
+    if t22b is not None and len(t22b):
+        ents["AttritionYearly"] = t22b
+    t22c = find(table_dir, "Table22c_Attrition_By_Vulnerability", required=False)
+    if t22c is not None and len(t22c):
+        ents["AttritionVulnerability"] = t22c
+
+    # Forecast scoreboard (Table23b/23c) - frozen predictions, scored on arrival
+    t23c = find(table_dir, "Table23c_Forecast_Scoreboard", required=False)
+    if t23c is not None and len(t23c):
+        ents["ForecastScore"] = t23c
+    t23b = find(table_dir, "Table23b_Forecast_Scored", required=False)
+    if t23b is not None and len(t23b):
+        keep = ["run_id", "forecast_made_week", "pathogen", "horizon_weeks", "target_week",
+                "pred_persistence", "pred_linear", "observed", "err_persistence", "err_linear"]
+        ents["ForecastRecord"] = t23b[[c for c in keep if c in t23b.columns]]
+
+    # Representativeness (Table24/24b) - the PHA4GE vacancy, defined
+    t24 = find(table_dir, "Table24_County_Representativeness", required=False)
+    if t24 is not None and len(t24):
+        rp = t24.copy()
+        rp["county_fips"] = rp["county_fips"].astype("string").str.zfill(5)
+        keep = ["county_fips", "county_name", "state_code", "n_sites", "sewer_population",
+                "county_population", "sewer_share", "sewer_share_raw", "sewershed_crosses_county",
+                "svi", "state_monitored_svi", "svi_gap", "representativeness",
+                "representativeness_tier", "analysis_ready", "definition_version"]
+        ents["Representativeness"] = rp[[c for c in keep if c in rp.columns]]
+    t24b = find(table_dir, "Table24b_Representativeness_National", required=False)
+    if t24b is not None and len(t24b):
+        ents["RepresentativenessNational"] = t24b
+
+    # AssayTarget (Table25) - curated, citation-bearing published target regions
+    t25 = find(table_dir, "Table25_Assay_Target_Panel", required=False)
+    if t25 is not None and len(t25):
+        keep = ["pathogen", "assay_name", "target_gene", "reference_accession", "region_start",
+                "region_end", "region_length", "citation", "citation_url", "notes",
+                "curation_status", "variation_source", "records_considered",
+                "overlay_available", "overlay_note"]
+        ents["AssayTarget"] = t25[[c for c in keep if c in t25.columns]]
+
+    # GlobalCoverage (Table26/26b) - sewer-connected denominator by country
+    t26 = find(table_dir, "Table26_Global_Coverage_Equity", required=False)
+    if t26 is not None and len(t26):
+        keep = ["country", "iso3", "sewer_connected_pct", "income_group", "population",
+                "observable_population", "unobservable_population", "has_open_feed",
+                "open_machine_readable_feed", "feed_rows_ingested", "feed_status"]
+        ents["GlobalCoverage"] = t26[[c for c in keep if c in t26.columns]]
+    t26b = find(table_dir, "Table26b_Global_Coverage_By_Income", required=False)
+    if t26b is not None and len(t26b):
+        ents["GlobalCoverageIncome"] = t26b
+
     # CountyCluster (Table08 LISA)
     cl = t08.copy()
     cl["county_fips"] = fips5(cl["county_fips"])

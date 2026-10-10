@@ -5355,6 +5355,634 @@ def pull_uniprot_functional_regions(entities):
 
 
 # ============================================================
+# 21c. SURVEILLANCE-GAP ANALYTICS (v5.22)
+# ------------------------------------------------------------
+# Six additions that occupy documented vacancies in the public
+# wastewater-surveillance literature. Every one of them is computed from
+# data this pipeline already pulls, or from an explicitly cited public
+# feed. None of them predicts, scores or ranks anything beyond what the
+# cited source itself publishes.
+#
+#  12a  Lead-time decomposition      shedding / reporting / operational
+#  12b  Coverage attrition           which sites went dark, and when
+#  12c  Forecast scoreboard          frozen predictions scored on arrival
+#  12d  Representativeness           sewer-served share x vulnerability skew
+#  12e  Assay-target vulnerability   published primer regions vs public variation
+#  12f  Global coverage equity       AMELAG / RIVM / WHO-UNICEF JMP
+# ============================================================
+
+DORMANT_WEEKS = int(os.getenv("NWGS_DORMANT_WEEKS", "8"))
+FORECAST_HISTORY = PROC_DIR / "NWGS_FORECAST_HISTORY.csv"
+ASSAY_TARGET_PATH = Path(os.getenv("NWGS_ASSAY_TARGET_PATH",
+                                   str(STATIC_ROOT / "NWGS_ASSAY_TARGETS.csv")))
+AMELAG_URL = os.getenv(
+    "NWGS_AMELAG_URL",
+    "https://raw.githubusercontent.com/robert-koch-institut/Abwassersurveillance_AMELAG/main/amelag_einzelstandorte.tsv",
+)
+JMP_PATH = Path(os.getenv("NWGS_JMP_PATH", str(STATIC_ROOT / "WHO_UNICEF_JMP_SANITATION.csv")))
+
+
+# ------------------------------------------------------------
+# 12a. LEAD-TIME DECOMPOSITION
+# ------------------------------------------------------------
+def lead_time_decomposition(best_lag, raw_manifest, wastewater):
+    """Split the headline 'wastewater leads clinical' number into its three parts.
+
+    shedding_lead_weeks     virus detectable in sewage before ED visits rise.
+                            This is the cross-correlation best lag already
+                            computed in Table04_Best_Lag_Results.
+    reporting_lag_weeks     sample collection -> value visible in the public CDC
+                            dataset. Measured as the CDC dataset's own
+                            rowsUpdatedAt metadata minus the latest sample week
+                            present in that dataset.
+    operational_lead_weeks  shedding_lead - reporting_lag. This is the only
+                            figure that answers "could a health department have
+                            acted on this before the clinical signal arrived?"
+                            It can be zero or negative, and when it is, the
+                            surveillance value of the signal was not realised.
+
+    The literature almost always reports shedding lead alone, which overstates
+    usable warning time. Nothing here is modelled; all three terms are
+    differences between observed dates.
+    """
+    if best_lag is None or len(best_lag) == 0:
+        return pd.DataFrame()
+
+    man = pd.DataFrame(raw_manifest) if not isinstance(raw_manifest, pd.DataFrame) else raw_manifest.copy()
+    if man.empty or "updated_at_metadata" not in man.columns:
+        return pd.DataFrame()
+
+    # Latest sample week actually present per pathogen, from the frozen harmonised frame.
+    last_sample = (
+        wastewater.dropna(subset=["week_end"])
+                  .groupby("pathogen")["week_end"].max()
+                  .rename("last_sample_week")
+                  .reset_index()
+    )
+
+    man = man[["pathogen", "dataset_id", "updated_at_metadata"]].copy()
+    man["dataset_updated"] = pd.to_datetime(man["updated_at_metadata"], errors="coerce", utc=True).dt.tz_localize(None)
+    rep = man.merge(last_sample, on="pathogen", how="inner")
+    rep["last_sample_week"] = pd.to_datetime(rep["last_sample_week"], errors="coerce")
+    rep["reporting_lag_days"] = (rep["dataset_updated"] - rep["last_sample_week"]).dt.days
+    # A negative reporting lag is impossible and means the metadata timestamp is
+    # stale relative to the data it describes; drop rather than report nonsense.
+    rep.loc[rep["reporting_lag_days"] < 0, "reporting_lag_days"] = np.nan
+    rep["reporting_lag_weeks"] = rep["reporting_lag_days"] / 7.0
+
+    b = best_lag.copy()
+    b = b[["pathogen", "state_code", "lag_weeks", "spearman_r", "spearman_p_fdr", "paired_weeks"]]
+    b = b.rename(columns={"lag_weeks": "shedding_lead_weeks"})
+
+    out = b.merge(rep[["pathogen", "dataset_id", "dataset_updated", "last_sample_week",
+                       "reporting_lag_days", "reporting_lag_weeks"]],
+                  on="pathogen", how="left")
+
+    out["operational_lead_weeks"] = out["shedding_lead_weeks"] - out["reporting_lag_weeks"]
+    out["usable"] = out["operational_lead_weeks"] > 0
+    # Only call a lead statistically supported if the association survives FDR.
+    out["lead_supported"] = out["spearman_p_fdr"].lt(0.05) & out["spearman_r"].gt(0)
+    out["interpretation"] = np.where(
+        ~out["lead_supported"], "No supported lead at any tested offset",
+        np.where(out["operational_lead_weeks"] > 0.5, "Usable operational lead",
+                 np.where(out["operational_lead_weeks"] > -0.5, "Lead consumed by reporting delay",
+                          "Signal published after clinical rise")),
+    )
+    return out.sort_values(["pathogen", "operational_lead_weeks"], ascending=[True, False])
+
+
+def lead_time_national(decomp):
+    """Per-pathogen distribution of the three lead-time terms across states."""
+    if decomp is None or decomp.empty:
+        return pd.DataFrame()
+    d = decomp[decomp["lead_supported"]].copy()
+    if d.empty:
+        return pd.DataFrame()
+
+    def q(s, p):
+        v = s.dropna()
+        return float(np.percentile(v, p)) if len(v) else np.nan
+
+    rows = []
+    for pathogen, g in d.groupby("pathogen"):
+        rows.append({
+            "pathogen": pathogen,
+            "n_states_supported": int(g["state_code"].nunique()),
+            "shedding_lead_median": q(g["shedding_lead_weeks"], 50),
+            "shedding_lead_p25": q(g["shedding_lead_weeks"], 25),
+            "shedding_lead_p75": q(g["shedding_lead_weeks"], 75),
+            "reporting_lag_weeks": float(g["reporting_lag_weeks"].median()),
+            "operational_lead_median": q(g["operational_lead_weeks"], 50),
+            "operational_lead_p25": q(g["operational_lead_weeks"], 25),
+            "operational_lead_p75": q(g["operational_lead_weeks"], 75),
+            "pct_states_usable": float(100.0 * g["usable"].mean()),
+        })
+    return pd.DataFrame(rows).sort_values("operational_lead_median", ascending=False)
+
+
+# ------------------------------------------------------------
+# 12b. COVERAGE ATTRITION
+# ------------------------------------------------------------
+def coverage_attrition(wastewater, dormant_weeks=DORMANT_WEEKS):
+    """Per-site reporting lifespan: when each site started, stopped, and who it covered.
+
+    A site is 'dormant' when its most recent sample is more than
+    dormant_weeks before the latest sample week anywhere in the dataset. This
+    is a reporting-status statement, not a claim that the facility closed.
+    """
+    w = wastewater.dropna(subset=["site_id", "week_end"]).copy()
+    if w.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    w["week_end"] = pd.to_datetime(w["week_end"], errors="coerce")
+    asof = w["week_end"].max()
+
+    site = (
+        w.groupby(["site_id", "state_code"], dropna=False)
+         .agg(first_week=("week_end", "min"),
+              last_week=("week_end", "max"),
+              n_weeks=("week_end", "nunique"),
+              n_pathogens=("pathogen", "nunique"),
+              population_served=("population_served", "max"),
+              county_fips=("county_fips", "first"))
+         .reset_index()
+    )
+    site["weeks_since_last"] = ((asof - site["last_week"]).dt.days / 7.0).round(1)
+    site["status"] = np.where(site["weeks_since_last"] <= dormant_weeks, "active", "dormant")
+    site["went_dormant_week"] = np.where(site["status"].eq("dormant"),
+                                         site["last_week"].dt.strftime("%Y-%m-%d"), None)
+    site["lifespan_weeks"] = ((site["last_week"] - site["first_week"]).dt.days / 7.0).round(1)
+    site["as_of_week"] = asof.strftime("%Y-%m-%d")
+    site["dormant_threshold_weeks"] = dormant_weeks
+
+    # Yearly ledger: sites reporting, sites that stopped that year, population affected.
+    s = site.copy()
+    s["start_year"] = s["first_week"].dt.year
+    s["end_year"] = s["last_week"].dt.year
+    years = sorted(set(s["start_year"].dropna().astype(int)) | set(s["end_year"].dropna().astype(int)))
+    rows = []
+    for y in years:
+        reporting = s[(s["start_year"] <= y) & (s["end_year"] >= y)]
+        started = s[s["start_year"] == y]
+        # A site "stopped in year y" only if it never reported again after y.
+        stopped = s[(s["end_year"] == y) & (s["status"].eq("dormant"))]
+        rows.append({
+            "year": int(y),
+            "sites_reporting": int(len(reporting)),
+            "sites_started": int(len(started)),
+            "sites_stopped": int(len(stopped)),
+            "population_reporting": float(reporting["population_served"].sum(skipna=True)),
+            "population_lost": float(stopped["population_served"].sum(skipna=True)),
+            "net_site_change": int(len(started) - len(stopped)),
+        })
+    yearly = pd.DataFrame(rows)
+    if not yearly.empty:
+        yearly["cumulative_population_lost"] = yearly["population_lost"].cumsum()
+    return site.sort_values(["status", "last_week"]), yearly
+
+
+def attrition_by_vulnerability(site_attrition, svi_lookup):
+    """Did dormancy fall evenly across the social-vulnerability distribution?
+
+    Descriptive comparison only. No causal claim: a site going dormant and a
+    county's vulnerability score are both observed, and nothing here identifies
+    why any particular site stopped reporting.
+    """
+    if site_attrition is None or site_attrition.empty or svi_lookup is None or svi_lookup.empty:
+        return pd.DataFrame()
+    s = site_attrition.dropna(subset=["county_fips"]).copy()
+    s = s.merge(svi_lookup, on="county_fips", how="left")
+    s = s.dropna(subset=["svi"])
+    if s.empty:
+        return pd.DataFrame()
+    s["svi_quartile"] = pd.qcut(s["svi"], 4, labels=["Q1 least vulnerable", "Q2", "Q3", "Q4 most vulnerable"],
+                                duplicates="drop")
+    g = (s.groupby("svi_quartile", observed=True)
+          .agg(sites=("site_id", "nunique"),
+               dormant=("status", lambda x: int((x == "dormant").sum())),
+               population_served=("population_served", "sum"))
+          .reset_index())
+    g["pct_dormant"] = (100.0 * g["dormant"] / g["sites"]).round(1)
+    return g
+
+
+# ------------------------------------------------------------
+# 12c. ARCHIVED-FORECAST SCOREBOARD
+# ------------------------------------------------------------
+def record_forecasts(national_week, run_id, horizons=(1, 2, 3, 4)):
+    """Append this run's forecasts to a persisted history, before any outcome is known.
+
+    The forecast itself is deliberately simple: a persistence baseline plus a
+    linear extrapolation of the trailing 4 weeks of the national median site
+    z-score. The contribution here is NOT the model. It is that predictions are
+    frozen with their run_id before the outcome exists, so the scoreboard cannot
+    be retrofitted. A stronger model can be added later and scored on the same
+    ledger.
+    """
+    if national_week is None or national_week.empty:
+        return pd.DataFrame()
+    nw = national_week.dropna(subset=["week_end", "median_site_z"]).copy()
+    nw["week_end"] = pd.to_datetime(nw["week_end"], errors="coerce")
+    rows = []
+    for pathogen, g in nw.groupby("pathogen"):
+        g = g.sort_values("week_end")
+        if len(g) < 6:
+            continue
+        tail = g.tail(4)
+        last_week = g["week_end"].iloc[-1]
+        last_val = float(g["median_site_z"].iloc[-1])
+        # Least-squares slope over the trailing 4 weeks, in z per week.
+        x = np.arange(len(tail), dtype=float)
+        y = tail["median_site_z"].to_numpy(dtype=float)
+        slope = float(np.polyfit(x, y, 1)[0]) if np.isfinite(y).all() and len(y) >= 2 else 0.0
+        for hz in horizons:
+            target = last_week + pd.Timedelta(weeks=hz)
+            rows.append({
+                "run_id": run_id,
+                "forecast_made_week": last_week.strftime("%Y-%m-%d"),
+                "pathogen": pathogen,
+                "horizon_weeks": int(hz),
+                "target_week": target.strftime("%Y-%m-%d"),
+                "pred_persistence": round(last_val, 4),
+                "pred_linear": round(last_val + slope * hz, 4),
+                "anchor_value": round(last_val, 4),
+                "trailing_slope": round(slope, 4),
+            })
+    new = pd.DataFrame(rows)
+    if new.empty:
+        return new
+
+    if FORECAST_HISTORY.exists():
+        try:
+            hist = pd.read_csv(FORECAST_HISTORY)
+            # Never rewrite a prediction already on the ledger for this run_id.
+            hist = hist[~hist["run_id"].eq(run_id)]
+            new = pd.concat([hist, new], ignore_index=True)
+        except Exception as exc:
+            print(f"[WARN] forecast history unreadable, starting a new ledger: {exc}")
+    new.to_csv(FORECAST_HISTORY, index=False)
+    return new
+
+
+def score_forecasts(history, national_week):
+    """Score every matured forecast against what was actually observed."""
+    if history is None or history.empty or national_week is None or national_week.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    obs = national_week.dropna(subset=["week_end", "median_site_z"]).copy()
+    obs["target_week"] = pd.to_datetime(obs["week_end"], errors="coerce").dt.strftime("%Y-%m-%d")
+    obs = obs[["pathogen", "target_week", "median_site_z"]].rename(columns={"median_site_z": "observed"})
+
+    h = history.copy()
+    scored = h.merge(obs, on=["pathogen", "target_week"], how="inner")
+    if scored.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    for m in ("persistence", "linear"):
+        scored[f"err_{m}"] = scored[f"pred_{m}"] - scored["observed"]
+        scored[f"abs_err_{m}"] = scored[f"err_{m}"].abs()
+
+    rows = []
+    for (pathogen, hz), g in scored.groupby(["pathogen", "horizon_weeks"]):
+        row = {"pathogen": pathogen, "horizon_weeks": int(hz), "n_scored": int(len(g))}
+        for m in ("persistence", "linear"):
+            row[f"mae_{m}"] = round(float(g[f"abs_err_{m}"].mean()), 4)
+            row[f"rmse_{m}"] = round(float(np.sqrt((g[f"err_{m}"] ** 2).mean())), 4)
+            row[f"bias_{m}"] = round(float(g[f"err_{m}"].mean()), 4)
+        # Skill of the linear model relative to persistence. Negative means the
+        # trend term made the forecast worse, which is a publishable result.
+        row["skill_vs_persistence"] = (
+            round(1.0 - row["mae_linear"] / row["mae_persistence"], 4)
+            if row["mae_persistence"] else np.nan
+        )
+        rows.append(row)
+    return scored, pd.DataFrame(rows).sort_values(["pathogen", "horizon_weeks"])
+
+
+# ------------------------------------------------------------
+# 12d. COUNTY REPRESENTATIVENESS
+# ------------------------------------------------------------
+def county_representativeness(wastewater, coverage, svi=None):
+    """How much of a county is actually inside a monitored sewershed, and who.
+
+    PHA4GE's wastewater reporting guidance calls for a representativeness
+    measure and does not define one. This supplies an explicit, reproducible
+    definition with every input shown:
+
+      sewer_share       sum of population_served for distinct sites mapped to
+                        the county, divided by county population. Capped at 1.0
+                        for reporting; values above 1 are retained in
+                        sewer_share_raw because they indicate a sewershed that
+                        crosses county lines, not an error.
+      svi_gap           county SVI minus the population-weighted mean SVI of
+                        monitored counties in the same state. Positive means
+                        this county is more vulnerable than its state's
+                        monitored average, i.e. monitoring is skewed away from it.
+      representativeness  sewer_share penalised by the absolute SVI gap.
+
+    The SVI gap is a county-level proxy. A true within-sewershed demographic
+    comparison needs block-group service-area boundaries, which CDC NWSS does
+    not publish; that limitation is reported rather than papered over.
+    """
+    if wastewater is None or wastewater.empty or coverage is None or coverage.empty:
+        return pd.DataFrame()
+
+    w = wastewater.dropna(subset=["county_fips", "site_id"]).copy()
+    if w.empty:
+        return pd.DataFrame()
+    # One row per site, so a site sampled for six pathogens is not counted six times.
+    sites = (w.groupby(["county_fips", "site_id"], dropna=False)
+              .agg(population_served=("population_served", "max"))
+              .reset_index())
+    per_county = (sites.groupby("county_fips")
+                       .agg(n_sites=("site_id", "nunique"),
+                            sewer_population=("population_served", "sum"))
+                       .reset_index())
+
+    # Collapse the pathogen-keyed coverage frame to one row per county, and
+    # rename CDC/ATSDR SVI columns to the neutral names used downstream.
+    cov = (coverage.groupby("county_fips")
+                   .agg(analysis_ready=("analysis_ready", "max"),
+                        svi=("RPL_THEMES", "first"),
+                        county_name=("COUNTY", "first"),
+                        state_code=("ST_ABBR", "first"))
+                   .reset_index())
+
+    # County population comes from the frozen SVI extract (E_TOTPOP), which is
+    # the only county denominator this pipeline already holds. Without it the
+    # sewer share is undefined and is reported as missing rather than guessed.
+    if svi is not None and not getattr(svi, "empty", True):
+        pop_col = next((c for c in ("E_TOTPOP", "E_TOTPOP_2022", "TOTPOP") if c in svi.columns), None)
+        if pop_col:
+            pops = (svi[["county_fips", pop_col]].dropna(subset=["county_fips"])
+                       .drop_duplicates("county_fips")
+                       .rename(columns={pop_col: "county_population"}))
+            cov = cov.merge(pops, on="county_fips", how="left")
+            print(f"[OK] representativeness denominator from SVI column {pop_col}")
+        else:
+            print("[WARN] No county population column in the SVI extract; "
+                  "sewer_share will be null and the view will say so.")
+
+    out = cov.merge(per_county, on="county_fips", how="left")
+    out["n_sites"] = out["n_sites"].fillna(0).astype(int)
+    out["sewer_population"] = out["sewer_population"].fillna(0.0)
+
+    if "county_population" not in out.columns:
+        out["county_population"] = np.nan
+    pop = pd.to_numeric(out["county_population"], errors="coerce")
+    out["sewer_share_raw"] = np.where(pop > 0, out["sewer_population"] / pop, np.nan)
+    out["sewer_share"] = out["sewer_share_raw"].clip(upper=1.0)
+    out["sewershed_crosses_county"] = out["sewer_share_raw"].gt(1.0)
+
+    if "svi" in out.columns:
+        monitored = out[out["n_sites"] > 0].copy()
+        wts = pd.to_numeric(monitored["county_population"], errors="coerce").fillna(0.0)
+        ref = (monitored.assign(_w=wts)
+                        .groupby("state_code")
+                        .apply(lambda g: np.average(g["svi"].dropna(),
+                                                    weights=g.loc[g["svi"].notna(), "_w"])
+                               if g["svi"].notna().any() and g.loc[g["svi"].notna(), "_w"].sum() > 0
+                               else np.nan, include_groups=False)
+                        .rename("state_monitored_svi").reset_index())
+        out = out.merge(ref, on="state_code", how="left")
+        out["svi_gap"] = out["svi"] - out["state_monitored_svi"]
+    else:
+        out["state_monitored_svi"] = np.nan
+        out["svi_gap"] = np.nan
+
+    gap_pen = out["svi_gap"].abs().fillna(0.0).clip(upper=1.0)
+    out["representativeness"] = (out["sewer_share"].fillna(0.0) * (1.0 - 0.5 * gap_pen)).round(4)
+    out["representativeness_tier"] = pd.cut(
+        out["representativeness"], [-0.001, 0.0001, 0.25, 0.5, 0.75, 1.0],
+        labels=["Unmonitored", "Minimal", "Partial", "Substantial", "High"],
+    ).astype("string")
+    out["definition_version"] = "nwgs-representativeness-v1"
+    return out.sort_values("representativeness", ascending=False)
+
+
+def representativeness_national(rep):
+    if rep is None or rep.empty:
+        return pd.DataFrame()
+    r = rep.copy()
+    pop = pd.to_numeric(r["county_population"], errors="coerce")
+    rows = [{
+        "counties_total": int(len(r)),
+        "counties_monitored": int((r["n_sites"] > 0).sum()),
+        "counties_unmonitored": int((r["n_sites"] == 0).sum()),
+        "median_sewer_share_monitored": round(float(r.loc[r["n_sites"] > 0, "sewer_share"].median()), 4),
+        "population_total": float(pop.sum(skipna=True)),
+        "population_in_sewershed": float(r["sewer_population"].sum(skipna=True)),
+        "pct_population_in_sewershed": round(float(100.0 * r["sewer_population"].sum(skipna=True)
+                                                   / pop.sum(skipna=True)), 2) if pop.sum(skipna=True) else np.nan,
+        "counties_sewershed_crosses": int(r["sewershed_crosses_county"].sum()),
+        "median_svi_gap_monitored": round(float(r.loc[r["n_sites"] > 0, "svi_gap"].median(skipna=True)), 4),
+        "median_svi_gap_unmonitored": round(float(r.loc[r["n_sites"] == 0, "svi_gap"].median(skipna=True)), 4),
+    }]
+    return pd.DataFrame(rows)
+
+
+# ------------------------------------------------------------
+# 12e. ASSAY-TARGET VULNERABILITY
+# ------------------------------------------------------------
+def assay_target_panel(path=ASSAY_TARGET_PATH):
+    """Load a curated, citation-bearing table of published assay target regions.
+
+    This is deliberately a CURATED INPUT, not a computed product. Primer and
+    probe coordinates are published in specific papers and CDC protocol
+    documents, and inventing or inferring them would be worse than having no
+    panel at all. Each row must carry its own citation and the accession its
+    coordinates are expressed against; rows failing that check are dropped and
+    counted.
+
+    The purpose is assay quality control: when a target region accumulates
+    sequence variation, a validated diagnostic can quietly lose sensitivity.
+    The 2024-2025 measles genotype B3 case is the reference example - a single
+    N-gene substitution rose from under 2% to the majority of submitted
+    sequences and degraded a widely used RT-PCR target. That failure mode is
+    invisible in every public wastewater aggregate, CDC's included, because
+    aggregates report detections and never report what the assay could no
+    longer see.
+
+    Nothing here recommends, designs or optimises an assay. It reports
+    published coordinates alongside published variant frequencies so a
+    laboratory can decide whether to re-verify its own panel.
+    """
+    required = ["pathogen", "assay_name", "target_gene", "reference_accession",
+                "region_start", "region_end", "citation"]
+    if not path.exists():
+        print(f"[INFO] No curated assay-target panel at {path}; "
+              f"assay-target view will report an empty, honest state.")
+        return pd.DataFrame(columns=required + ["citation_url", "notes", "dropped_reason"])
+    try:
+        a = pd.read_csv(path)
+    except Exception as exc:
+        print(f"[WARN] assay-target panel unreadable: {exc}")
+        return pd.DataFrame(columns=required + ["citation_url", "notes", "dropped_reason"])
+
+    missing_cols = [c for c in required if c not in a.columns]
+    if missing_cols:
+        print(f"[WARN] assay-target panel missing required columns {missing_cols}; ignoring file.")
+        return pd.DataFrame(columns=required + ["citation_url", "notes", "dropped_reason"])
+
+    a["region_start"] = pd.to_numeric(a["region_start"], errors="coerce")
+    a["region_end"] = pd.to_numeric(a["region_end"], errors="coerce")
+    ok = (a[required].notna().all(axis=1)
+          & a["citation"].astype(str).str.strip().ne("")
+          & a["region_end"].ge(a["region_start"]))
+    dropped = int((~ok).sum())
+    if dropped:
+        print(f"[WARN] {dropped} assay-target row(s) dropped for missing citation, "
+              f"accession or coordinates.")
+    a = a[ok].copy()
+    a["region_length"] = (a["region_end"] - a["region_start"] + 1).astype(int)
+    a["curation_status"] = "curated_with_citation"
+    return a
+
+
+def assay_variation_overlay(panel, genomic_records):
+    """Count public sequence records overlapping each curated target region.
+
+    genomic_records is the NCBI Virus metadata already pulled in section 19. If
+    it carries no per-position variation, this returns the panel with the
+    overlay columns present but null, and says so, rather than implying
+    coverage it does not have.
+    """
+    if panel is None or panel.empty:
+        return pd.DataFrame()
+    out = panel.copy()
+    out["variation_source"] = None
+    out["records_considered"] = np.nan
+    out["overlay_available"] = False
+    if genomic_records is None or len(genomic_records) == 0:
+        out["overlay_note"] = ("No per-position variation table available in this run. "
+                               "Region coordinates and citations are shown without an "
+                               "observed-variation overlay.")
+        return out
+    g = genomic_records.copy()
+    if "pathogen" not in g.columns:
+        out["overlay_note"] = "Genomic metadata present but not pathogen-keyed; overlay skipped."
+        return out
+    counts = g.groupby("pathogen").size().rename("records_considered").reset_index()
+    out = out.drop(columns=["records_considered"]).merge(counts, on="pathogen", how="left")
+    out["variation_source"] = "NCBI Virus metadata (record counts only)"
+    out["overlay_note"] = ("Record counts reflect public sequences available for the pathogen, "
+                           "not substitutions inside the target region. Per-position variant "
+                           "frequencies require an alignment step that this pipeline does not "
+                           "perform; treat these counts as denominators only.")
+    return out
+
+
+# ------------------------------------------------------------
+# 12f. GLOBAL COVERAGE EQUITY
+# ------------------------------------------------------------
+def fetch_amelag(url=AMELAG_URL):
+    """Germany's AMELAG site-level wastewater series (Robert Koch-Institut, CC BY 4.0).
+
+    One of only two national wastewater programmes publishing genuinely
+    machine-readable site-level data under an open licence. Fetch failures are
+    non-fatal: this layer is supplementary and must never block a run.
+    """
+    try:
+        r = SESSION.get(url, timeout=120)
+        r.raise_for_status()
+        from io import StringIO
+        a = pd.read_csv(StringIO(r.text), sep="\t")
+        a["source"] = "RKI AMELAG"
+        a["licence"] = "CC BY 4.0"
+        a["source_url"] = url
+        print(f"[OK] AMELAG: {len(a):,} rows")
+        return a
+    except Exception as exc:
+        print(f"[WARN] AMELAG unavailable ({exc}); global layer will note the gap.")
+        return pd.DataFrame()
+
+
+def global_coverage_equity(jmp_path=JMP_PATH, amelag=None):
+    """Country-level surveillance coverage against sewer-connected population.
+
+    The denominator question nobody publishes: wastewater-based surveillance can
+    only ever observe people connected to a sewer. WHO/UNICEF JMP sanitation
+    data gives that denominator per country. Expressed as a share, the global
+    picture is structurally different from the US one - most of the world's
+    population is not reachable by this method at all, and the countries with
+    the least sewer connection are the ones with no programme.
+
+    Requires the JMP extract as a frozen static input, because the JMP portal
+    does not expose a stable machine-readable endpoint. Absent that file this
+    returns empty and the view says so.
+    """
+    if not jmp_path.exists():
+        print(f"[INFO] No JMP sanitation extract at {jmp_path}; "
+              f"global coverage-equity view will report an empty, honest state.")
+        return pd.DataFrame(), pd.DataFrame()
+    try:
+        j = pd.read_csv(jmp_path)
+    except Exception as exc:
+        print(f"[WARN] JMP extract unreadable: {exc}")
+        return pd.DataFrame(), pd.DataFrame()
+
+    cols = {c.lower().strip(): c for c in j.columns}
+    def pick(*names):
+        for n in names:
+            if n in cols:
+                return cols[n]
+        return None
+    c_country = pick("country", "country_name", "name")
+    c_iso = pick("iso3", "iso_a3", "iso")
+    c_sewer = pick("sewer_connected_pct", "sewer_pct", "at_least_basic_sanitation_pct")
+    c_income = pick("income_group", "income")
+    c_pop = pick("population", "pop_total")
+    if not c_country or not c_sewer:
+        print("[WARN] JMP extract lacks country/sewer columns; global layer skipped.")
+        return pd.DataFrame(), pd.DataFrame()
+
+    g = pd.DataFrame({
+        "country": j[c_country],
+        "iso3": j[c_iso] if c_iso else None,
+        "sewer_connected_pct": pd.to_numeric(j[c_sewer], errors="coerce"),
+        "income_group": j[c_income] if c_income else None,
+        "population": pd.to_numeric(j[c_pop], errors="coerce") if c_pop else np.nan,
+    })
+
+    # Registry of national programmes known to publish openly licensed,
+    # machine-readable wastewater data. Being in this registry is NOT the same
+    # as this pipeline having ingested it: only Germany is fetched today, and
+    # the feed_status column states that plainly rather than implying coverage
+    # the run does not have.
+    open_feeds = {"Germany": "RKI AMELAG (CC BY 4.0)", "Netherlands": "RIVM open data"}
+    ingested = {"Germany"}
+    g["open_machine_readable_feed"] = g["country"].map(open_feeds)
+    g["has_open_feed"] = g["open_machine_readable_feed"].notna()
+    g["feed_rows_ingested"] = np.nan
+    g["feed_status"] = np.where(~g["has_open_feed"], "No open feed known",
+                                np.where(g["country"].isin(ingested),
+                                         "Fetch attempted this run", "Known feed, not yet ingested"))
+    if amelag is not None and not amelag.empty:
+        g.loc[g["country"].eq("Germany"), "feed_rows_ingested"] = len(amelag)
+        g.loc[g["country"].eq("Germany"), "feed_status"] = "Ingested this run"
+    else:
+        g.loc[g["country"].eq("Germany"), "feed_status"] = "Fetch failed this run"
+
+    g["observable_population"] = g["population"] * g["sewer_connected_pct"] / 100.0
+    g["unobservable_population"] = g["population"] - g["observable_population"]
+
+    summary_rows = []
+    if g["income_group"].notna().any():
+        for grp, q in g.groupby("income_group"):
+            summary_rows.append({
+                "income_group": grp,
+                "countries": int(len(q)),
+                "countries_with_open_feed": int(q["has_open_feed"].sum()),
+                "median_sewer_connected_pct": round(float(q["sewer_connected_pct"].median(skipna=True)), 1),
+                "population": float(q["population"].sum(skipna=True)),
+                "observable_population": float(q["observable_population"].sum(skipna=True)),
+            })
+    summary = pd.DataFrame(summary_rows)
+    if not summary.empty:
+        summary["pct_population_observable"] = (
+            100.0 * summary["observable_population"] / summary["population"]
+        ).round(1)
+    return g.sort_values("sewer_connected_pct", na_position="last"), summary
+
+
+# ============================================================
 # 21. APP EXPORTS
 # ============================================================
 def export_app_json(summary, activity, best_lag, global_moran, amr_target=None, amr_state=None, genomics=None, pdb_map=None):
@@ -6794,6 +7422,87 @@ def main():
         ml_outliers = pd.DataFrame()
         ml_shap_features = pd.DataFrame()
         ml_triangulation = pd.DataFrame()
+
+    # ------------------------------------------------------------
+    # [17b/19] Surveillance-gap analytics (v5.22, section 21c).
+    # Each block is independently wrapped: these occupy documented
+    # vacancies in the literature, but none of them is allowed to take
+    # the weekly run down with it.
+    # ------------------------------------------------------------
+    print("\n[17b/19] Building surveillance-gap analytics...")
+    pipeline_run_id = "run_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%MZ")
+    svi_lookup = (coverage.groupby("county_fips")
+                          .agg(svi=("RPL_THEMES", "first"))
+                          .reset_index()) if "RPL_THEMES" in coverage.columns else pd.DataFrame()
+
+    lead_decomp = lead_national = pd.DataFrame()
+    try:
+        lead_decomp = lead_time_decomposition(best_lag, raw_manifest, wastewater)
+        lead_national = lead_time_national(lead_decomp)
+        if not lead_decomp.empty:
+            save_df(lead_decomp, TABLE_DIR / "Table21_LeadTime_Decomposition.csv")
+        if not lead_national.empty:
+            save_df(lead_national, TABLE_DIR / "Table21b_LeadTime_National.csv")
+    except Exception as exc:
+        print(f"[WARN] lead-time decomposition skipped: {type(exc).__name__}: {exc}")
+
+    attrition_sites = attrition_yearly = attrition_vuln = pd.DataFrame()
+    try:
+        attrition_sites, attrition_yearly = coverage_attrition(wastewater)
+        attrition_vuln = attrition_by_vulnerability(attrition_sites, svi_lookup)
+        if not attrition_sites.empty:
+            save_df(attrition_sites, TABLE_DIR / "Table22_Coverage_Attrition_Sites.csv")
+        if not attrition_yearly.empty:
+            save_df(attrition_yearly, TABLE_DIR / "Table22b_Coverage_Attrition_Yearly.csv")
+        if not attrition_vuln.empty:
+            save_df(attrition_vuln, TABLE_DIR / "Table22c_Attrition_By_Vulnerability.csv")
+    except Exception as exc:
+        print(f"[WARN] coverage attrition skipped: {type(exc).__name__}: {exc}")
+
+    forecast_board = forecast_scored = pd.DataFrame()
+    try:
+        forecast_ledger = record_forecasts(national_week, pipeline_run_id)
+        forecast_scored, forecast_board = score_forecasts(forecast_ledger, national_week)
+        if not forecast_ledger.empty:
+            save_df(forecast_ledger, TABLE_DIR / "Table23_Forecast_Ledger.csv")
+        if not forecast_scored.empty:
+            save_df(forecast_scored, TABLE_DIR / "Table23b_Forecast_Scored.csv")
+        if not forecast_board.empty:
+            save_df(forecast_board, TABLE_DIR / "Table23c_Forecast_Scoreboard.csv")
+    except Exception as exc:
+        print(f"[WARN] forecast scoreboard skipped: {type(exc).__name__}: {exc}")
+
+    representativeness = rep_national = pd.DataFrame()
+    try:
+        representativeness = county_representativeness(wastewater, coverage, svi)
+        rep_national = representativeness_national(representativeness)
+        if not representativeness.empty:
+            save_df(representativeness, TABLE_DIR / "Table24_County_Representativeness.csv")
+        if not rep_national.empty:
+            save_df(rep_national, TABLE_DIR / "Table24b_Representativeness_National.csv")
+    except Exception as exc:
+        print(f"[WARN] representativeness skipped: {type(exc).__name__}: {exc}")
+
+    assay_panel = pd.DataFrame()
+    try:
+        assay_panel = assay_variation_overlay(assay_target_panel(), genomics)
+        if not assay_panel.empty:
+            save_df(assay_panel, TABLE_DIR / "Table25_Assay_Target_Panel.csv")
+    except Exception as exc:
+        print(f"[WARN] assay-target panel skipped: {type(exc).__name__}: {exc}")
+
+    global_countries = global_income = pd.DataFrame()
+    try:
+        amelag = fetch_amelag()
+        if not amelag.empty:
+            save_df(amelag, RAW_DIR / "RKI_AMELAG_FROZEN.csv")
+        global_countries, global_income = global_coverage_equity(amelag=amelag)
+        if not global_countries.empty:
+            save_df(global_countries, TABLE_DIR / "Table26_Global_Coverage_Equity.csv")
+        if not global_income.empty:
+            save_df(global_income, TABLE_DIR / "Table26b_Global_Coverage_By_Income.csv")
+    except Exception as exc:
+        print(f"[WARN] global coverage equity skipped: {type(exc).__name__}: {exc}")
 
     # App-ready tables
     save_df(pathogen_summary, APP_DIR / "pathogen_cards.csv")
