@@ -1,9 +1,14 @@
 # NWGS Grid™ site
 
-Static site for nwgsgrid.com, rebuilt every week by GitHub Actions.
+### 🌐 Live site: **[victorialovefranklin.github.io/nwgs-grid-site](https://victorialovefranklin.github.io/nwgs-grid-site/)**
+
+Weekly, validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties,
+rebuilt every Saturday by GitHub Actions. Sign in on the site to save alerts.
 
 **Author:** Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+
 **Contact, license requests and beta feedback:** victorialovefranklin@gmail.com
+
 **Copyright © 2026 Victoria Love Franklin. All rights reserved.** No reuse without written
 permission; see [LICENSE](LICENSE). To cite, use **Cite this repository** on GitHub (from
 [CITATION.cff](CITATION.cff)) and name the weekly release your numbers come from.
