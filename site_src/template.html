@@ -7,9 +7,9 @@
 :root{
   /* NWGS Grid™ brand (Victoria Love Franklin signature palette): navy, wine, gold on paper */
   --navy:#14213a; --navy-2:#1c2c4c; --wine:#6e1f2b; --gold:#c49a4a; --gold-soft:#f0cf8f; --paper:#fbf8f3; --cream:#f7f1e8;
-  --bg:#fcfbf9; --surface:#ffffff; --ink:#14213a; --muted:#5b6070; --line:#e9e6e0;
+  --bg:#ffffff; --surface:#ffffff; --ink:#14213a; --muted:#5b6070; --line:#e7e4de;
   --accent:#1c2c4c; --accent-ink:#ffffff; --accent-soft:#e7ebf3; --link:#1c2c4c;
-  --rail-bg:#14213a; --rail-ink:#f7f1e8; --rail-muted:#b8bfcc; --rail-hover:rgba(247,241,232,.08); --rail-active:rgba(196,154,74,.2);
+  --rail-bg:#ffffff; --rail-ink:#14213a; --rail-muted:#4e5566; --rail-hover:#f5f3ef; --rail-active:rgba(196,154,74,.16); --rail-line:#e7e4de; --count-ink:#6e1f2b; --count-bg:rgba(196,154,74,.18); --brand-accent:#1d4f91;
   --nodata:#e8e6e1; --typ:#f4f3ef; --typ-line:#bdb8ad; --hi-soft:#f5cdc6;
   --vl:#2166ac; --lo:#67a9cf; --el:#ef8a62; --hi:#b2182b; --warn:#b4630f; --ok:#2e7d4f;
   --display:"Fraunces",Georgia,"Times New Roman",serif;
@@ -20,13 +20,15 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0c1424; --surface:#131d33; --ink:#f2ece2; --muted:#a9b0c0; --line:#27324b;
   --accent:#e0bd74; --accent-ink:#14213a; --accent-soft:#25304a; --link:#f0cf8f;
-  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18);
+  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18); --rail-line:#27324b; --count-ink:#f0cf8f; --count-bg:rgba(196,154,74,.16); --brand-accent:#e0bd74;
   --nodata:#283247; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2630;
   --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}}
+:root[data-theme="dark"] .fulllogo{background:#fff;padding:8px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fulllogo{background:#fff;padding:8px}}
 :root[data-theme="dark"]{
   --bg:#0c1424; --surface:#131d33; --ink:#f2ece2; --muted:#a9b0c0; --line:#27324b;
   --accent:#e0bd74; --accent-ink:#14213a; --accent-soft:#25304a; --link:#f0cf8f;
-  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18);
+  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18); --rail-line:#27324b; --count-ink:#f0cf8f; --count-bg:rgba(196,154,74,.16); --brand-accent:#e0bd74;
   --nodata:#283247; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2630;
   --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}
 *{box-sizing:border-box}
@@ -45,12 +47,18 @@ li{text-wrap:pretty}
 .label{font:600 .7rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 
 .app{display:grid;grid-template-columns:228px minmax(0,1fr);min-height:100%}
-.rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--rail-bg);color:var(--rail-ink);padding:22px 14px;display:flex;flex-direction:column;gap:20px;border-top:3px solid var(--gold)}
+.rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--rail-bg);color:var(--rail-ink);padding:20px 14px;display:flex;flex-direction:column;gap:18px;border-top:3px solid var(--gold);border-right:1px solid var(--rail-line)}
 .brand{display:flex;align-items:center;gap:10px;padding:0 8px;text-decoration:none;color:inherit}
 .brand svg{flex:none}
+.fulllogo{display:block;width:100%;max-width:184px;height:auto;margin:0 auto;border-radius:10px}
+.rail .brand{justify-content:center}
+.rail .brand .markbadge,.rail .brand .wm{display:none}
+.markbadge{flex:none;width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 2px var(--gold)}
+.markbadge img{width:34px;height:auto;display:block}
+.wlogo{width:min(220px,60%);height:auto;display:block;margin:0 0 4px}
 .brand .wm{display:flex;flex-direction:column;gap:3px}
 .brand b{font:700 1.4rem/1 var(--display);letter-spacing:.005em;color:var(--rail-ink)}
-.brand b span{color:var(--gold)}
+.brand b span{color:var(--brand-accent,#1d4f91)}
 .brand b sup{font:500 .55rem var(--body);color:var(--rail-muted);margin-left:1px}
 .brand small{color:var(--rail-muted);font-size:.72rem;line-height:1.3}
 .menubtn{display:none}
@@ -59,7 +67,7 @@ li{text-wrap:pretty}
 .nav button:hover{color:var(--rail-ink);background:var(--rail-hover)}
 .nav button[aria-current="page"]{background:var(--rail-active);color:var(--rail-ink);font-weight:600;border-left-color:var(--gold)}
 .nav button:focus-visible,button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.nav .count{font:500 .72rem var(--mono);color:var(--gold-soft);background:rgba(196,154,74,.16);padding:1px 7px;border-radius:999px}
+.nav .count{font:500 .72rem var(--mono);color:var(--count-ink);background:var(--count-bg);padding:1px 7px;border-radius:999px}
 .rail .foot{margin-top:auto;font-size:.72rem;color:var(--rail-muted);padding:0 8px;line-height:1.5}
 .sitefoot{margin-top:12px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.78rem;color:var(--muted)}
 .acct{margin-left:auto}
@@ -214,6 +222,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   .c8,.c7,.c6,.c5{grid-column:span 12}.c4,.c3{grid-column:span 6}
   .c4.solo{grid-column:span 12}
   .brand b{font-size:1.15rem}
+  .fulllogo{max-width:160px}
   .aboutgrid .portrait{grid-column:span 4}.aboutgrid .bio{grid-column:span 8}
 }
 @media (max-width:760px){
@@ -222,8 +231,13 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   .app{grid-template-columns:minmax(0,1fr)}
   .rail{position:sticky;top:0;height:auto;max-height:100vh;z-index:30;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-top-width:3px}
   .brand b{font-size:1.2rem}
+  .fulllogo{display:none}
+  .rail .brand{justify-content:flex-start}
+  .rail .brand .markbadge{display:grid}.rail .brand .wm{display:flex}
+  .rail{border-right:none;border-bottom:1px solid var(--rail-line)}
+  .markbadge{width:36px;height:36px}.markbadge img{width:28px}
   .brand small{display:none}
-  .menubtn{display:inline-flex;align-items:center;gap:8px;all:unset;cursor:pointer;color:var(--rail-ink);font:600 .86rem var(--body);padding:7px 12px;border:1px solid rgba(247,241,232,.25);border-radius:999px}
+  .menubtn{display:inline-flex;align-items:center;gap:8px;all:unset;cursor:pointer;color:var(--rail-ink);font:600 .86rem var(--body);padding:7px 12px;border:1px solid var(--rail-line);border-radius:999px}
   .menubtn{display:inline-flex}
   .menubtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .nav{display:none;flex-basis:100%;padding:6px 0 10px;max-height:calc(100vh - 70px);overflow-y:auto}
@@ -242,7 +256,8 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 <div class="app">
   <aside class="rail">
     <a class="brand" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid home">
-      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="none" stroke="#c49a4a" stroke-width="1.6"/><g fill="#c49a4a"><rect x="7" y="7" width="4.5" height="4.5" rx="1"/><rect x="12.75" y="7" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="18.5" y="7" width="4.5" height="4.5" rx="1"/><rect x="7" y="12.75" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="12.75" y="12.75" width="4.5" height="4.5" rx="1" fill="#f7f1e8"/><rect x="18.5" y="12.75" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="7" y="18.5" width="4.5" height="4.5" rx="1"/><rect x="12.75" y="18.5" width="4.5" height="4.5" rx="1" opacity=".55"/><rect x="18.5" y="18.5" width="4.5" height="4.5" rx="1"/></g></svg>
+      <img class="fulllogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ · National Wastewater Genomic Surveillance" width="520" height="496">
+      <span class="markbadge"><img src="img/nwgs-mark.webp" alt="" width="149" height="160"></span>
       <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomic Surveillance</small></span></a>
     <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="nav"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
     <nav class="nav" id="nav" aria-label="Views"></nav>
@@ -720,7 +735,7 @@ about(){
     <p class="small muted mono" style="overflow-wrap:anywhere">${EMAIL}</p></article>
   </div>
   <div class="grid">
-  <article class="panel c7 why"><span class="label">Why I built NWGS Grid™</span>
+  <article class="panel c7 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><span class="label">Why I built NWGS Grid™</span>
     <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor.</p>
     <p>But that signal is spread across separate CDC datasets, clinical feeds and vulnerability indices. It changes every week, and it reaches some communities far better than others. I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses.</p>
     <p>That last question is personal. In my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.</p>

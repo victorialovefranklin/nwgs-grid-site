@@ -135,6 +135,9 @@ def main(export_dir, site_dir):
     html = html.replace("__SUPA__", SUPA.read_text() if SUPA.exists() else "null")
     page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+            '<link rel="icon" type="image/png" href="img/nwgs-favicon.png">'
+            '<link rel="apple-touch-icon" href="img/nwgs-touch-icon.png">'
+            '<meta name="theme-color" content="#14213a">'
             '<meta name="author" content="Victoria Love Franklin">'
             '<meta name="copyright" content="© 2026 Victoria Love Franklin. All rights reserved.">'
             '<meta name="description" content="NWGS Grid™: weekly validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties. By Victoria Love Franklin.">'
