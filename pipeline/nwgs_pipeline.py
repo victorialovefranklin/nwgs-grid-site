@@ -6053,6 +6053,20 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
         label = f"{carry} {s}".strip() if s and s != "nan" else carry
         cols.append(label)
 
+    # JMP's merged two-row header repeats a top-level label across its
+    # sub-columns, so the labels built above are not unique. Left duplicated,
+    # body[label] returns a DataFrame rather than a Series and every numeric
+    # conversion below fails. Make them unique before they are used.
+    seen, uniq = {}, []
+    for c in cols:
+        if c in seen:
+            seen[c] += 1
+            uniq.append(f"{c} [{seen[c]}]")
+        else:
+            seen[c] = 0
+            uniq.append(c)
+    cols = uniq
+
     body = df.iloc[hdr + 2:].copy()
     body.columns = cols[:body.shape[1]]
     body = body.loc[:, [c for c in body.columns if c and c != "nan"]]
@@ -6075,13 +6089,30 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
         return pd.DataFrame()
     print(f"[OK] JMP sanitation parsed from sheet '{sheet}' | sewer column: '{c_sewer}'")
 
-    out = pd.DataFrame({
-        "country": body[c_country],
-        "iso3": body[c_iso] if c_iso else None,
-        "year": pd.to_numeric(body[c_year], errors="coerce") if c_year else np.nan,
-        "sewer_connected_pct": pd.to_numeric(body[c_sewer], errors="coerce"),
-        "population": pd.to_numeric(body[c_pop], errors="coerce") if c_pop else np.nan,
-    }).dropna(subset=["country", "sewer_connected_pct"])
+    # Even with unique labels, a future layout could still hand back a frame.
+    # Take the first column in that case rather than letting it raise.
+    def one(name):
+        if name is None:
+            return None
+        s = body[name]
+        return s.iloc[:, 0] if isinstance(s, pd.DataFrame) else s
+
+    try:
+        out = pd.DataFrame({
+            "country": one(c_country),
+            "iso3": one(c_iso) if c_iso else None,
+            "year": pd.to_numeric(one(c_year), errors="coerce") if c_year else np.nan,
+            "sewer_connected_pct": pd.to_numeric(one(c_sewer), errors="coerce"),
+            "population": pd.to_numeric(one(c_pop), errors="coerce") if c_pop else np.nan,
+        }).dropna(subset=["country", "sewer_connected_pct"])
+    except Exception as exc:
+        # Never let a JMP layout change propagate: it shares a try block with
+        # the World Bank fallback, and taking that down too would leave the
+        # global layer with no basis at all.
+        record_source("WHO/UNICEF JMP", "FAILED",
+                      f"sheet '{sheet}' parsed but could not be assembled - "
+                      f"{type(exc).__name__}: {exc}", url)
+        return pd.DataFrame()
 
     # JMP reports population in thousands; convert so the denominator is people.
     if c_pop and "thousand" in c_pop:
