@@ -195,7 +195,7 @@ details>summary.btn::-webkit-details-marker{display:none}
 .gsearch input{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;width:min(420px,90vw)}
 .gsearch input:focus{outline:2px solid var(--gold);outline-offset:0}
 @media (max-width:1100px){.glist{column-count:1}}
-.tapcue{display:flex;align-items:center;gap:10px;margin:0;padding:8px 12px;border-radius:999px;background:var(--count-bg);color:var(--ink);font-weight:600;font-size:.88rem;align-self:center}
+.tapcue{display:flex;align-items:center;gap:10px;margin:0;padding:8px 12px;border-radius:4px;border:1px solid var(--line);background:var(--count-bg);color:var(--ink);font-weight:600;font-size:.88rem;align-self:flex-start}
 .tapdot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(196,154,74,.6);animation:pulse 1.8s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(196,154,74,.6)}70%{box-shadow:0 0 0 10px rgba(196,154,74,0)}100%{box-shadow:0 0 0 0 rgba(196,154,74,0)}}
 .county.sel{stroke:var(--gold)!important;stroke-width:2.4!important}
@@ -218,11 +218,17 @@ details>summary.btn::-webkit-details-marker{display:none}
 .rt-transmembrane,.rt-intramembrane,.rt-topological-domain,.rt-signal-peptide{background:var(--typ);color:var(--ink)}
 .scope{max-width:none}
 .pending{color:var(--warn);font-weight:500}
-.dtable td{vertical-align:top;padding:12px 10px}
-.dtable .dname{font-weight:600;white-space:normal;min-width:11rem}
-.dtable td.small{max-width:26rem}
-.tags{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.tags li{font-size:.78rem;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.dtable{width:100%;border-collapse:collapse}
+.dtable th{padding:8px 12px;border-bottom:1px solid var(--line)}
+.dtable td{vertical-align:top;padding:14px 12px;border-bottom:1px solid var(--hair)}
+.dtable tr:last-child td{border-bottom:none}
+.dtable .dname{font-weight:600;white-space:normal;width:15rem}
+.dtable td.small{width:22rem}
+/* Areas read as a plain list in columns rather than as pills. Hairline rules
+   give the rows structure without boxing every item. */
+.tags{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0 20px}
+.tags li{font-size:.82rem;color:var(--ink);padding:4px 0;border-bottom:1px solid var(--hair)}
 .molhead #mol-r{display:block;font-weight:400;margin-top:2px}
 .cite{font-size:.84rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;overflow-wrap:anywhere}
 
@@ -237,7 +243,7 @@ details>summary.btn::-webkit-details-marker{display:none}
 .qmark:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .qmark:hover{border-color:var(--gold);color:var(--ink)}
 .status .opt-s{white-space:nowrap}
-.pill{display:inline-flex;align-items:center;gap:6px;font:500 .74rem var(--body);padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:var(--surface);white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;font:500 .74rem var(--body);padding:3px 9px;border-radius:4px;border:1px solid var(--line);color:var(--ink);background:var(--surface);white-space:nowrap}
 .pill i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .pill.warn i{background:var(--warn)} .pill.ok i{background:var(--ok)} .pill.bad i{background:var(--hi)}
 .status button.pill{cursor:pointer}
@@ -370,7 +376,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   .rail{border-right:none;border-bottom:1px solid var(--rail-line)}
   .markbadge{width:36px;height:36px}.markbadge img{width:28px}
   .brand small{display:none}
-  .menubtn{display:inline-flex;align-items:center;gap:8px;all:unset;cursor:pointer;color:var(--rail-ink);font:600 .86rem var(--body);padding:7px 12px;border:1px solid var(--rail-line);border-radius:999px}
+  .menubtn{display:inline-flex;align-items:center;gap:8px;all:unset;cursor:pointer;color:var(--rail-ink);font:600 .86rem var(--body);padding:7px 12px;border:1px solid var(--rail-line);border-radius:var(--r)}
   .menubtn{display:inline-flex}
   .menubtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .nav{display:none;flex-basis:100%;padding:6px 0 10px;max-height:calc(100vh - 70px);overflow-y:auto}
