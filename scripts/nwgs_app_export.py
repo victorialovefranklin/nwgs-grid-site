@@ -282,7 +282,8 @@ def main(table_dir, out_dir, allow_mixed=False):
                 "observable_population", "unobservable_population", "has_open_feed",
                 "open_machine_readable_feed", "feed_rows_ingested", "feed_status",
                 "safely_managed_pct", "sanitation_not_observable_pct",
-                "sanitation_not_observable_population", "gap_uninterpretable"]
+                "sanitation_not_observable_population", "gap_uninterpretable",
+                "denominator_basis", "denominator_caveat"]
         ents["GlobalCoverage"] = t26[[c for c in keep if c in t26.columns]]
     t26b = find(table_dir, "Table26b_Global_Coverage_By_Income", required=False)
     if t26b is not None and len(t26b):

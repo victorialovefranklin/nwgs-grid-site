@@ -179,7 +179,8 @@ def main(export_dir, site_dir):
         "observable_population", "unobservable_population", "has_open_feed",
         "open_machine_readable_feed", "feed_rows_ingested", "feed_status",
         "safely_managed_pct", "sanitation_not_observable_pct",
-        "sanitation_not_observable_population", "gap_uninterpretable"])
+        "sanitation_not_observable_population", "gap_uninterpretable",
+        "denominator_basis", "denominator_caveat"])
     D["global_income"] = opt("GlobalCoverageIncome")
     # Per-county representativeness keyed for the map layer.
     if D["representativeness"]:

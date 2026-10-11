@@ -1031,6 +1031,12 @@ global(){
   }
 
   const g=D.global_coverage, inc=D.global_income||[];
+  // Which denominator this run used. A World Bank upper bound and a measured
+  // JMP sewer share are not interchangeable, so the page says which it is.
+  const basis=(g[0]&&g[0].denominator_basis)||'';
+  const isBound=/upper_bound/i.test(basis);
+  const caveat=(g[0]&&g[0].denominator_caveat)||'';
+  const basisNote=basis?`<p class="note"${isBound?' style="border-left:3px solid var(--gold);padding-left:10px"':''}><b>Denominator basis:</b> ${isBound?'World Bank WDI safely-managed sanitation, used as an <b>upper bound</b>':'WHO/UNICEF JMP sewer-connected share (a direct measurement)'}. ${esc(caveat)}</p>`:'';
   const withSM=g.filter(c=>c.safely_managed_pct!=null&&c.sanitation_not_observable_pct!=null);
   const hasSM=withSM.length>0, smN=withSM.length;
   const smPop=d3.sum(withSM,c=>c.sanitation_not_observable_population||0);
@@ -1038,10 +1044,11 @@ global(){
   const feeds=g.filter(c=>c.has_open_feed);
   const totPop=d3.sum(g,c=>c.population||0), obs=d3.sum(g,c=>c.observable_population||0);
   el.innerHTML=head+`
+  ${basisNote}
   <div class="statgrid">
     <div class="stat"><span class="label">Countries with sanitation data</span><span class="big">${g.length}</span></div>
     <div class="stat"><span class="label">With an open machine-readable feed</span><span class="big">${feeds.length}</span><span class="small muted">${feeds.map(c=>esc(c.country)).join(', ')||'none'}</span></div>
-    <div class="stat"><span class="label">Population observable by this method</span><span class="big">${totPop?fmt(100*obs/totPop,0)+'%':'—'}</span><span class="small muted">sewer-connected share, weighted</span></div>
+    <div class="stat"><span class="label">Population ${isBound?'observable at most':'observable by this method'}</span><span class="big">${totPop?fmt(100*obs/totPop,0)+'%':'—'}</span><span class="small muted">${isBound?'upper bound, weighted':'sewer-connected share, weighted'}</span></div>
   </div>
   ${inc.length?`<article class="panel c6"><header><h2>Observable population by income group <button class="qmark" data-gloss="observable-population" aria-label="What does observable population mean?">?</button></h2></header>
     <div class="chart" id="gl-bars"></div>
@@ -1056,8 +1063,8 @@ global(){
       <div class="stat"><span class="label">Largest gaps</span><span class="big" style="font-size:1.2rem">${topGap.map(c=>esc(c.country)).join(', ')||'—'}</span></div>
     </div>
     <p class="note">The two series come from different collections and can cross in either direction for a given country-year. Where safely managed is reported below sewer-connected the gap is not interpretable and is shown as zero rather than a negative number.</p></article>`:''}
-  <article class="panel c6"><header><h2>Sewer-connected population by country <button class="qmark" data-gloss="sewer-connected" aria-label="What does sewer-connected mean?">?</button></h2><span class="small muted">lowest first</span></header>
-    <div class="tbl scroll"><table><tr><th>Country</th><th class="n">Sewer %</th>${hasSM?'<th class="n">Safely managed %</th><th class="n">Gap</th>':''}<th>Income group</th><th>Open feed</th><th>Status in this run</th></tr>
+  <article class="panel c6"><header><h2>${isBound?'Sanitation coverage by country':'Sewer-connected population by country'} <button class="qmark" data-gloss="sewer-connected" aria-label="What does sewer-connected mean?">?</button></h2><span class="small muted">lowest first</span></header>
+    <div class="tbl scroll"><table><tr><th>Country</th><th class="n">${isBound?'Upper bound %':'Sewer %'}</th>${hasSM?'<th class="n">Safely managed %</th><th class="n">Gap</th>':''}<th>Income group</th><th>Open feed</th><th>Status in this run</th></tr>
       ${g.slice(0,60).map(c=>`<tr><td>${esc(c.country)}</td><td class="n">${fmt(c.sewer_connected_pct,1)}</td>${hasSM?`<td class="n">${c.safely_managed_pct!=null?fmt(c.safely_managed_pct,1):'—'}</td><td class="n">${c.sanitation_not_observable_pct!=null?fmt(c.sanitation_not_observable_pct,1):'—'}</td>`:''}<td class="small">${esc(c.income_group??'—')}</td><td class="small">${c.open_machine_readable_feed?esc(c.open_machine_readable_feed):'—'}</td><td class="small muted">${esc(c.feed_status??'—')}</td></tr>`).join('')}</table></div>
     ${g.length>60?`<p class="small muted">Showing the 60 countries with the lowest sewer-connected share, of ${g.length}.</p>`:''}</article>`
   +sources;

@@ -6178,8 +6178,69 @@ def fetch_wdi_indicator(code="SH.STA.SMSS.ZS", date="2015:2024"):
     return df.rename(columns={"value": code, "year": f"{code}_year"}).reset_index(drop=True)
 
 
+def wdi_sanitation_frame():
+    """Build a country sanitation frame from World Bank WDI indicators.
+
+    This is the FALLBACK basis for global coverage when the WHO/UNICEF JMP
+    workbook does not load. It is deliberately not treated as equivalent.
+
+    The World Bank sanitation ladder has no sewer-connection indicator. Its
+    tiers - "at least basic" and "safely managed" - both count septic tanks and
+    improved latrines, neither of which sends anything to a treatment plant.
+    So a country's safely-managed share is an UPPER BOUND on the share that
+    wastewater surveillance could observe, never the figure itself. Every row
+    produced here is marked as such so the distinction survives into the export,
+    the site and any citation.
+
+    Urban safely-managed sanitation is carried alongside it because sewer
+    networks are overwhelmingly urban, which makes it the tighter of the two
+    bounds where it is reported.
+    """
+    want = {
+        "SH.STA.SMSS.ZS": "safely_managed_pct",
+        "SH.STA.BASS.ZS": "basic_sanitation_pct",
+        "SH.STA.SMSS.UR.ZS": "safely_managed_urban_pct",
+        "SP.POP.TOTL": "population",
+    }
+    frames = {}
+    for code, col in want.items():
+        df = fetch_wdi_indicator(code)
+        if df.empty:
+            continue
+        val = next((c for c in df.columns if c.startswith(("SH.", "SP.")) and not c.endswith("_year")), None)
+        if val:
+            frames[col] = df[["iso3", val]].rename(columns={val: col})
+
+    if "safely_managed_pct" not in frames or "population" not in frames:
+        record_source("World Bank sanitation (fallback basis)", "EMPTY",
+                      "safely-managed share or population unavailable; no global basis could be built")
+        return pd.DataFrame()
+
+    out = frames["safely_managed_pct"]
+    for col, df in frames.items():
+        if col != "safely_managed_pct":
+            out = out.merge(df, on="iso3", how="outer")
+
+    # The observability bound: prefer the urban figure where reported, since
+    # sewer networks are concentrated in urban areas.
+    out["observable_upper_bound_pct"] = out.get("safely_managed_urban_pct")
+    if "safely_managed_urban_pct" in out.columns:
+        out["observable_upper_bound_pct"] = out["safely_managed_urban_pct"].fillna(out["safely_managed_pct"])
+    else:
+        out["observable_upper_bound_pct"] = out["safely_managed_pct"]
+
+    out["denominator_basis"] = "safely_managed_upper_bound (World Bank WDI)"
+    out["denominator_caveat"] = (
+        "Upper bound only. World Bank sanitation tiers include septic tanks and "
+        "improved latrines, which wastewater surveillance cannot observe. The "
+        "true observable share is lower and is not reported here.")
+    record_source("World Bank sanitation (fallback basis)", "OK",
+                  f"{len(out):,} countries; basis = safely-managed upper bound")
+    return out
+
+
 def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_df=None,
-                           wdi_safely_managed=None):
+                           wdi_safely_managed=None, wdi_basis=None):
     """Country-level surveillance coverage against sewer-connected population.
 
     The denominator question nobody publishes: wastewater-based surveillance can
@@ -6204,9 +6265,17 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
         except Exception as exc:
             print(f"[WARN] JMP extract unreadable: {exc}")
             return pd.DataFrame(), pd.DataFrame()
+    elif wdi_basis is not None and not wdi_basis.empty:
+        # No sewer figure available, so fall back to the World Bank upper bound.
+        # Renamed into the same shape, but the basis columns travel with it so
+        # nothing downstream can mistake a bound for a measured sewer share.
+        j = wdi_basis.rename(columns={"observable_upper_bound_pct": "sewer_connected_pct"}).copy()
+        j["country"] = j["iso3"]
+        print("[OK] global coverage using the World Bank upper-bound basis "
+              "(no sewer-connection figure available)")
     else:
-        print(f"[INFO] No JMP data (live fetch empty, no extract at {jmp_path}); "
-              f"global coverage-equity view will report an empty, honest state.")
+        record_source("Global coverage basis", "EMPTY",
+                      "neither the JMP sewer share nor a World Bank fallback was available")
         return pd.DataFrame(), pd.DataFrame()
 
     cols = {c.lower().strip(): c for c in j.columns}
@@ -6216,6 +6285,8 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
                 return cols[n]
         return None
     c_country = pick("country", "country_name", "name")
+    if c_country is None and "iso3" in {k.lower() for k in j.columns}:
+        j = j.copy(); j["country"] = j["iso3"]; c_country = "country"
     c_iso = pick("iso3", "iso_a3", "iso")
     c_sewer = pick("sewer_connected_pct", "sewer_pct", "at_least_basic_sanitation_pct")
     c_income = pick("income_group", "income")
@@ -6257,6 +6328,10 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
     else:
         g.loc[g["country"].eq("Germany"), "feed_status"] = "Fetch failed this run"
 
+    for c, default in (("denominator_basis", "sewer_connected (WHO/UNICEF JMP)"),
+                       ("denominator_caveat", "")):
+        if c not in g.columns:
+            g[c] = j[c] if c in j.columns else default
     g["observable_population"] = g["population"] * g["sewer_connected_pct"] / 100.0
     g["unobservable_population"] = g["population"] - g["observable_population"]
 
@@ -7823,9 +7898,14 @@ def main():
             save_df(jmp_live, TABLE_DIR / "Table26c_JMP_Sanitation_Parsed.csv")
         wb_income = fetch_worldbank_income()
         wdi_smss = fetch_wdi_indicator("SH.STA.SMSS.ZS")
+        wdi_basis = pd.DataFrame()
+        if jmp_live.empty:
+            # JMP is preferred because it reports sewer connection directly.
+            # Only build the World Bank upper-bound basis when it is missing.
+            wdi_basis = wdi_sanitation_frame()
         global_countries, global_income = global_coverage_equity(
             amelag=amelag, jmp_df=jmp_live, income_df=wb_income,
-            wdi_safely_managed=wdi_smss)
+            wdi_safely_managed=wdi_smss, wdi_basis=wdi_basis)
         if not global_countries.empty:
             save_df(global_countries, TABLE_DIR / "Table26_Global_Coverage_Equity.csv")
         if not global_income.empty:
