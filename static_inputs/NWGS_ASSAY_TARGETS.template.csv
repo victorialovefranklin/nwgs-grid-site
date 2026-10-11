@@ -1,0 +1,14 @@
+pathogen,assay_name,target_gene,reference_accession,region_start,region_end,citation,citation_url,notes
+# HOW TO USE THIS FILE
+# 1. Fill one row per published assay target region.
+# 2. Rename to NWGS_ASSAY_TARGETS.csv (drop ".template") and commit it.
+# 3. Every row needs a real citation, a reference accession, and a coordinate
+#    range on that accession. Rows missing any of those are dropped by the
+#    pipeline, and rows whose citation reads as filler (demo, example, test,
+#    placeholder, TBD and similar) are refused outright.
+# 4. Coordinates must be expressed against the accession named in the row.
+#    Do not convert between accessions by hand.
+# 5. Delete these comment lines before committing.
+#
+# EXAMPLE OF THE SHAPE (not real coordinates - replace entirely):
+# Measles,<assay name>,N,<NCBI accession>,<start>,<end>,"<Author et al., Journal Year;Vol(Issue):pages>",<doi or URL>,<optional note>

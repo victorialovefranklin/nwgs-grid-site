@@ -5371,6 +5371,19 @@ def pull_uniprot_functional_regions(entities):
 #  12f  Global coverage equity       AMELAG / RIVM / WHO-UNICEF JMP
 # ============================================================
 
+# Every external source this section touches records the outcome of its fetch
+# here. The result is exported into the Audit log, so a source that failed to
+# load is visible on the site and in the permanent release, instead of being
+# buried in a CI log that nobody reads. A missing layer should always be
+# explainable from the published artefacts alone.
+SOURCE_STATUS = []
+
+def record_source(name, status, detail="", url=""):
+    SOURCE_STATUS.append({"source": name, "status": status, "detail": str(detail)[:400], "url": url})
+    mark = {"OK": "[OK]", "EMPTY": "[INFO]", "FAILED": "[WARN]"}.get(status, "[INFO]")
+    print(f"{mark} source {name}: {status}" + (f" - {detail}" if detail else ""))
+
+
 DORMANT_WEEKS = int(os.getenv("NWGS_DORMANT_WEEKS", "8"))
 FORECAST_HISTORY = PROC_DIR / "NWGS_FORECAST_HISTORY.csv"
 # The working copy above lives in the run's scratch directory, which on a CI
@@ -5420,21 +5433,60 @@ def lead_time_decomposition(best_lag, raw_manifest, wastewater):
     if man.empty or "updated_at_metadata" not in man.columns:
         return pd.DataFrame()
 
-    # Latest sample week actually present per pathogen, from the frozen harmonised frame.
+    # Latest sample actually present per pathogen. This must be the collection
+    # DATE, not the week_end label: week_end is the Saturday a week ends, so a
+    # sample collected on the Monday carries a label several days in the future
+    # relative to when CDC published it. Measuring against the label produces a
+    # negative lag and destroys the figure.
+    col = "sample_collect_date" if "sample_collect_date" in wastewater.columns else "week_end"
     last_sample = (
-        wastewater.dropna(subset=["week_end"])
-                  .groupby("pathogen")["week_end"].max()
-                  .rename("last_sample_week")
+        wastewater.dropna(subset=[col])
+                  .assign(**{col: lambda x: pd.to_datetime(x[col], errors="coerce")})
+                  .groupby("pathogen")[col].max()
+                  .rename("last_sample_date")
                   .reset_index()
     )
+    if col != "sample_collect_date":
+        print("[WARN] no sample_collect_date column; reporting lag falls back to the "
+              "week-ending label, which understates it by up to six days.")
 
     man = man[["pathogen", "dataset_id", "updated_at_metadata"]].copy()
-    man["dataset_updated"] = pd.to_datetime(man["updated_at_metadata"], errors="coerce", utc=True).dt.tz_localize(None)
+
+    def parse_updated(v):
+        """CDC's Socrata metadata reports rowsUpdatedAt as a Unix timestamp in
+        SECONDS. Parsing it without a unit makes pandas read it as nanoseconds
+        and return 1970, which silently destroys the reporting lag. Accept both
+        the numeric form and an ISO string, and refuse anything implausible
+        rather than letting a bad timestamp become a published figure."""
+        ts = pd.to_numeric(v, errors="coerce")
+        if pd.notna(ts):
+            out = pd.to_datetime(ts, unit="s", errors="coerce", utc=True)
+        else:
+            out = pd.to_datetime(v, errors="coerce", utc=True)
+        if pd.isna(out):
+            return pd.NaT
+        out = out.tz_localize(None) if out.tzinfo is not None else out
+        # A dataset update outside this window cannot be real for this project.
+        # Compare against a naive "now" so the check never raises on tz mismatch.
+        now = pd.Timestamp.utcnow().tz_localize(None)
+        if out < pd.Timestamp("2020-01-01") or out > now + pd.Timedelta(days=2):
+            return pd.NaT
+        return out
+
+    man["dataset_updated"] = man["updated_at_metadata"].map(parse_updated)
+    n_bad = int(man["dataset_updated"].isna().sum())
+    if n_bad:
+        print(f"[WARN] {n_bad} dataset update timestamp(s) unusable; "
+              f"reporting lag is left blank for those pathogens rather than guessed.")
     rep = man.merge(last_sample, on="pathogen", how="inner")
-    rep["last_sample_week"] = pd.to_datetime(rep["last_sample_week"], errors="coerce")
-    rep["reporting_lag_days"] = (rep["dataset_updated"] - rep["last_sample_week"]).dt.days
-    # A negative reporting lag is impossible and means the metadata timestamp is
-    # stale relative to the data it describes; drop rather than report nonsense.
+    rep["last_sample_date"] = pd.to_datetime(rep["last_sample_date"], errors="coerce")
+    rep["reporting_lag_days"] = (rep["dataset_updated"] - rep["last_sample_date"]).dt.days
+    # A negative lag means the published snapshot predates its own latest sample,
+    # which cannot be true; report nothing rather than a nonsense figure.
+    n_neg = int((rep["reporting_lag_days"] < 0).sum())
+    if n_neg:
+        print(f"[WARN] {n_neg} pathogen(s) show a negative reporting lag "
+              f"(dataset timestamp earlier than its latest sample); left blank.")
     rep.loc[rep["reporting_lag_days"] < 0, "reporting_lag_days"] = np.nan
     rep["reporting_lag_weeks"] = rep["reporting_lag_days"] / 7.0
 
@@ -5442,7 +5494,7 @@ def lead_time_decomposition(best_lag, raw_manifest, wastewater):
     b = b[["pathogen", "state_code", "lag_weeks", "spearman_r", "spearman_p_fdr", "paired_weeks"]]
     b = b.rename(columns={"lag_weeks": "shedding_lead_weeks"})
 
-    out = b.merge(rep[["pathogen", "dataset_id", "dataset_updated", "last_sample_week",
+    out = b.merge(rep[["pathogen", "dataset_id", "dataset_updated", "last_sample_date",
                        "reporting_lag_days", "reporting_lag_weeks"]],
                   on="pathogen", how="left")
 
@@ -5450,12 +5502,25 @@ def lead_time_decomposition(best_lag, raw_manifest, wastewater):
     out["usable"] = out["operational_lead_weeks"] > 0
     # Only call a lead statistically supported if the association survives FDR.
     out["lead_supported"] = out["spearman_p_fdr"].lt(0.05) & out["spearman_r"].gt(0)
-    out["interpretation"] = np.where(
-        ~out["lead_supported"], "No supported lead at any tested offset",
-        np.where(out["operational_lead_weeks"] > 0.5, "Usable operational lead",
-                 np.where(out["operational_lead_weeks"] > -0.5, "Lead consumed by reporting delay",
-                          "Signal published after clinical rise")),
+    # NaN fails every comparison, so an unavailable reporting lag would quietly
+    # fall through to the harshest reading. Handle it explicitly instead.
+    op = out["operational_lead_weeks"]
+    out["interpretation"] = np.select(
+        [
+            ~out["lead_supported"],
+            op.isna(),
+            op > 0.5,
+            op > -0.5,
+        ],
+        [
+            "No supported lead at any tested offset",
+            "Reporting lag unavailable for this dataset",
+            "Usable operational lead",
+            "Lead consumed by reporting delay",
+        ],
+        default="Signal published after clinical rise",
     )
+    out.loc[op.isna(), "usable"] = False
     return out.sort_values(["pathogen", "operational_lead_weeks"], ascending=[True, False])
 
 
@@ -5829,8 +5894,8 @@ def assay_target_panel(path=ASSAY_TARGET_PATH):
     required = ["pathogen", "assay_name", "target_gene", "reference_accession",
                 "region_start", "region_end", "citation"]
     if not path.exists():
-        print(f"[INFO] No curated assay-target panel at {path}; "
-              f"assay-target view will report an empty, honest state.")
+        record_source("Assay-target panel (curated input)", "EMPTY",
+                      f"no curated file at {path}; the view reports this rather than showing rows")
         return pd.DataFrame(columns=required + ["citation_url", "notes", "dropped_reason"])
     try:
         a = pd.read_csv(path)
@@ -5918,10 +5983,10 @@ def fetch_amelag(url=AMELAG_URL):
         a["source"] = "RKI AMELAG"
         a["license"] = "CC BY 4.0"
         a["source_url"] = url
-        print(f"[OK] AMELAG: {len(a):,} rows")
+        record_source("RKI AMELAG (Germany)", "OK", f"{len(a):,} rows", url)
         return a
     except Exception as exc:
-        print(f"[WARN] AMELAG unavailable ({exc}); global layer will note the gap.")
+        record_source("RKI AMELAG (Germany)", "FAILED", f"{type(exc).__name__}: {exc}", url)
         return pd.DataFrame()
 
 
@@ -5947,14 +6012,13 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
         raw.write_bytes(r.content)
         print(f"[OK] JMP workbook downloaded ({len(r.content):,} bytes) -> {raw.name}")
     except Exception as exc:
-        print(f"[WARN] JMP download failed ({type(exc).__name__}: {exc}); "
-              f"falling back to any frozen CSV extract.")
+        record_source("WHO/UNICEF JMP", "FAILED", f"download failed - {type(exc).__name__}: {exc}", url)
         return pd.DataFrame()
 
     try:
         book = pd.read_excel(raw, sheet_name=None, header=None)
     except Exception as exc:
-        print(f"[WARN] JMP workbook unreadable: {exc}")
+        record_source("WHO/UNICEF JMP", "FAILED", f"workbook unreadable - {exc}", url)
         return pd.DataFrame()
 
     def norm(v):
@@ -5962,7 +6026,8 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
 
     sheet = next((n for n in book if "sanitation" in n.lower()), None)
     if sheet is None:
-        print(f"[WARN] No sanitation sheet in JMP workbook; sheets present: {list(book)[:12]}")
+        record_source("WHO/UNICEF JMP", "FAILED",
+                      f"no sanitation sheet; sheets present: {list(book)[:12]}", url)
         return pd.DataFrame()
     df = book[sheet]
 
@@ -5974,7 +6039,8 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
             hdr = i
             break
     if hdr is None:
-        print("[WARN] Could not locate the JMP header row (no country + ISO3 pair found).")
+        record_source("WHO/UNICEF JMP", "FAILED",
+                      "could not locate the header row (no country + ISO3 pair in the first 12 rows)", url)
         return pd.DataFrame()
 
     # JMP uses a two-row header; merge the row above into blank cells where needed.
@@ -6004,7 +6070,8 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
     c_pop = pick(r"population")
     c_sewer = pick(r"sewer")
     if not c_country or not c_sewer:
-        print(f"[WARN] JMP sheet parsed but no sewer column found. Columns seen: {list(body.columns)[:20]}")
+        record_source("WHO/UNICEF JMP", "FAILED",
+                      f"sheet parsed but no sewer column. Columns seen: {list(body.columns)[:20]}", url)
         return pd.DataFrame()
     print(f"[OK] JMP sanitation parsed from sheet '{sheet}' | sewer column: '{c_sewer}'")
 
@@ -6022,7 +6089,8 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
 
     if out["year"].notna().any():
         out = (out.sort_values("year").groupby("country", as_index=False).tail(1))
-    print(f"[OK] JMP sanitation: {len(out):,} countries at their most recent year")
+    record_source("WHO/UNICEF JMP", "OK",
+                  f"{len(out):,} countries from sheet '{sheet}', sewer column '{c_sewer}'", url)
     return out.reset_index(drop=True)
 
 
@@ -6048,11 +6116,10 @@ def fetch_worldbank_income(url="https://api.worldbank.org/v2/country?format=json
                 continue
             out.append({"iso3": c.get("id"), "income_group": lvl})
         df = pd.DataFrame(out)
-        print(f"[OK] World Bank income groups: {len(df):,} countries")
+        record_source("World Bank income groups", "OK", f"{len(df):,} countries", url)
         return df
     except Exception as exc:
-        print(f"[WARN] World Bank income groups unavailable ({exc}); "
-              f"global page will omit the income grouping.")
+        record_source("World Bank income groups", "FAILED", f"{type(exc).__name__}: {exc}", url)
         return pd.DataFrame()
 
 
@@ -6097,14 +6164,17 @@ def fetch_wdi_indicator(code="SH.STA.SMSS.ZS", date="2015:2024"):
                 break
             page += 1
     except Exception as exc:
-        print(f"[WARN] WDI {code} unavailable ({exc}); the safely-managed comparison is omitted.")
+        record_source(f"World Bank WDI {code}", "FAILED", f"{type(exc).__name__}: {exc}",
+                      "https://api.worldbank.org/v2/")
         return pd.DataFrame()
 
     if not rows:
-        print(f"[WARN] WDI {code} returned no usable values.")
+        record_source(f"World Bank WDI {code}", "EMPTY", "request succeeded but returned no usable values",
+                      "https://api.worldbank.org/v2/")
         return pd.DataFrame()
     df = pd.DataFrame(rows).sort_values("year").groupby("iso3", as_index=False).tail(1)
-    print(f"[OK] WDI {code}: {len(df):,} countries (most recent year per country)")
+    record_source(f"World Bank WDI {code}", "OK", f"{len(df):,} countries",
+                  "https://api.worldbank.org/v2/")
     return df.rename(columns={"value": code, "year": f"{code}_year"}).reset_index(drop=True)
 
 
@@ -7762,6 +7832,16 @@ def main():
             save_df(global_income, TABLE_DIR / "Table26b_Global_Coverage_By_Income.csv")
     except Exception as exc:
         print(f"[WARN] global coverage equity skipped: {type(exc).__name__}: {exc}")
+
+    # Whether each external source loaded is itself a published result, so it
+    # travels with the run instead of living only in the CI log.
+    try:
+        if SOURCE_STATUS:
+            save_df(pd.DataFrame(SOURCE_STATUS), TABLE_DIR / "Table26d_Source_Fetch_Status.csv")
+            _ok = sum(1 for r in SOURCE_STATUS if r["status"] == "OK")
+            print(f"[OK] source fetch status recorded: {_ok} of {len(SOURCE_STATUS)} sources loaded")
+    except Exception as exc:
+        print(f"[WARN] could not record source fetch status: {exc}")
 
     # App-ready tables
     save_df(pathogen_summary, APP_DIR / "pathogen_cards.csv")

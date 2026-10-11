@@ -430,6 +430,21 @@ def main(table_dir, out_dir, allow_mixed=False):
         extra.append({"component": "RCSB structural QC (Table11c)", "status": last11["figure_component_qc"],
                       "detail": f"{last11['metadata_status']} structures, {last11['render_status']}",
                       "source": "Table11c"})
+    # External source outcomes become audit rows, so a layer that is empty on
+    # the site can always be explained from the published tables alone.
+    t26d = find(table_dir, "Table26d_Source_Fetch_Status", required=False)
+    if t26d is not None and len(t26d):
+        STATUS_MAP = {"OK": "PASS", "EMPTY": "INFO", "FAILED": "WARNING"}
+        for _, r in t26d.iterrows():
+            extra.append({
+                "component": f"Source: {r['source']}",
+                "status": STATUS_MAP.get(str(r.get("status")), "INFO"),
+                "detail": (str(r.get("detail") or "")
+                           + (f" [{r['url']}]" if str(r.get("url") or "") else "")).strip() or "no detail recorded",
+                "source": "Table26d",
+            })
+        ents["SourceStatus"] = t26d
+
     ents["AuditLog"] = pd.concat([al, pd.DataFrame(extra)], ignore_index=True)
 
     # ---- 4. derived alerts --------------------------------------------------
