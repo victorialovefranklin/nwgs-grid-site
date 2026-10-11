@@ -25,6 +25,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Fail here, loudly, rather than later and quietly. Without this the run
+      # could fall back to a saved export and report success while publishing
+      # stale data.
+      - name: Verify the build inputs are present
+        run: |
+          missing=0
+          for f in pipeline/nwgs_pipeline.py \
+                   scripts/nwgs_app_export.py \
+                   scripts/build_site.py \
+                   site_src/template.html \
+                   requirements.txt; do
+            if [ ! -s "$f" ]; then
+              echo "::error file=$f::Required for the build and missing or empty."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Refusing to build. The previous run stays published."
+            exit 1
+          fi
+          echo "All required build inputs present."
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -42,7 +64,6 @@ jobs:
           if [ -d static_inputs ]; then cp -r static_inputs/. "$NWGS_ROOT/data/"; fi
 
       - name: Download Census TIGER/Line 2025 counties (too large for GitHub, ~130 MB)
-        if: hashFiles('pipeline/nwgs_pipeline.py') != ''
         run: |
           curl -fsSL --retry 3 -A "Mozilla/5.0 (NWGS Grid weekly build)" \
             -o /tmp/tl_2025_us_county.zip \
@@ -54,7 +75,6 @@ jobs:
         run: echo "NWGS_STUDY_END=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
 
       - name: Run surveillance pipeline
-        if: hashFiles('pipeline/nwgs_pipeline.py') != ''
         env:
           NWGS_PROJECT_ROOT: /content/NWGS_GRID
           NWGS_STATIC_ROOT: /content/NWGS_GRID/data
@@ -68,19 +88,14 @@ jobs:
         run: python pipeline/nwgs_pipeline.py 2>&1 | tee pipeline_log.txt
 
       - name: Export app data (stops here if validation fails or tables are from mixed runs)
-        if: hashFiles('pipeline/nwgs_pipeline.py') != ''
         run: python scripts/nwgs_app_export.py "$TABLE_DIR" app_export
-
-      - name: Use the saved Oct 9 export until the pipeline is added
-        if: hashFiles('pipeline/nwgs_pipeline.py') == ''
-        run: cp -r sample_export app_export
 
       # The forecast ledger is only meaningful if it outlives the run that wrote
       # it. The runner is wiped between runs, so the updated ledger is committed
       # back to the repository; git history is then the proof that each
       # prediction was recorded before its target week arrived.
       - name: Persist the forecast ledger
-        if: success() && hashFiles('pipeline/nwgs_pipeline.py') != ''
+        if: success()
         run: |
           LEDGER="$TABLE_DIR/Table23_Forecast_Ledger.csv"
           if [ ! -f "$LEDGER" ]; then
@@ -122,7 +137,7 @@ jobs:
           retention-days: 90
 
       - name: Archive this run as a permanent GitHub Release
-        if: success() && hashFiles('pipeline/nwgs_pipeline.py') != ''
+        if: success()
         env:
           GH_TOKEN: ${{ github.token }}
           CREDIT_LINE: "Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar"
@@ -162,7 +177,7 @@ jobs:
             --title "Data through ${AS_OF} (${RUN_ID})" --notes-file release/notes.md --target "$GITHUB_SHA"
 
       - name: Email saved alerts (Supabase)
-        if: success() && hashFiles('pipeline/nwgs_pipeline.py') != ''
+        if: success()
         continue-on-error: true      # an email problem never blocks the site update
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
