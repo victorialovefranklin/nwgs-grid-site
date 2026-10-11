@@ -105,6 +105,28 @@ details>summary.btn::-webkit-details-marker{display:none}
 .statecard .ptitle{font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:7px}
 .statecard .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .statecard .btn{align-self:flex-start;margin-top:auto}
+/* County chips: name left, z-score right, aligned down the column so the
+   numbers can be compared at a glance instead of read as prose. */
+/* County rows: name left, z-score right, aligned down each column so values
+   can be compared by eye. No fills or outlines — severity is carried by the
+   weight and colour of the number itself, which keeps a card with fourteen
+   counties calm rather than making it a field of coloured tags. */
+.clist{list-style:none;margin:3px 0 0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0 18px}
+.clist li{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:3px 0;border-bottom:1px solid var(--hair);font-size:.82rem;min-width:0}
+.clist .cname{overflow-wrap:anywhere;color:var(--ink)}
+.clist .cz{font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--muted);flex:none}
+.clist li.z2 .cz{color:#9c4f10;font-weight:600}
+.clist li.z3 .cz{color:#8c1f1f;font-weight:700}
+.zkey{font-variant-numeric:tabular-nums}
+.zkey.z2{color:#9c4f10;font-weight:600}
+.zkey.z3{color:#8c1f1f;font-weight:700}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .clist li.z2 .cz,:root:not([data-theme="light"]) .zkey.z2{color:#e8b07a}
+  :root:not([data-theme="light"]) .clist li.z3 .cz,:root:not([data-theme="light"]) .zkey.z3{color:#e8a0a0}
+}
+
 .statecard{height:100%}
 .banner{margin:0;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#e9eef6}
 .banner img{display:block;width:100%;height:auto;aspect-ratio:1400/349;object-fit:cover;object-position:left center}
@@ -119,9 +141,26 @@ details>summary.btn::-webkit-details-marker{display:none}
 .refs{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:.86rem}
 .refs li{overflow-wrap:anywhere}
 .refs li::marker{color:var(--gold);font-weight:600}
-.scard .sfig{margin:-18px -20px 4px;border-bottom:1px solid var(--line);background:#fff;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border-radius:var(--r) var(--r) 0 0;overflow:hidden}
-.scard .sfig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.scard .btn{align-self:flex-start}
+/* Structure cards: a fixed-ratio figure so every card has the same silhouette
+   whether or not its rendered image is present, a clear name block, a compact
+   spec row, then the regions and the actions. */
+.scard{gap:10px}
+.scard .sfig{position:relative;margin:-18px -20px 2px;border-bottom:1px solid var(--line);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:linear-gradient(160deg,#f7f4ee 0%,#eef1f6 55%,#e7ecf4 100%)}
+.scard .sfig img{position:relative;max-width:100%;max-height:100%;object-fit:contain;display:block;z-index:1}
+.scard .sfig img[hidden]{display:none}
+.sfig-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--navy-2,#1c2c4c);opacity:.17;font-size:1.6rem;letter-spacing:.14em;font-weight:600}
+.sfig-tag{position:absolute;right:8px;bottom:8px;z-index:2;background:rgba(20,33,58,.86);color:#f7f1e8;font-size:.68rem;letter-spacing:.03em;padding:3px 7px;border-radius:4px}
+.shead{display:flex;flex-direction:column;gap:2px}
+.shead h2{font-size:1.12rem}
+.sprot{margin:0;font-weight:600;font-size:.92rem;color:var(--ink)}
+.stitle{margin:0}
+.sspec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:2px 0;padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sspec>div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.sspec dt{font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.sspec dd{margin:0;font-size:.88rem;font-weight:600;overflow-wrap:anywhere}
+.sact{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:auto}
+.btn.primary{background:var(--navy,#14213a);color:#f7f1e8;border-color:var(--navy,#14213a);font-weight:600}
+.sref{margin:0;font-size:.74rem;overflow-wrap:anywhere}
 .moldlg{width:min(1060px,96vw);padding:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink)}
 .moldlg::backdrop{background:rgba(12,20,36,.6)}
 .molhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
@@ -140,16 +179,22 @@ details>summary.btn::-webkit-details-marker{display:none}
 @media (max-width:760px){.molbody{grid-template-columns:1fr}.molview{height:46vh}.mollegend{border-left:none;border-top:1px solid var(--line);height:auto;max-height:34vh}}
 .emlist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto}
 .emlist li{border-top:1px solid var(--line);padding-top:8px}
-.glist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+/* Column flow, not a grid: a grid forces every row to the height of its
+   tallest panel, which leaves large empty gaps under the short sections. */
+.glist{column-count:2;column-gap:12px}
+.glist>.gsec{break-inside:avoid;page-break-inside:avoid;margin:0 0 12px;display:block}
 .gsec dl{margin:0;display:flex;flex-direction:column}
-.gitem{padding:10px 0;border-top:1px solid var(--line);scroll-margin:90px;transition:background .3s}
+.gitem{padding:7px 0;border-top:1px solid var(--line);scroll-margin:90px;transition:background .3s}
 .gitem:first-child{border-top:none;padding-top:0}
-.gitem dt{font-weight:600;font-size:.92rem}
-.gitem dd{margin:3px 0 0;font-size:.88rem;color:var(--muted)}
+.gsec{gap:8px;padding:14px 16px}
+.gsec h2{margin:0;font-size:1.1rem}
+.gitem.hl{padding-left:8px;padding-right:8px}
+.gitem dt{font-weight:600;font-size:.92rem;line-height:1.3}
+.gitem dd{margin:1px 0 0;font-size:.88rem;line-height:1.45;color:var(--muted)}
 .gitem.hl{background:var(--count-bg);border-radius:6px}
 .gsearch input{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;width:min(420px,90vw)}
 .gsearch input:focus{outline:2px solid var(--gold);outline-offset:0}
-@media (max-width:1100px){.glist{grid-template-columns:1fr}}
+@media (max-width:1100px){.glist{column-count:1}}
 .tapcue{display:flex;align-items:center;gap:10px;margin:0;padding:8px 12px;border-radius:999px;background:var(--count-bg);color:var(--ink);font-weight:600;font-size:.88rem;align-self:center}
 .tapdot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(196,154,74,.6);animation:pulse 1.8s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(196,154,74,.6)}70%{box-shadow:0 0 0 10px rgba(196,154,74,0)}100%{box-shadow:0 0 0 0 rgba(196,154,74,0)}}
@@ -185,7 +230,11 @@ details>summary.btn::-webkit-details-marker{display:none}
 .status{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px 16px;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
 .status .sinfo{grid-column:2;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;text-align:center}
 .status .acct{grid-column:3;justify-self:end;margin:0}
-.qmark{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);font:600 .66rem var(--body);color:var(--muted)}
+/* The visible mark stays small, but an invisible overlay gives it a 28px
+   touch target so it is usable on a phone without changing the design. */
+.qmark{all:unset;cursor:pointer;position:relative;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);font:600 .66rem var(--body);color:var(--muted)}
+.qmark::after{content:'';position:absolute;top:50%;left:50%;width:28px;height:28px;transform:translate(-50%,-50%);border-radius:50%}
+.qmark:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .qmark:hover{border-color:var(--gold);color:var(--ink)}
 .status .opt-s{white-space:nowrap}
 .pill{display:inline-flex;align-items:center;gap:6px;font:500 .74rem var(--body);padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:var(--surface);white-space:nowrap}
@@ -201,6 +250,10 @@ details>summary.btn::-webkit-details-marker{display:none}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
 .c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}.c3{grid-column:span 3}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;min-width:0;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 3px rgba(20,33,58,.05),0 1px 1px rgba(20,33,58,.03)}
+/* Left-aligned body text everywhere, and no single word stranded alone
+   on a final line. text-wrap:pretty asks the browser to avoid orphans. */
+.panel p,.panel li,.note,.small,.muted{text-align:left}
+p,li,dd,dt,td,th,figcaption,.detail,.arow,.amsg,.statecard,.stat{text-wrap:pretty}
 .panel.flat{background:transparent;border:none;padding:0}
 .panel header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 
@@ -243,10 +296,18 @@ details>summary.btn::-webkit-details-marker{display:none}
 .posterfig figcaption{margin-top:8px;text-align:left}
 .origin h3{margin-top:22px}
 tr.unsup td{opacity:.62}
+:root{--hair:rgba(20,33,58,.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hair:rgba(247,241,232,.10)}}
+#al-sum .statgrid{grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr))}
+.natsig{display:flex;flex-direction:column;gap:8px}
+.methodsteps{margin:4px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:10px}
+.methodsteps li{padding-left:4px}
+.notloaded{border:1px solid var(--gold);border-left:4px solid var(--gold);background:var(--count-bg);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.notloaded p{margin:0;text-align:left}
+.nl-head{font-weight:700;font-size:.98rem;color:var(--ink)}
 .plain{background:var(--surface)}
-.plain h2{font-size:1.05rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.plain p{max-width:78ch;font-size:1.02rem}
-.plainlist{max-width:78ch;margin:10px 0 12px;padding-left:20px}
+.plain p{max-width:none;font-size:1.02rem;text-align:left}
+.plainlist{max-width:none;margin:10px 0 12px;padding-left:20px;text-align:left}
 .plainlist li{margin:6px 0}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{font:600 .7rem var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -280,7 +341,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 .stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);min-width:0}
 .stat .label,.stat .small{overflow-wrap:anywhere}
 .stat .mono{overflow-wrap:anywhere}
-.note{font-size:.82rem;color:var(--muted);max-width:80ch}
+.note{font-size:.82rem;color:var(--muted);max-width:none;text-align:left}
 .callout{border-left:3px solid var(--warn);padding:8px 12px;background:var(--surface);font-size:.86rem;border-radius:0 var(--r) var(--r) 0}
 .detail{font-size:.88rem}
 .flag{color:var(--warn);font-weight:600}
@@ -518,6 +579,7 @@ function go(v,push=true){
   VIEWS.forEach(([k])=>{document.getElementById('v-'+k).hidden=k!==v});
   nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'page':'false'));
   if(!built[v]){RENDER[v]();built[v]=true}
+  try{noWidows(document.getElementById('v-'+v))}catch(e){}
   if(push&&location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(e){}}
   try{localStorage.setItem('nwgs_view',v);if(v!=='about')localStorage.setItem('nwgs_last',v)}catch(e){}
   rail.classList.remove('open');menubtn.setAttribute('aria-expanded','false');
@@ -546,16 +608,76 @@ const ser = p => D.trend[p].map(([w,z])=>[new Date(w),z]);
 const highCount = p => Object.values(D.activity[p]).filter(([z])=>z>1).length;
 
 /* ---------- views ---------- */
+/* Alert county chips: a readable pathogen colour and a severity band, so a
+   county 4 standard deviations above its own normal is visibly different
+   from one just over the threshold rather than lost in a run of text. */
+const PCOL={'SARS-CoV-2':'#1d4f91','Influenza A':'#b4630f','RSV':'#6e1f2b',
+            'Influenza A(H5)':'#5b3b8c','Measles':'#0f766e','Mpox':'#a3123a'};
+const pcol = p => PCOL[p]||'var(--hi)';
+const zband = z => z>=3?'z3':z>=2?'z2':'z1';
+
+/* ---------- widow control ----------
+   text-wrap:pretty is not honoured everywhere, so bind the final two words of
+   each block of prose with a non-breaking space. That makes it impossible for
+   a single word to be left stranded on its own last line. Runs on the text
+   node itself so markup, links and entities inside the block are untouched. */
+function noWidows(root){
+  if(!root) return;
+  root.querySelectorAll('p,li,dd,figcaption,.note').forEach(el=>{
+    if(el.dataset.nw) return;
+    const walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+    let last=null,n;
+    while((n=walk.nextNode())) if(n.nodeValue.trim()) last=n;
+    if(!last) return;
+    const t=last.nodeValue.replace(/\s+$/,'');
+    const words=t.split(' ');
+    if(words.length>1 && t.length>40){
+      words[words.length-1]='\u00A0'+words[words.length-1];
+      last.nodeValue=words.slice(0,-1).join(' ')+words[words.length-1];
+    }
+    el.dataset.nw='1';
+  });
+}
+
+/* ---------- missing-data notice ----------
+   Used wherever a layer has no data. It must never be possible to mistake
+   an unavailable source for a finding of zero, so the notice names the
+   source, says plainly that nothing is estimated or simulated in its
+   absence, and points at the Audit log where the failure is recorded. */
+function notLoaded(what, source, detail){
+  return `<div class="notloaded" role="status">
+    <p class="nl-head">⚠ ${esc(what)} is not loaded in this run</p>
+    <p><b>No data is shown, and none is estimated, simulated or carried over from a previous run.</b> An empty panel here means the source did not load — not that the measurement came back empty.</p>
+    <p class="small"><b>Source:</b> ${source}</p>
+    ${detail?`<p class="small">${detail}</p>`:''}
+    <p class="small muted">Whether each source loaded is recorded for every run on the <a href="#audit" data-go="audit">Audit log</a>. The next weekly update retries automatically.</p>
+  </div>`;
+}
+
 /* ---------- assay-target vulnerability ---------- */
 function assayPanel(){
   const why=`<p>A validated diagnostic assay binds a specific stretch of the pathogen genome. When that stretch accumulates sequence variation, the assay can quietly lose sensitivity — the pathogen is present, and the test stops reporting it. The reference case is measles genotype B3 in 2024–2025, where a single substitution in the N-gene target rose from under 2% of submitted sequences to the majority and degraded a widely used RT-PCR target.</p>
   <p>This failure mode is invisible in every public wastewater aggregate, CDC's included, because aggregates report <i>detections</i> and never report what the assay could no longer see. A detection rate that falls because an assay drifted looks identical to one that falls because transmission fell.</p>
   <p class="note"><b>What this panel is, and is not.</b> It reproduces published assay target coordinates alongside the public sequence record, each row carrying its own citation and the reference accession its coordinates are expressed against. Rows without a citation, accession or valid coordinate range are dropped rather than displayed. It is a quality-control reference for laboratories deciding whether to re-verify their own panels. It does not design, recommend, optimise or score any assay, and it is not a substitute for a laboratory's own verification.</p>`;
-  if(!D.assay_targets||!D.assay_targets.length)
+
+  // Defense in depth: refuse to render any row that looks like a placeholder,
+  // even if one reaches the export. A citation is what makes a coordinate
+  // trustworthy, so anything self-describing as demo, example, test, dummy,
+  // illustrative or TBD is dropped here rather than shown to a reader.
+  const PLACEHOLDER=/\b(demo|demonstration|example|sample|placeholder|dummy|test|illustrative|fake|synthetic|simulated|tbd|todo|lorem|xxx|n\/?a)\b/i;
+  const all=D.assay_targets||[];
+  const a=all.filter(r=>{
+    const c=String(r.citation||'').trim();
+    return c && !PLACEHOLDER.test(c) && !PLACEHOLDER.test(String(r.assay_name||''));
+  });
+  const dropped=all.length-a.length;
+  if(!a.length)
     return `<article class="panel c12"><header><h2>Assay-target vulnerability</h2><span class="small muted">why the structural layer is here</span></header>
       ${why}
-      <p class="note">⚠ No curated target panel is loaded in this run, so nothing is listed. This table is a <b>curated input</b>, not a computed one: primer and probe coordinates are published in specific papers and protocol documents, and inferring or generating them would be worse than showing none. Entries appear once a citation-bearing panel is supplied and verified.</p></article>`;
-  const a=D.assay_targets, ov=a[0]&&a[0].overlay_note;
+      ${notLoaded('Assay-target panel','a curated table of published primer and probe coordinates, each row carrying its own citation and reference accession',
+        (dropped?`<b>${dropped} row${dropped===1?'':'s'} in this run named no real citation and ${dropped===1?'was':'were'} refused.</b> `:'')+
+        'This table is a <b>curated input</b>, not a computed one. Primer and probe coordinates are published in specific papers and protocol documents; inferring or generating them would be worse than showing none. Entries appear only once a citation-bearing panel is supplied and verified.')}</article>`;
+  const ov=a[0]&&a[0].overlay_note;
   return `<article class="panel c12"><header><h2>Assay-target vulnerability</h2><span class="small muted">published target regions, with citations</span></header>
   ${why}
   <div class="tbl"><table><tr><th>Pathogen</th><th>Assay</th><th>Gene</th><th>Reference accession</th><th class="n">Region</th><th class="n">Length</th><th>Citation</th></tr>
@@ -563,7 +685,7 @@ function assayPanel(){
       <td class="mono small">${esc(r.reference_accession)}</td>
       <td class="n mono">${r.region_start}–${r.region_end}</td><td class="n">${r.region_length??'—'} nt</td>
       <td class="small">${r.citation_url?`<a href="${esc(r.citation_url)}" target="_blank" rel="noopener">${esc(r.citation)}</a>`:esc(r.citation)}</td></tr>`).join('')}</table></div>
-  ${ov?`<p class="note">${esc(ov)}</p>`:''}</article>`;
+  ${ov&&!PLACEHOLDER.test(ov)?`<p class="note">${esc(ov)}</p>`:''}</article>`;
 }
 
 /* ---------- forecast scoreboard ---------- */
@@ -572,7 +694,7 @@ function forecastPanel(){
   <p class="note"><b>The models here are deliberately plain</b> — a persistence baseline and a linear extrapolation of the trailing four weeks. The contribution is not the model but the ledger: the field has no public wastewater forecasting hub or standing benchmark, so there is nowhere to find out whether anyone's forecast actually worked. A stronger model can be added later and scored on the same ledger against the same frozen history. Negative skill is reported as readily as positive skill; a trend term that makes forecasts worse is a result, not a bug.</p>`;
   if(!D.forecast_board||!D.forecast_board.length)
     return `<article class="panel c12"><header><h2>Forecast scoreboard</h2></header>
-      <p>The ledger is being written but nothing has matured yet. A forecast made this week cannot be scored until the week it predicted has actually arrived, so the first scores appear once the shortest horizon comes due.</p>${defn}</article>`;
+      <p><b>This is not a failed load.</b> The ledger is being written correctly, but nothing has matured yet: a forecast made this week cannot be scored until the week it predicted has actually arrived. The first scores appear once the shortest horizon comes due. No placeholder scores are shown in the meantime.</p>${defn}</article>`;
   const b=D.forecast_board;
   const best=b.reduce((a,c)=>(c.skill_vs_persistence??-9)>(a.skill_vs_persistence??-9)?c:a,b[0]);
   const nScored=d3.sum(b,r=>r.n_scored||0);
@@ -593,11 +715,12 @@ function forecastPanel(){
 
 /* ---------- coverage sub-panels (representativeness, attrition) ---------- */
 function repPanel(){
-  const defn=`<p class="note"><b>Definition.</b> Sewer share is the summed population served by the distinct monitored sites mapped to a county, divided by county population. The SVI gap is the county's social vulnerability minus the population-weighted mean vulnerability of monitored counties in the same state, so a positive gap means monitoring is skewed away from this county. Representativeness is the sewer share penalised by the absolute SVI gap. The definition is versioned (<span class="mono">nwgs-representativeness-v1</span>) so a change to it is visible between runs.</p>
+  const defn=`<p class="note"><b>Definition.</b> Sewer share is the summed population served by the distinct monitored sites mapped to a county, divided by county population. The SVI gap is the county's social vulnerability minus the population-weighted mean vulnerability of monitored counties in the same state, so a positive gap means monitoring is skewed away from this county. Representativeness is the sewer share penalized by the absolute SVI gap. The definition is versioned (<span class="mono">nwgs-representativeness-v1</span>) so a change to it is visible between runs.</p>
   <p class="note"><b>Stated limitation.</b> The vulnerability term is a county-level proxy. A true within-sewershed demographic comparison needs block-group service-area boundaries, and CDC NWSS does not publish them. That is a limit of the available data, not of the definition, and it is reported rather than worked around.</p>`;
   if(!D.representativeness||!D.representativeness.length)
     return `<article class="panel c12"><header><h2>Representativeness</h2></header>
-      <p>PHA4GE's wastewater reporting guidance calls for a representativeness measure and does not define one. This page supplies an explicit definition, but it has not populated in this run — it needs a county population denominator from the frozen SVI extract. Nothing is shown rather than a score built on a guessed denominator.</p>${defn}</article>`;
+      <p>PHA4GE's wastewater reporting guidance calls for a representativeness measure and does not define one. This page supplies an explicit definition.</p>
+      ${notLoaded('Representativeness','CDC/ATSDR Social Vulnerability Index 2022 county file (county population denominator) and CDC NWSS site records','Without a population denominator the sewer share is undefined. It is left blank rather than filled with an assumed county population.')}${defn}</article>`;
   const n=D.rep_national||{};
   const tiers=['High','Substantial','Partial','Minimal','Unmonitored'];
   const byTier=tiers.map(t=>({t,n:D.representativeness.filter(r=>r.representativeness_tier===t).length})).filter(x=>x.n);
@@ -625,7 +748,7 @@ function attritionPanel(){
   <p class="note">This measure exists only because every weekly run is frozen and versioned. A platform that overwrites its own values cannot reconstruct when a site stopped reporting, which is why coverage attrition has no published equivalent.</p>`;
   if(!D.attrition_sites||!D.attrition_sites.length)
     return `<article class="panel c12"><header><h2>Coverage attrition</h2></header>
-      <p>This layer has not populated in this run. It is built on the next weekly update.</p>${defn}</article>`;
+      ${notLoaded('Coverage attrition','CDC NWSS site-level sample records across the full study window','Attrition is derived from each site&rsquo;s first and last reporting week, so it needs the complete harmonised record set for the run.')}${defn}</article>`;
   const s=D.attrition_sites, y=D.attrition_yearly||[], v=D.attrition_vuln||[];
   const dormant=s.filter(x=>x.status==='dormant');
   const popLost=d3.sum(dormant,x=>x.population_served||0);
@@ -671,7 +794,8 @@ dashboard(){
     <article class="panel c5"><header><h2>Latest alerts</h2><a href="#alerts" data-go="alerts" class="small">All ${D.alerts.length} alerts</a></header>
       <div>${[...D.alerts].sort((a,b)=>['high','moderate','info'].indexOf(a.severity)-['high','moderate','info'].indexOf(b.severity)).filter((a,i,arr)=>a.severity!=='high'||arr.filter(x=>x.severity==='high').indexOf(a)<2).slice(0,5).map(alertRow).join('')}</div>
     </article>
-  </div>`;
+  </div>
+  <p class="note srcline"><b>Sources.</b> CDC National Wastewater Surveillance System (NWSS), six public pathogen datasets on data.cdc.gov, pulled for this run and listed with their dataset identifiers on <a href="#methods" data-go="methods">Methods &amp; sources</a>. Activity is standardized within each site against its own history before any county or national figure is taken.</p>`;
   ROUTINE.forEach(p=>spark(document.getElementById('sp-'+p.replace(/\W/g,'')),D.trend[p].slice(-52).map(d=>d[1]),css('--accent')));
   EMERGING.forEach(p=>spark(document.getElementById('se-'+p.replace(/\W/g,'')),D.emerging[p].slice(-52).map(d=>d[1]*100),css('--warn'),{zero:false,base:0,dom:[0,Math.max(3,d3.max(D.emerging[p].slice(-52),d=>d[1]*100))]}));
 },
@@ -683,7 +807,8 @@ map(){
   <div class="seg" id="m-layer"><button aria-pressed="true" data-l="activity">Recent activity</button><button aria-pressed="false" data-l="cluster">Spatial clusters</button><button aria-pressed="false" data-l="coverage">Coverage</button></div></div>
   <div class="grid"><div class="panel c8"><p class="tapcue"><span class="tapdot" aria-hidden="true"></span>Interactive map: click or tap any county to see its details</p><div class="mapbox" id="m-map"></div><div id="m-legend"></div></div>
   <div class="c4 stackcol"><div class="panel selcard" id="m-sel" hidden><h2>Selected county</h2><div class="detail" id="m-detail"></div></div>
-  <div class="panel" id="m-stats"></div></div></div>`;
+  <div class="panel" id="m-stats"></div></div></div>
+  <p class="note srcline"><b>Sources.</b> County activity from CDC NWSS. County boundaries from the U.S. Census Bureau TIGER/Line files via us-atlas, drawn with d3 and topojson (ISC license). Clustering uses local Moran's I. Full dataset list on <a href="#methods" data-go="methods">Methods &amp; sources</a>.</p>`;
   let P='SARS-CoV-2',L='activity',SEL=null;
   const CL={'High-High':'--hi','Low-Low':'--vl','High-Low':'--el','Low-High':'--lo','Not Significant':'--typ'};
   const covBins=[[0,'No data','--nodata'],[25,'1–25 weeks','--accent-soft'],[51,'26–51','--lo'],[103,'52–103','--vl'],[155,'104–155','--accent'],[1e9,'≥156 weeks','--ink']];
@@ -725,22 +850,23 @@ analytics(){
   <article class="panel"><header><h2>National wastewater activity</h2><div class="seg" id="a-path">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div></header>
   <div class="chart" id="a-trend"></div>${legend([['var(--vl)','Very Low ≤ −1'],['var(--lo)','Low'],['var(--el)','Elevated'],['var(--hi)','High > 1']])}</article>
   <div class="grid">
-  <article class="panel c7"><header><h2>Wastewater vs. emergency-department timing</h2></header>
+  <article class="panel c12"><header><h2>Wastewater vs. emergency-department timing</h2></header>
     <div class="seg" id="a-lagp">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
     <div class="mapbox" id="a-lagmap"></div>${legend([['var(--accent)','Same week'],['var(--el)','Wastewater leads'],['var(--nodata)','Not significant or no data']])}</article>
-  <article class="panel c5"><header><h2>By pathogen</h2><span class="small muted">best lag per state</span></header>
+  <article class="panel c12"><header><h2>By pathogen</h2><span class="small muted">best lag per state</span></header>
     <div class="tbl"><table class="tight"><tr><th>Pathogen</th><th class="n">Same week</th><th class="n">WW leads</th><th class="n">Median <span class="nocase">ρ</span></th><th class="n">FDR sig.</th></tr>
     ${ROUTINE.map(p=>{const s=lagSum(p);return `<tr><td class="nw">${p}</td><td class="n">${s.sync}/${s.n}</td><td class="n">${s.lead}</td><td class="n">${fmt(s.rho)}</td><td class="n">${s.sig}/${s.n}</td></tr>`}).join('')}</table></div>
     <p class="note">Most states peak in the same week in wastewater and clinical data. Leads, where present, are almost always one week. Significance uses FDR-corrected Spearman tests.</p></article>
   </div>
   <div class="grid">
-  <article class="panel c7"><header><h2>National seasonal peaks</h2><span class="small muted">complete July–June seasons</span></header>
+  <article class="panel c12"><header><h2>National seasonal peaks</h2><span class="small muted">complete July–June seasons</span></header>
     <div class="tbl"><table class="tight"><tr><th>Pathogen</th><th>Season</th><th>Wastewater peak</th><th>Clinical peak</th><th class="n">Lead (wk)</th><th class="n">Peak z</th></tr>
     ${D.seasonal.map(s=>`<tr><td class="nw">${s.pathogen}</td><td class="mono nw">${s.season}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td><td class="n">${fmt(s.ww_peak_magnitude_z)}</td></tr>`).join('')}</table></div>
     <p class="note">Positive lead = wastewater peaked first. At state level, ${D.state_seasons.flagged} of ${D.state_seasons.n} eligible state-seasons are flagged for implausible leads (${D.state_seasons.by.map(b=>`${b.pathogen} ${b.flagged}`).join(', ')}).</p></article>
-  <article class="panel c5"><header><h2>Emerging pathogens</h2><div class="seg" id="a-em">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p.replace('Influenza A(H5)','H5')}</button>`).join('')}</div></header>
+  <article class="panel c12"><header><h2>Emerging pathogens</h2><div class="seg" id="a-em">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p.replace('Influenza A(H5)','H5')}</button>`).join('')}</div></header>
     <div class="chart" id="a-emc"></div><p class="note">Weekly share of tested sites with a detection. Weeks with fewer than 20 sites are hidden.</p></article>
-  </div>`;
+  </div>
+  <p class="note srcline"><b>Sources.</b> Wastewater from CDC NWSS; clinical comparison from CDC's National Syndromic Surveillance Program (NSSP) emergency-department visit percentages. Lag is a Spearman cross-correlation with Benjamini&ndash;Hochberg correction across all state&ndash;pathogen pairs. Full dataset list on <a href="#methods" data-go="methods">Methods &amp; sources</a>.</p>`;
   let P='SARS-CoV-2';
   const drawT=()=>lineChart(document.getElementById('a-trend'),[{name:P,values:ser(P),color:css('--accent'),area:false}],{bands:true,zero:true,w:900,h:260});
   const drawLag=p=>{const by=Object.fromEntries(D.statelag.filter(x=>x.pathogen===p).map(x=>[x.state_code,x]));
@@ -756,7 +882,7 @@ leadtime(){
   const el=document.getElementById('v-leadtime');
   const head=`<div class="head"><h1>Lead time, decomposed <button class="qmark" data-gloss="operational-lead" aria-label="What does operational lead mean?">?</button></h1>
     <p class="muted">Early warning is usually reported as one number. It is actually three, and only the third one tells a health department whether the signal arrived in time to act on.</p></div>
-  <article class="panel c12 plain"><h2>In plain terms</h2>
+  <article class="panel c12 plain">
     <p>People shed viruses into wastewater before they feel sick enough to go to a hospital. That is the promise of this method: sewage can show an outbreak building before clinics do. The usual way of saying this is “wastewater gives one to three weeks of warning.”</p>
     <p>But that sentence quietly skips a step. The virus reaching the sewer is not the same as <i>somebody knowing about it</i>. The sample has to be collected, shipped, tested, reported to the state, passed to CDC and published. All of that takes time too — and that time comes out of the warning, not in addition to it.</p>
     <p>So this page measures three things instead of one:</p>
@@ -766,18 +892,18 @@ leadtime(){
       <li><b>Operational lead</b> <button class="qmark" data-gloss="operational-lead" aria-label="Define operational lead">?</button> — what is left over. This is the real warning time.</li>
     </ul>
     <p>If a virus shows up in sewage two weeks early, but it takes two weeks to publish the result, the <b>real warning time is zero</b>. The signal was there. Nobody could have used it. That is not a failure of wastewater surveillance — it is a failure of the pipeline around it, and it is fixable in a way that biology is not.</p>
-    <p><b>Why this matters:</b> a health department deciding whether to fund a wastewater programme needs the third number, not the first. Reporting a two-week lead when the usable lead is zero promises something the system cannot deliver.</p></article>`;
+    <p><b>Why this matters:</b> a health department deciding whether to fund a wastewater program needs the third number, not the first. Reporting a two-week lead when the usable lead is zero promises something the system cannot deliver.</p></article>`;
   const explain=`<article class="panel c12"><header><h2>What the three terms mean</h2></header>
     <div class="tbl"><table class="stack"><tr><th>Term</th><th>Definition</th><th>What it is measured from</th></tr>
       <tr><td class="lead" data-l="Term"><b>Shedding lead</b></td><td data-l="Definition" class="small">Weeks that wastewater activity leads emergency-department visits.</td><td data-l="Measured from" class="small">Cross-correlation best lag between the site-standardized wastewater index and NSSP ED visit percentage, per pathogen and state.</td></tr>
       <tr><td class="lead" data-l="Term"><b>Reporting lag</b></td><td data-l="Definition" class="small">Weeks between a sample being collected and its value appearing in the public CDC dataset.</td><td data-l="Measured from" class="small">The CDC dataset's own <span class="mono">rowsUpdatedAt</span> metadata minus the latest sample week present in that dataset.</td></tr>
-      <tr><td class="lead" data-l="Term"><b>Operational lead</b></td><td data-l="Definition" class="small">Shedding lead minus reporting lag. Can be zero or negative.</td><td data-l="Measured from" class="small">Difference of the two rows above. Nothing is modelled; all three are differences between observed dates.</td></tr>
+      <tr><td class="lead" data-l="Term"><b>Operational lead</b></td><td data-l="Definition" class="small">Shedding lead minus reporting lag. Can be zero or negative.</td><td data-l="Measured from" class="small">Difference of the two rows above. Nothing is modeled; all three are differences between observed dates.</td></tr>
     </table></div>
     <p class="note">Published lead-time figures are almost always shedding lead alone, which overstates usable warning time because it ignores the pipeline between the laboratory and the public dataset. A negative operational lead does not mean wastewater carries no signal — it means that in this run, for this pathogen and state, the signal became public after the clinical rise it was meant to anticipate.</p></article>`;
 
   if(!D.leadtime||!D.leadtime.length){
-    el.innerHTML=head+explain+`<article class="panel c12"><header><h2>No decomposition in this run</h2></header>
-      <p>This layer is computed from the lag analysis and the CDC dataset update metadata together. It has not populated in this run, so nothing is shown rather than a chart of zeros. It is built on the next weekly update.</p></article>`;
+    el.innerHTML=head+explain+`<article class="panel c12"><header><h2>Lead-time decomposition</h2></header>
+      ${notLoaded('Lead-time decomposition','CDC NWSS wastewater datasets and CDC NSSP emergency-department data, combined with each dataset&rsquo;s own update metadata','Both inputs must be present in the same run: the cross-correlation needs paired wastewater and clinical weeks, and the reporting lag needs the dataset update timestamp.')}</article>`;
     return;
   }
 
@@ -837,7 +963,8 @@ predictive(){
     <p class="small muted">${interp(m)}</p>
     <span class="label">Top predictors (mean |SHAP|)</span><div class="chart" id="p-shap-${p.replace(/\W/g,'')}"></div></article>`}).join('')}</div>
   <p class="note">Wastewater features (orange) are often strongly correlated with last week’s clinical value (r up to 0.77), so a small SHAP rank inside the full model can understate wastewater’s standalone signal. That is why the wastewater-only model is shown separately.</p>
-  ${forecastPanel()}`;
+  ${forecastPanel()}
+  <p class="note srcline"><b>Sources.</b> Features from CDC NWSS wastewater and CDC NSSP emergency-department data for the same state-weeks. Models are evaluated on later weeks they never saw. Attribution uses SHAP (Lundberg &amp; Lee, 2017). Full dataset list on <a href="#methods" data-go="methods">Methods &amp; sources</a>.</p>`;
   groupedBars(document.getElementById('p-bars'),ROUTINE.map(p=>({name:p,a:M[p].clinical_persistence_r2,b:M[p].wastewater_only_r2,c:M[p].full_model_r2})),['a','b','c'],[css('--muted'),css('--el'),css('--accent')],{labels:['Clinical only','Wastewater only','Full model'],valueLabels:true,max:1,w:1000,h:300});
   ROUTINE.forEach(p=>hbars(document.getElementById('p-shap-'+p.replace(/\W/g,'')),D.shap.filter(s=>s.pathogen===p).slice(0,8).map(s=>({label:FEAT(s.feature),v:s.mean_abs_shap,color:/^(ww_|wastewater)/.test(s.feature)?css('--el'):css('--muted')})),{left:150,w:360,bh:18,fmt:v=>v<.01?v.toFixed(3):v.toFixed(2)}));
 },
@@ -847,17 +974,17 @@ equity(){
   const g=D.equity[0];const sig=g.glm_p_value<.05;
   const line=sig?(g.glm_odds_ratio<1?'More socially vulnerable counties are less likely to have analysis-ready wastewater surveillance.':'More socially vulnerable counties are more likely to have analysis-ready surveillance.'):'No clear difference by social vulnerability.';
   el.innerHTML=`<div class="head"><h1>Coverage & equity</h1><p class="muted">Who the wastewater system reaches, measured against the CDC/ATSDR Social Vulnerability Index (SVI).</p></div>
-  <div class="grid"><article class="panel c5"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
+  <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
     <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
-  <article class="panel c7"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
-    <p style="font-size:1.05rem;font-weight:600;max-width:60ch">${line}</p>
+  <article class="panel c12"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
+    <p style="font-size:1.05rem;font-weight:600">${line}</p>
     <div class="statgrid"><div class="stat"><span class="label">Odds ratio per 0.10 SVI</span><span class="big">${fmt(g.glm_odds_ratio,3)}</span></div><div class="stat"><span class="label">95% CI</span><span class="big" style="font-size:1.4rem">${fmt(g.glm_or_95ci_low,3)}–${fmt(g.glm_or_95ci_high,3)}</span></div><div class="stat"><span class="label">p value</span><span class="big" style="font-size:1.4rem">${pFmt(g.glm_p_value)}</span></div></div>
     <div class="mapbox" id="e-map"></div>${legend([['var(--accent)','Analysis-ready'],['var(--lo)','Observed, not ready'],['var(--nodata)','No surveillance']])}
     <p class="note">Analysis-ready = at least 52 qualifying weeks and at least 70% completeness across the active span. Association, not cause.</p>
     <p class="note"><b>This model is a replication, and is presented as one.</b> Alkhouri et al. (<i>AJPM Focus</i>, 2025) fitted the same county-level design on 859 of 3,143 counties and reported coverage skewed by county demographics. The contribution here is not the finding but the frame: the model is refitted on every county in the weekly run, the inputs are published as analysis-ready tables, and the result is recomputed and re-versioned each week rather than fixed at one point in time. The two measures below — representativeness and attrition — are the parts of this page with no published equivalent.</p></article></div>
   ${repPanel()}
   ${attritionPanel()}`;
-  hbars(document.getElementById('e-bars'),D.equity.map(q=>({label:q.svi_quartile.replace(' vulnerability',''),v:q.pct_analysis_ready})),{min:0,max:100,left:110,w:440,fmt:v=>v.toFixed(1)+'%'});
+  hbars(document.getElementById('e-bars'),D.equity.map(q=>({label:q.svi_quartile.replace(' vulnerability',''),v:q.pct_analysis_ready})),{min:0,max:100,left:120,bh:38,fmt:v=>v.toFixed(1)+'%'});
   if(D.rep_by_fips){
     const re=document.getElementById('r-map');
     if(re) countyMap(re,f=>{const v=D.rep_by_fips[f];if(!v||v[2]===0)return css('--nodata');
@@ -867,11 +994,11 @@ equity(){
   }
   if(D.attrition_yearly&&D.attrition_yearly.length){
     const ae=document.getElementById('a-bars');
-    if(ae) hbars(ae,D.attrition_yearly.map(y=>({label:String(y.year),v:y.sites_reporting})),{min:0,left:70,fmt:v=>String(v)});
+    if(ae) hbars(ae,D.attrition_yearly.map(y=>({label:String(y.year),v:y.sites_reporting})),{min:0,left:70,bh:30,fmt:v=>String(v)});
   }
   if(D.attrition_vuln&&D.attrition_vuln.length){
     const ve=document.getElementById('av-bars');
-    if(ve) hbars(ve,D.attrition_vuln.map(q=>({label:String(q.svi_quartile).replace(' vulnerable',''),v:q.pct_dormant,color:'#6e1f2b'})),{min:0,max:100,left:130,fmt:v=>fmt(v,1)+'%'});
+    if(ve) hbars(ve,D.attrition_vuln.map(q=>({label:String(q.svi_quartile).replace(' vulnerable',''),v:q.pct_dormant,color:'#6e1f2b'})),{min:0,max:100,left:130,bh:30,fmt:v=>fmt(v,1)+'%'});
   }
   countyMap(document.getElementById('e-map'),f=>{const v=D.coverage[f];return !v?css('--nodata'):v[1]?css('--accent'):css('--lo')},f=>{const v=D.coverage[f];return `<b>${cname(f)}</b><div>${v?`${v[0]} weeks${v[1]?', analysis-ready':', not analysis-ready'}`:'No surveillance'}</div>${v&&v[2]!=null?`<div>SVI ${fmt(v[2])}</div>`:''}`},{label:'Coverage readiness map'});
 },
@@ -880,22 +1007,20 @@ global(){
   const el=document.getElementById('v-global');
   const head=`<div class="head"><h1>Global coverage <button class="qmark" data-gloss="global-coverage" aria-label="What does global coverage mean?">?</button></h1>
     <p class="muted">Wastewater surveillance can only ever see people whose waste reaches a monitored sewer. This page asks a different question from the rest of the site: not “what is rising,” but “who could this method ever detect in the first place?”</p></div>
-  <article class="panel c12 plain"><h2>In plain terms</h2>
+  <article class="panel c12 plain">
     <p>Testing sewage for disease works by catching what a community flushes. If a household is not connected to a sewer system — if it uses a pit latrine, a septic tank, or no sanitation at all — nothing that household sheds ever arrives at a treatment plant, so no amount of testing will ever detect it.</p>
-    <p>That makes sewer connection a hard ceiling on this method. Worldwide, <b>most people are not connected to a sewer.</b> So before asking whether a country has a wastewater surveillance programme, this page asks how much of that country's population such a programme could observe even if it were perfectly run and fully funded.</p>
-    <p><b>Why it matters for policy:</b> the countries with the least sewer connection are generally the countries with the least surveillance capacity. The populations this method can least observe are the same populations least likely to have a programme trying to observe them. Investment in wastewater surveillance alone will not close that gap, because the gap is in sanitation infrastructure, not in laboratories.</p>
+    <p>That makes sewer connection a hard ceiling on this method. Worldwide, <b>most people are not connected to a sewer.</b> So before asking whether a country has a wastewater surveillance program, this page asks how much of that country's population such a program could observe even if it were perfectly run and fully funded.</p>
+    <p><b>Why it matters for policy:</b> the countries with the least sewer connection are generally the countries with the least surveillance capacity. The populations this method can least observe are the same populations least likely to have a program trying to observe them. Investment in wastewater surveillance alone will not close that gap, because the gap is in sanitation infrastructure, not in laboratories.</p>
     <p><b>Why it matters for researchers:</b> a national wastewater figure is a statement about the sewered population, not the whole population. Comparing two countries' numbers without comparing their sewer coverage compares two different denominators.</p></article>`;
   const sources=`<article class="panel c12"><header><h2>Why this layer is built this way</h2></header>
-    <p>Absolute wastewater concentrations are not portable between countries: normalization targets, units and laboratory methods diverge, so a figure from one national programme cannot be placed on the same axis as another's. Only <b>within-site relative</b> metrics transfer, which is the standardization this project already uses throughout.</p>
-    <p>Of the national programmes publishing wastewater data, only two currently publish it in a genuinely machine-readable, openly licensed form: <b>Germany</b>'s AMELAG (Robert Koch-Institut, CC BY 4.0, versioned with a DOI) and the <b>Netherlands</b>' RIVM open data. Sequences and phylogenetics in this project come from <b>NCBI Virus, GenBank and the SRA</b> — public-domain INSDC records that may be redistributed.</p>
-    <p><b>Sources for this page.</b> Sewer-connected share and population: <a href="https://washdata.org/data/downloads" target="_blank" rel="noopener">WHO/UNICEF Joint Monitoring Programme</a> household world workbook, downloaded and parsed each run, with the raw workbook frozen alongside the run. Income classification: <a href="https://api.worldbank.org/v2/country?format=json" target="_blank" rel="noopener">World Bank country API</a>, fetched each run rather than hard-coded, because those classifications are revised annually. German site-level data: <a href="https://github.com/robert-koch-institut/Abwassersurveillance_AMELAG" target="_blank" rel="noopener">RKI AMELAG</a>. The “Status in this run” column states, per country, whether a feed was actually ingested or is only a known feed not yet wired in — a registry entry is not data in hand.</p>
-    <p class="note"><b>On GISAID.</b> GISAID hosts wastewater-relevant content and phylogenetics, including EpiCoV/hCoV-19, EpiFlu, EpiPox with PoxSurver and the Clade I and Clade II trees, EpiArbo and EpiNiV. None of it appears here, and the reason is terms rather than content. The Database Access Agreement bars distributing Data to third parties, bars a “separate portal,” bars use “in connection with any other database,” and defines Data to include <i>derivatives or other enhancements</i> — so a tree rendered from GISAID sequences remains GISAID's Data, with ownership retained by GISAID. In October 2025 GISAID terminated the Nextstrain feed, which also affected covSPECTRUM and outbreak.info. Publication with acknowledgement is permitted; a public dashboard layer is not. Analyses that use GISAID are therefore reported in manuscripts and cited there, never served from this site.</p></article>`;
+    <p>Absolute wastewater concentrations are not portable between countries: normalization targets, units and laboratory methods diverge, so a figure from one national program cannot be placed on the same axis as another's. Only <b>within-site relative</b> metrics transfer, which is the standardization this project already uses throughout.</p>
+    <p>Of the national programs publishing wastewater data, only two currently publish it in a genuinely machine-readable, openly licensed form: <b>Germany</b>'s AMELAG (Robert Koch-Institut, CC BY 4.0, versioned with a DOI) and the <b>Netherlands</b>' RIVM open data. Sequences and phylogenetics in this project come from <b>NCBI Virus, GenBank and the SRA</b> — public-domain INSDC records that may be redistributed, which is why every sequence shown here can be downloaded, checked and reused by anyone.</p>
+    <p><b>Sources for this page.</b> Sewer-connected share and population: <a href="https://washdata.org/data/downloads" target="_blank" rel="noopener">WHO/UNICEF Joint Monitoring Program</a> household world workbook, downloaded and parsed each run, with the raw workbook frozen alongside the run. Income classification: <a href="https://api.worldbank.org/v2/country?format=json" target="_blank" rel="noopener">World Bank country API</a>, fetched each run rather than hard-coded, because those classifications are revised annually. German site-level data: <a href="https://github.com/robert-koch-institut/Abwassersurveillance_AMELAG" target="_blank" rel="noopener">RKI AMELAG</a>. The “Status in this run” column states, per country, whether a feed was actually ingested or is only a known feed not yet wired in — a registry entry is not data in hand.</p>
+    </article>`;
 
   if(!D.global_coverage||!D.global_coverage.length){
-    el.innerHTML=head+`<article class="panel c12"><header><h2>Not populated in this run</h2></header>
-      <p>The sanitation denominator comes from the WHO/UNICEF Joint Monitoring Programme household workbook, which this pipeline downloads and parses on each run. It did not parse this time — either the download failed, or the workbook's sheet and column layout changed from what the parser recognises. The Audit log records which.</p>
-      <p>The view stays empty rather than estimating a denominator it does not have. If a frozen JMP extract is present in the repository it is used as a fallback, and the next run will try the live download again.</p>
-      <p class="small muted">The German AMELAG fetch is attempted on every run and reported on the Audit log whether or not it succeeds.</p></article>`+sources;
+    el.innerHTML=head+`<article class="panel c12"><header><h2>Global coverage</h2></header>
+      ${notLoaded('The sanitation denominator','WHO/UNICEF Joint Monitoring Programme household world workbook (<a href="https://washdata.org/data/downloads" target="_blank" rel="noopener">washdata.org</a>), downloaded and parsed on each run','Either the download failed or the workbook&rsquo;s sheet and column layout changed from what the parser recognizes; the Audit log records which. If a frozen JMP extract is present in the repository it is used as a fallback. The German AMELAG and World Bank fetches are attempted every run and reported there too.')}</article>`+sources;
     return;
   }
 
@@ -916,7 +1041,7 @@ global(){
     <div class="chart" id="gl-bars"></div>
     <div class="tbl"><table><tr><th>Income group</th><th class="n">Countries</th><th class="n">Open feed</th><th class="n">Median sewer %</th><th class="n">Observable</th></tr>
       ${inc.map(i=>`<tr><td>${esc(i.income_group)}</td><td class="n">${i.countries}</td><td class="n">${i.countries_with_open_feed}</td><td class="n">${fmt(i.median_sewer_connected_pct,0)}%</td><td class="n">${fmt(i.pct_population_observable,0)}%</td></tr>`).join('')}</table></div>
-    <p class="note">The gradient is the finding: where sewer connection is lowest, surveillance capacity is lowest too, so the populations least observable by this method are also the least likely to be covered by a programme that could observe them.</p></article>`:''}
+    <p class="note">The gradient is the finding: where sewer connection is lowest, surveillance capacity is lowest too, so the populations least observable by this method are also the least likely to be covered by a program that could observe them.</p></article>`:''}
   ${hasSM?`<article class="panel c12"><header><h2>Sanitation is not the same as visibility</h2></header>
     <p>“Safely managed sanitation” (World Bank <span class="mono">SH.STA.SMSS.ZS</span>) counts septic tanks and improved latrines as success — and rightly so, as public health. But neither reaches a treatment plant, so neither can be observed by testing wastewater. The difference between the two columns below is, approximately, <b>the population with working sanitation that this method still cannot see.</b></p>
     <div class="statgrid">
@@ -934,7 +1059,7 @@ global(){
   if(inc.length){
     hbars(document.getElementById('gl-bars'),
       inc.map(i=>({label:i.income_group,v:i.pct_population_observable??0})),
-      {min:0,max:100,left:130,fmt:v=>fmt(v,0)+'%'});
+      {min:0,max:100,left:140,bh:34,fmt:v=>fmt(v,0)+'%'});
   }
 },
 
@@ -946,12 +1071,12 @@ tennessee(){
   const q=D.tn_equity[0];
   el.innerHTML=`<div class="head"><h1>Tennessee</h1><p class="muted">How much of Tennessee’s 95 counties CDC wastewater surveillance reaches, and how it has changed.</p></div>
   <div class="statgrid"><div class="stat"><span class="label">Ever monitored</span><span class="big">${obs.length}<span class="small muted"> / 95</span></span></div><div class="stat"><span class="label">Analysis-ready</span><span class="big">${ready.length}<span class="small muted"> / 95</span></span></div><div class="stat"><span class="label">Reporting now</span><span class="big" style="color:var(--hi)">${now.length}<span class="small muted"> / 95</span></span><span class="small muted">${now.map(c=>c.county_name).join(' and ')}</span></div></div>
-  <div class="grid"><article class="panel c7"><div class="mapbox" id="t-map"></div>${legend(Object.entries(ST).map(([k,v])=>[css(v),k]))}</article>
-  <article class="panel c5"><header><h2>Monitored counties</h2></header><div class="tbl"><table class="stack"><tr><th>County</th><th class="n">Weeks</th><th>Last season</th><th>Status</th></tr>
+  <div class="grid"><article class="panel c12"><div class="mapbox" id="t-map"></div>${legend(Object.entries(ST).map(([k,v])=>[css(v),k]))}</article>
+  <article class="panel c12"><header><h2>Monitored counties</h2></header><div class="tbl"><table class="stack"><tr><th>County</th><th class="n">Weeks</th><th>Last season</th><th>Status</th></tr>
   ${obs.map(c=>`<tr><td class="lead">${esc(c.county_name)}</td><td class="n" data-l="Weeks">${c.surveillance_weeks}</td><td class="mono" data-l="Last season">${c.last_season_with_data??'—'}</td><td data-l="Status"><span style="display:inline-flex;gap:6px;align-items:baseline"><span class="chip sw" style="background:${css(ST[c.status])};flex:none"></span><span>${c.status}</span></span></td></tr>`).join('')}</table></div></article></div>
-  <div class="grid"><article class="panel c4"><header><h2>Wastewater vs. ED</h2><span class="small muted">same-week Spearman ρ</span></header>
+  <div class="grid"><article class="panel c12"><header><h2>Wastewater vs. ED</h2><span class="small muted">same-week Spearman ρ</span></header>
     <div class="chart" id="t-rho"></div></article>
-  <article class="panel c8"><header><h2>Seasonal peaks</h2><span class="small muted">seasons meeting coverage criteria</span></header>
+  <article class="panel c12"><header><h2>Seasonal peaks</h2><span class="small muted">seasons meeting coverage criteria</span></header>
     <div class="tbl"><table class="tight"><tr><th>Pathogen</th><th>Season</th><th class="n">Ready counties</th><th>WW peak</th><th>ED peak</th><th class="n">Lead</th></tr>
     ${D.tn_seasonal.filter(s=>s.eligible_for_tennessee_seasonal_inference).map(s=>`<tr><td class="nw">${s.pathogen}</td><td class="mono nw">${s.season}</td><td class="n">${s.season_ready_counties}/${s.observed_counties}</td><td>${dateFmt(s.ww_peak_week)}</td><td>${dateFmt(s.clinical_peak_week)}</td><td class="n">${s.ww_lead_to_clinical_peak_weeks>0?'+':''}${s.ww_lead_to_clinical_peak_weeks}${s.implausible_lead_flag?' <span class="flag">⚑</span>':''}</td></tr>`).join('')}</table></div>
     ${D.tn_seasonal.some(s=>s.eligible_for_tennessee_seasonal_inference&&s.implausible_lead_flag)?'<p class="callout">⚑ Flagged leads are not real lags. SARS-CoV-2 has summer and winter waves, and in these seasons the wastewater and clinical peaks fell in different waves.</p>':''}</article></div>
@@ -966,13 +1091,13 @@ genomics(){
   const el=document.getElementById('v-genomics');
   const yrs=[...new Set(D.genomic_year.map(r=>r.release_year))].sort();
   el.innerHTML=`<div class="head"><h1>Genomics & antimicrobial resistance</h1><p class="muted">Resistance genes measured in wastewater, and the public NCBI genome records behind each pathogen.</p></div>
-  <div class="grid"><article class="panel c6"><header><h2>Resistance genes in wastewater</h2><span class="small muted">share of sites with detection</span></header><div class="chart" id="g-amr"></div></article>
-  <article class="panel c6"><header><h2>Mean detection by state</h2></header><div class="mapbox" id="g-map"></div>
-    <div class="legend"><span>Lower</span><i style="background:linear-gradient(90deg,var(--accent-soft),var(--accent));width:90px"></i><span>Higher</span><span><i style="background:var(--nodata)"></i>No sites</span></div></article></div>
+  <div class="grid"><article class="panel c12"><header><h2>Mean detection by state</h2></header><div class="mapbox" id="g-map"></div>
+    <div class="legend"><span>Lower</span><i style="background:linear-gradient(90deg,var(--accent-soft),var(--accent));width:90px"></i><span>Higher</span><span><i style="background:var(--nodata)"></i>No sites</span></div></article>
+  <article class="panel c12"><header><h2>Resistance genes in wastewater</h2><span class="small muted">share of sites with detection</span></header><div class="chart" id="g-amr"></div></article></div>
   <article class="panel"><header><h2>NCBI virus genome records</h2></header><div class="tbl"><table class="stack"><tr><th>Pathogen</th><th class="n">Records</th><th class="n">With collection date</th><th class="n">Complete genomes</th><th>Main hosts</th><th>Main locations</th></tr>
   ${D.genomic.map(g=>`<tr><td class="lead nw">${g.pathogen}</td><td class="n" data-l="Records">${g.records.toLocaleString()}</td><td class="n" data-l="With collection date">${g.dated_collection.toLocaleString()}</td><td class="n" data-l="Complete genomes">${g.complete_genome_records.toLocaleString()}</td><td class="small" data-l="Main hosts">${Object.entries(D.genomic_hosts[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td><td class="small" data-l="Main locations">${Object.entries(D.genomic_places[g.pathogen]||{}).slice(0,3).map(([k,v])=>`${esc(k)} (${v})`).join(', ')}</td></tr>`).join('')}</table></div>
   <p class="note">Most recent records from NCBI Virus per pathogen. These are public sequence records, not sequences from the wastewater samples.</p></article>`;
-  hbars(document.getElementById('g-amr'),[...D.amr].sort((a,b)=>b.detection_rate_pct-a.detection_rate_pct).map(a=>({label:`${a.target} · ${a.amr_class}`,v:a.detection_rate_pct})),{min:0,max:100,left:170,w:520,bh:17,fmt:v=>v.toFixed(0)+'%'});
+  hbars(document.getElementById('g-amr'),[...D.amr].sort((a,b)=>b.detection_rate_pct-a.detection_rate_pct).map(a=>({label:`${a.target} · ${a.amr_class}`,v:a.detection_rate_pct})),{min:0,max:100,left:200,bh:24,fmt:v=>v.toFixed(0)+'%'});
   const by=Object.fromEntries(D.amr_state.map(s=>[s.state_code,s]));const ext=d3.extent(D.amr_state,s=>s.mean_detection_rate_pct);
   const col=d3.scaleLinear().domain(ext).range([css('--accent-soft'),css('--accent')]);
   stateMap(document.getElementById('g-map'),st=>by[st]?col(by[st].mean_detection_rate_pct):css('--nodata'),(st,name)=>by[st]?`<b>${esc(name)}</b><div>${fmt(by[st].mean_detection_rate_pct,1)}% mean detection</div><div>${by[st].sites} site${by[st].sites>1?'s':''}</div>`:`<b>${esc(name)}</b><div>No AMR sites</div>`);
@@ -998,13 +1123,22 @@ structures(){
       <p class="small muted">Residues shown in this structure’s numbering. Source: UniProt <span class="mono">${esc(ordered[0].uniprot_accession||'')}</span>.</p></div>`};
   el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One reference structure per pathogen from the RCSB Protein Data Bank, each passing the pipeline’s structural QC. Each card lists the protein’s curated functional regions from UniProt, mapped onto that structure’s own residue numbering; select a region to highlight it in 3D.</p></div>
   <div class="grid">${D.structures.map(s=>`<article class="panel c4 scard">
-    <figure class="sfig"><img loading="lazy" alt="${esc(s.protein)} (PDB ${s.pdb_entry_id}) structure image" src="${esc(s.image_url||`img/structures/${s.pdb_entry_id}.png`)}" data-alt="img/structures/${s.pdb_entry_id}.png" onerror="if(this.dataset.alt&&this.src.indexOf(this.dataset.alt)<0){this.src=this.dataset.alt}else{this.closest('figure').hidden=true}"></figure>
-    <header><h2>${s.pathogen}</h2><a class="mono" href="${s.pdb_entry_url}" target="_blank" rel="noopener">PDB ${s.pdb_entry_id} ↗</a></header>
-    <p style="font-weight:600">${esc(s.protein)}</p><p class="small muted">${esc(s.rcsb_title)}</p>
-    <div class="kv small"><div><span class="label">Method</span><b style="font-family:var(--body);font-size:.82rem">${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')}</b></div><div><span class="label">Resolution</span><b>${fmt(s.resolution_a,2)} Å</b></div><div><span class="label">C-alpha atoms</span><b>${s.ca_atom_count.toLocaleString()}</b></div></div>
-    <p class="small muted">UniProt <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc} · DOI <a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">10.2210/pdb${s.pdb_entry_id}/pdb</a></p>
+    <figure class="sfig">
+      <div class="sfig-ph" aria-hidden="true"><span class="mono">${s.pdb_entry_id}</span></div>
+      <img loading="lazy" alt="${esc(s.protein)} (PDB ${s.pdb_entry_id}) structure image" src="${esc(s.image_url||`img/structures/${s.pdb_entry_id}.png`)}" data-alt="img/structures/${s.pdb_entry_id}.png" onerror="if(this.dataset.alt&&this.src.indexOf(this.dataset.alt)<0){this.src=this.dataset.alt}else{this.hidden=true}">
+      <span class="sfig-tag mono">${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')} · ${fmt(s.resolution_a,2)} Å</span>
+    </figure>
+    <div class="shead"><h2>${s.pathogen}</h2><p class="sprot">${esc(s.protein)}</p><p class="small muted stitle">${esc(s.rcsb_title)}</p></div>
+    <dl class="sspec">
+      <div><dt>Method</dt><dd>${s.method.replace('ELECTRON MICROSCOPY','Cryo-EM').replace('X-RAY DIFFRACTION','X-ray')}</dd></div>
+      <div><dt>Resolution</dt><dd class="mono">${fmt(s.resolution_a,2)} Å</dd></div>
+      <div><dt>Cα atoms</dt><dd class="mono">${s.ca_atom_count.toLocaleString()}</dd></div>
+    </dl>
     ${regionBlock(s)}
-    <button class="btn small" data-mol="${s.pdb_entry_id}" data-name="${esc(s.pathogen+' · '+s.protein)}">View in 3D</button></article>`).join('')}</div>
+    <div class="sact"><button class="btn primary" data-mol="${s.pdb_entry_id}" data-name="${esc(s.pathogen+' · '+s.protein)}">View in 3D</button>
+      <a class="btn small" href="${s.pdb_entry_url}" target="_blank" rel="noopener">PDB ${s.pdb_entry_id} ↗</a></div>
+    <p class="small muted sref">UniProt <span class="mono">${esc((s.uniprot_ids||'').replace(/;/g,', '))}</span> · QC ${s.figure_component_qc} · <a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">doi:10.2210/pdb${s.pdb_entry_id}/pdb</a></p>
+    </article>`).join('')}</div>
   <article class="panel scope"><h2>About these annotations</h2>
     <p class="small">Functional regions are imported unchanged from <a href="https://www.uniprot.org" target="_blank" rel="noopener">UniProtKB</a>’s curated feature table for the same protein each structure contains. Residue ranges are converted from UniProt numbering to the structure’s own author numbering using RCSB’s published sequence alignments, so a highlighted region sits where the depositors placed it. Regions UniProt lists but the structure does not resolve are left out rather than approximated.</p>
     <p class="small">This is a reference and surveillance layer: NWGS Grid™ reproduces and cites published annotations alongside the structure they describe. It does not predict, score or rank anything about these regions, and it is not intended as design guidance. Every row carries its UniProt accession and evidence codes so any claim can be traced to its source.</p>
@@ -1034,7 +1168,7 @@ structures(){
       viewer.addModel(txt,fmt);
       const all=((D.regions||{})[id]||[]).filter(r=>r.pdb_start!=null);
       const leg=document.getElementById('mol-leg');
-      // one colour per region, stable across openings
+      // one color per region, stable across openings
       all.forEach((r,i)=>{r._c=RCOL[i%RCOL.length]});
       const resiOf=r=>r.pdb_start===r.pdb_end?String(r.pdb_start):`${r.pdb_start}-${r.pdb_end}`;
       const nameAt=(ch,resi)=>{const m=all.filter(r=>r.pdb_chain===ch&&resi>=r.pdb_start&&resi<=r.pdb_end);
@@ -1058,7 +1192,7 @@ structures(){
         viewer.render();
         if(focus){viewer.zoomTo({chain:focus.pdb_chain,resi:resiOf(focus)},800)}else{viewer.zoomTo();viewer.render();viewer.zoom(1.05,600)}
       }
-      // a labelled pointer sitting on the focused region
+      // a labeled pointer sitting on the focused region
       function addPointer(r){
         try{
           viewer.addLabel(`${r.feature_description}  ${r.pdb_chain} ${resiOf(r)}`,
@@ -1161,13 +1295,13 @@ about(){
     </article>
   </div>
   <div class="grid">
-  <article class="panel c7 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><h2>Why I built NWGS Grid™</h2>
+  <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><h2>Why I built NWGS Grid™</h2>
     <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor.</p>
     <p>But that signal is spread across separate CDC datasets, clinical feeds and vulnerability indices. It changes every week, and it reaches some communities far better than others. I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses.</p>
-    <p><b>NWGS Grid™ is independent work.</b> Victoria created and built every part of it — the pipeline, the validation checks, the weekly automation and this site — outside any employer, fellowship or sponsored programme, using only public data.</p>
+    <p><b>NWGS Grid™ is independent work.</b> Victoria created and built every part of it — the pipeline, the validation checks, the weekly automation and this site — outside any employer, fellowship or sponsored program, using only public data.</p>
     <p>That last question is personal. In my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.</p>
     <p class="sig">— Victoria</p></article>
-  <article class="panel c5"><h2>Credentials &amp; affiliations</h2>
+  <article class="panel c12"><h2>Credentials &amp; affiliations</h2>
     <h3>Education &amp; training</h3>
     <ul class="creds">
       <li><b>Ph.D. student, Data Science</b> (Cybersecurity concentration), Meharry Medical College, expected 2027 · Doctoral Research Scholar, SACS Cybersecurity Research Center</li>
@@ -1212,13 +1346,13 @@ about(){
           <td data-l="Today" class="small">Local spatial clustering is computed each week and correlated against clinical emergency-department data and social vulnerability. <a href="#equity" data-go="equity">Coverage &amp; equity</a></td></tr>
     </table></div>
     <p class="small muted">The poster’s stated limitation — missing sewer-access location data for the study site — is the same problem that the representativeness measure now addresses at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is.</p>
-    <p class="note">The poster was collaborative work with the co-authors named above. <b>NWGS Grid™ is independent work</b> that followed it: Victoria created and built every part of the platform herself, outside any employer, fellowship or sponsored programme, using only public data.</p></article>
+    <p class="note">The poster was collaborative work with the co-authors named above. <b>NWGS Grid™ is independent work</b> that followed it: Victoria created and built every part of the platform herself, outside any employer, fellowship or sponsored program, using only public data.</p></article>
   <article class="panel domains"><h2>Domains</h2>
     <p class="small">Victoria’s work runs along one thread: the critical systems communities depend on — health, energy, environment — and the geospatial and AI methods that reveal where those systems are strong, where they fail and whom they reach. NWGS Grid™ is the public-health expression of that thread.</p>
     <div class="tbl"><table class="stack dtable"><tr><th>Domain</th><th>Focus</th><th>Areas</th></tr><tr><td class="lead dname" data-l="Domain">Biosurveillance &amp; public health</td><td data-l="Focus" class="small">Turning environmental and clinical signals into early warning, and asking who the system reaches.</td><td data-l="Areas"><ul class="tags"><li>Wastewater biosurveillance</li><li>Genomic epidemiology</li><li>Spatial epidemiology</li><li>Metagenomics &amp; NGS</li><li>Structural biology</li><li>Health equity &amp; social vulnerability</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Critical infrastructure &amp; cybersecurity</td><td data-l="Focus" class="small">Protecting operational systems and modelling how they behave under stress.</td><td data-l="Areas"><ul class="tags"><li>Nuclear cybersecurity</li><li>ICS/OT security</li><li>Power grids &amp; smart grids</li><li>Grid resilience</li><li>Digital twins</li><li>Anomaly detection</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Environment &amp; remote sensing</td><td data-l="Focus" class="small">Measuring land, air and climate pressure from satellite and sensor data.</td><td data-l="Areas"><ul class="tags"><li>GIS &amp; geospatial intelligence</li><li>Remote sensing</li><li>Forestry &amp; biomass</li><li>Carbon sequestration</li><li>Air quality</li><li>Climate hazards &amp; wildfire risk</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">AI &amp; application development</td><td data-l="Focus" class="small">Building the models, pipelines and interfaces that put the analysis in people’s hands.</td><td data-l="Areas"><ul class="tags"><li>App development, front end &amp; back end</li><li>Machine learning &amp; explainable AI</li><li>Retrieval-augmented generation (RAG)</li><li>Automated data pipelines</li><li>Dashboards &amp; public data portals</li></ul></td></tr></table></div>
     <p class="small muted">Full project history on her <a href="https://victorialovefranklin.github.io/victoria-franklin-site/" target="_blank" rel="noopener">personal website</a>.</p></article>
   <div class="grid">
-  <article class="panel c7"><h2>Work with NWGS Grid</h2>
+  <article class="panel c6"><h2>Work with NWGS Grid</h2>
     <div class="opt"><h3>License request</h3><p class="small muted">Use of the code, pipeline, figures or data products in research, a product or a service.</p>
       ${SB?`<details><summary class="btn">Request a license</summary><form class="form" id="lic-form" style="margin-top:10px">
         <div class="row2"><label>Name<input id="lic-name" required maxlength="200" autocomplete="name"></label><label>Email<input id="lic-email" type="email" required maxlength="200" autocomplete="email" value="${esc(USER?.email||'')}"></label></div>
@@ -1267,14 +1401,15 @@ alerts(){
   <div class="controls"><div class="seg" id="al-p">${['All',...ROUTINE].map(p=>`<button aria-pressed="${p==='All'}" data-p="${p}">${p==='All'?'All three':p}</button>`).join('')}</div>
     <label class="selectwrap"><span class="sr">State</span><select id="al-st"></select></label></div>
   <div class="grid">
-    <article class="panel c8"><div class="mapbox" id="al-map"></div><div id="al-legend"></div></article>
-    <div class="c4 stackcol"><article class="panel" id="al-sum"></article>${other.length?`<article class="panel"><h2>National signals</h2><div>${other.map(alertRow).join('')}</div></article>`:''}</div>
+    <article class="panel ${other.length?'c5':'c12'}" id="al-sum"></article>
+    ${other.length?`<article class="panel c7"><h2>National signals</h2><div class="natsig">${other.map(alertRow).join('')}</div></article>`:''}
+    <article class="panel c12"><div class="mapbox" id="al-map"></div><div id="al-legend"></div></article>
   </div>
   <div id="al-list" class="statecards"></div>
-  <p class="note">Same rule as the weekly email alerts: a county is High when its median site z-score over the latest four weeks is above 1.0.</p>
+  <p class="note">Same rule as the weekly email alerts: a county is High when its median site z-score over the latest four weeks is above 1.0. Each chip gives the county and that z-score, and values of <span class="zkey z2">2.0 and above</span> or <span class="zkey z3">3.0 and above</span> are emphasised so the strongest signals stand out. A z-score compares a site only against its own history, so a high value means unusual for that place, not more cases than somewhere else.</p>
   <div class="head" style="margin-top:12px"><span class="eyebrow">Emerging pathogens</span><h2 style="font-size:1.5rem">Where H5 bird flu, measles and mpox were detected</h2><p class="muted">CDC tests these as detected / not detected. A site counts as positive if any sample tested positive in the latest four weeks.</p></div>
   <div class="controls"><div class="seg" id="em-p">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p==='Influenza A(H5)'?'H5 bird flu':p}</button>`).join('')}</div></div>
-  <div class="grid"><article class="panel c8"><div class="mapbox" id="em-map"></div><div id="em-legend"></div></article><article class="panel c4" id="em-list"></article></div>`;
+  <div class="grid"><article class="panel c12"><div class="mapbox" id="em-map"></div><div id="em-legend"></div></article><article class="panel c12" id="em-list"></article></div>`;
   const sel=document.getElementById('al-st');
   function draw(){
     const H=highBy(), max=Math.max(1,d3.max(Object.values(H),d=>d.total)||1);
@@ -1303,7 +1438,7 @@ alerts(){
     const show=ST?[ST]:states;
     document.getElementById('al-list').innerHTML=(ST?`<div class="filterbar"><span>Showing <b>${esc(STATE_NAMES[ST])}</b></span><button class="btn small" id="al-clear">Show all states</button></div>`:'')+
       (show.length?`<div class="grid">${show.map(s=>{const h=H[s];return `<article class="panel c4 statecard"><header><h2>${esc(STATE_NAMES[s])}</h2><span class="small muted">${h?`${h.total} at High`:'none at High'}</span></header>
-        ${h?Object.entries(h.by).map(([p,c])=>`<div class="pblock"><div class="ptitle"><span class="dot" style="background:var(--hi)"></span>${p} <span class="muted small">· ${c.length} ${c.length>1?'counties':'county'}</span></div><p class="small">${c.sort((a,b)=>b[1]-a[1]).map(([n,z])=>`${esc(n.replace(/ (County|Parish|Borough|Census Area|Municipality)$/,''))} <span class="muted mono">${fmt(z,1)}</span>`).join(' · ')}</p></div>`).join(''):`<p class="small muted">No counties with wastewater sites are at High for ${P==='All'?'these viruses':esc(P)} right now.</p>`}
+        ${h?Object.entries(h.by).map(([p,c])=>`<div class="pblock"><div class="ptitle"><span class="dot" style="background:${pcol(p)}"></span>${p} <span class="muted small">· ${c.length} ${c.length>1?'counties':'county'}</span></div><ul class="clist">${c.sort((a,b)=>b[1]-a[1]).map(([n,z])=>`<li class="${zband(z)}"><span class="cname">${esc(n.replace(/ (County|Parish|Borough|Census Area|Municipality)$/,''))}</span><span class="cz mono">${fmt(z,1)}</span></li>`).join('')}</ul></div>`).join(''):`<p class="small muted">No counties with wastewater sites are at High for ${P==='All'?'these viruses':esc(P)} right now.</p>`}
         <button class="btn small" data-alertme="${s}">Alert me for ${esc(STATE_NAMES[s])}</button></article>`}).join('')}</div>`:'<p class="muted">No counties are at High right now.</p>');
   }
   el.querySelector('#al-p').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;P=b.dataset.p;el.querySelectorAll('#al-p button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
@@ -1318,7 +1453,11 @@ alerts(){
   function drawEm(){
     const box=document.getElementById('em-map'),list=document.getElementById('em-list'),leg=document.getElementById('em-legend');
     const EC=D.emerging_county&&D.emerging_county[EP];
-    if(!EC){box.innerHTML='';leg.innerHTML='';list.innerHTML=`<p class="small muted">State-level detections appear after the next weekly update. National trends are on the <a href="#dashboard" data-go="dashboard">dashboard</a>.</p>`;return}
+    if(!EC){box.innerHTML='';leg.innerHTML='';
+      list.innerHTML=notLoaded(`County detections for ${EP}`,
+        'CDC NWSS emerging-pathogen datasets (H5, measles and mpox), summarised to county level for the latest four weeks',
+        'CDC reports these three as detected / not detected rather than as activity levels, so this layer needs the per-county detection table from the run. National trends for the same pathogens are on the <a href="#dashboard" data-go="dashboard">dashboard</a>.');
+      return}
     const byS={};Object.entries(EC).forEach(([f,[tested,det,last]])=>{const n=D.names[f];if(!n)return;const s=n[1];(byS[s]??={tested:0,det:0,counties:[]});byS[s].tested+=tested;byS[s].det+=det;if(det>0)byS[s].counties.push([n[0],det,last])});
     const maxD=Math.max(1,d3.max(Object.values(byS),d=>d.det)||1);
     const col=d3.scaleLinear().domain([1,maxD]).range([css('--gold-soft'),css('--warn')]).interpolate(d3.interpolateRgb);
@@ -1345,19 +1484,20 @@ audit(){
   <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono">${R.n_pass} pass · ${R.n_warning} warn · ${R.n_fail} fail</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
   ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
   <article class="panel"><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
-  ${D.audit.map(a=>{const phil=/PHIL/.test(a.component)&&/PARTIAL_IMAGES/.test(a.status);return `<tr><td class="lead">${esc(a.component)}</td><td class="status-${phil?'INFO':cls(a.status)}" style="white-space:nowrap;font-weight:600">${phil?'INFO · OPTIONAL':esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}${phil?'. Optional photos from CDC’s image library (PHIL), which blocks automated downloads; no analysis uses them.':''}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`}).join('')}</table></div></article>`;
+  ${D.audit.map(a=>{const phil=/PHIL/.test(a.component)&&/PARTIAL_IMAGES/.test(a.status);return `<tr><td class="lead">${esc(a.component)}</td><td class="status-${phil?'INFO':cls(a.status)}" style="white-space:nowrap;font-weight:600">${phil?'INFO · OPTIONAL':esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}${phil?'. Optional photos from CDC’s image library (PHIL), which blocks automated downloads; no analysis uses them.':''}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`}).join('')}</table></div></article>
+  <p class="note srcline"><b>Sources.</b> Checks are generated by the pipeline itself during the run (validation summary and per-table audits), together with export-time consistency checks that confirm every table in this build came from the same run. Nothing on this page is entered by hand. The run identifier and data-through date shown in the header identify the snapshot these results describe, and each week&rsquo;s log is archived with its tables and figures as a permanent release.</p>`;
 },
 
 glossary(){
   const el=document.getElementById('v-glossary');
   const G=[
    ['Global coverage',[
-    ['global-coverage','Global coverage','How much of a country’s population wastewater surveillance could observe at all, which depends on how many people are connected to a sewer. It is a ceiling on the method, measured before asking whether a programme exists.'],
+    ['global-coverage','Global coverage','How much of a country’s population wastewater surveillance could observe at all, which depends on how many people are connected to a sewer. It is a ceiling on the method, measured before asking whether a program exists.'],
     ['sewer-connected','Sewer-connected population','The share of people whose household waste reaches a sewer system rather than a septic tank, pit latrine, or no sanitation. Only this share can ever be seen by testing wastewater, however good the laboratory is.'],
-    ['observable-population','Observable population','Population multiplied by the sewer-connected share — the number of people a perfectly run wastewater programme in that country could detect. The remainder is invisible to the method regardless of funding.'],
+    ['observable-population','Observable population','Population multiplied by the sewer-connected share — the number of people a perfectly run wastewater program in that country could detect. The remainder is invisible to the method regardless of funding.'],
     ['income-group','Income group','The World Bank classification of countries as low, lower-middle, upper-middle or high income. Shown here because sewer connection and surveillance capacity both track it closely, which is the central finding of this page.'],
-    ['jmp','WHO/UNICEF JMP','The Joint Monitoring Programme for Water Supply, Sanitation and Hygiene — the standard international source for how many people in each country have sewer connections. It supplies the denominator for this page.'],
-    ['open-feed','Open machine-readable feed','A national programme that publishes its wastewater data in a form software can read directly, under a licence permitting reuse. Very few do. A dashboard a human can look at is not a feed; being listed here means the data can be downloaded and recomputed.'],
+    ['jmp','WHO/UNICEF JMP','The Joint Monitoring Program for Water Supply, Sanitation and Hygiene — the standard international source for how many people in each country have sewer connections. It supplies the denominator for this page.'],
+    ['open-feed','Open machine-readable feed','A national program that publishes its wastewater data in a form software can read directly, under a license permitting reuse. Very few do. A dashboard a human can look at is not a feed; being listed here means the data can be downloaded and recomputed.'],
     ['insdc','INSDC / NCBI Virus / GenBank','The International Nucleotide Sequence Database Collaboration and its public archives. Sequences here are in the public domain and may be redistributed, which is why every sequence and phylogenetic tree shown on this site comes from them.'],
     ['gisaid','GISAID','A widely used virus sequence database, including wastewater-relevant collections and phylogenetic trees. Its Database Access Agreement does not permit redistributing data — or anything derived from it — through another portal, so GISAID data is not shown anywhere on this site. It may be used in published research with acknowledgement, and is cited there instead.'],
     ['phylogenetic-tree','Phylogenetic tree','A branching diagram showing how versions of a virus are related by descent, used to tell whether cases share a common origin or arrived separately.'],
@@ -1424,7 +1564,7 @@ glossary(){
     ['domain','Domain','A self-contained, independently folding part of a protein, usually with its own function.'],
     ['binding-site','Binding site','Residues a protein uses to attach to another molecule, such as a receptor on a human cell.'],
     ['residue','Residue · residue numbering','A residue is one amino-acid building block. Numbering counts along the protein chain, but a structure’s own (author) numbering can differ from UniProt’s, so ranges are converted before anything is highlighted.'],
-    ['chain','Chain','One protein molecule within a structure, labelled A, B, C and so on. A spike protein, for example, is three identical chains together.'],
+    ['chain','Chain','One protein molecule within a structure, labeled A, B, C and so on. A spike protein, for example, is three identical chains together.'],
     ['evidence','Evidence codes','Short codes recording how an annotation was established, for example from experiment or by similarity to a studied protein.'],
     ['mapped','Mapped · not in structure','Mapped means UniProt’s region lines up with residues this structure actually resolves. Regions the structure does not cover are left out rather than approximated.']]],
    ['Genomics & structures',[
@@ -1449,6 +1589,20 @@ methods(){
   const el=document.getElementById('v-methods');
   const acc=new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   el.innerHTML=`<div class="head"><h1>Methods &amp; sources</h1><p class="muted">How the numbers on this site are made, and every dataset and tool they come from.</p></div>
+  <article class="panel c12"><header><h2>Methods</h2><span class="small muted">what the pipeline does, in order</span></header>
+    <p>Every figure on this site is produced by one automated pipeline that runs weekly and rebuilds the whole site from a single frozen snapshot. The steps below run in this order; each is recorded in the run log, and the <a href="#audit" data-go="audit">Audit log</a> reports the result of every check.</p>
+    <ol class="methodsteps">
+      <li><b>Acquisition.</b> Six CDC National Wastewater Surveillance System pathogen datasets, the NSSP emergency-department series and CDC PLACES are pulled from the Socrata API on data.cdc.gov. Each dataset is saved unmodified as a frozen snapshot with its row count and the provider's own update timestamp, so the inputs to any past run can be recovered exactly.</li>
+      <li><b>Harmonization.</b> The six wastewater datasets do not share a schema. Fields are mapped onto a common set of names through an explicit alias table, and the mapping actually used is written out per pathogen rather than assumed. County identifiers are normalized to five-digit FIPS, and sewersheds that span several counties are kept in their native multi-county form for coverage work instead of being forced to one county.</li>
+      <li><b>Measurement selection.</b> Where a dataset offers more than one concentration measure, one is chosen by a fixed, documented hierarchy: fecal-normalized first, then flow-population-normalized, then raw. The choice is recorded per row, so no figure silently mixes measurement types.</li>
+      <li><b>Within-site standardization.</b> Absolute concentrations are not comparable between sites, because laboratories, methods and sewersheds differ. Each site is therefore compared only against its own history: concentrations are log-transformed and converted to a z-score within that site, grouped by laboratory method and sample matrix. County and national figures are medians across those standardized values, never averages of raw concentrations.</li>
+      <li><b>Quality control.</b> Inhibition and no-template-control flags are carried through rather than dropped, zero and negative concentrations are treated as missing before log transformation, and a sample never tested is recorded as untested rather than as a negative.</li>
+      <li><b>Analysis.</b> Clinical alignment uses Spearman cross-correlation at lags of 0&ndash;6 weeks with Benjamini&ndash;Hochberg correction across all state&ndash;pathogen pairs. Spatial clustering uses global and local Moran's I on a six-nearest-neighbour graph in EPSG:5070 with permutation inference. Coverage models are binomial GLMs at county level. Forecast models are evaluated only on weeks they never saw.</li>
+      <li><b>Validation gate.</b> The run passes through automated checks covering parsing, county counts, pathogen independence, spatial and model audits and cross-table consistency. Warnings are published with an explanation attached. <b>If any check fails, nothing is published and the previous week's site is kept.</b></li>
+      <li><b>Publication.</b> The site is one static page built from a single export, so every table and chart on it comes from the same run. The run identifier and data-through date are shown on every page, and each week's tables, figures and log are archived as a permanent release for citation.</li>
+    </ol>
+    <p class="note"><b>What this pipeline does not do.</b> It does not infer or impute missing observations, estimate values for unmonitored counties, carry numbers over from a previous run, or adjust published figures after the fact. Where a source does not load, the affected panel says so and shows nothing. Where an annotation comes from an external database it is reproduced and cited rather than predicted.</p>
+  </article>
   <article class="panel"><header><h2>Data sources &amp; references</h2><span class="small muted">accessed ${acc}</span></header>
   <ol class="refs">
     ${D.sources.map(s=>`<li>Centers for Disease Control and Prevention. <i>${esc(s.dataset_name)}</i> [dataset <span class="mono">${s.dataset_id}</span>]. National Wastewater Surveillance System (NWSS). data.cdc.gov; updated ${dateFmt(String(s.updated_utc).slice(0,10))}; ${s.rows.toLocaleString()} rows. <a href="${s.source_url}" target="_blank" rel="noopener">${s.source_url.replace('https://','')}</a></li>`).join('')}

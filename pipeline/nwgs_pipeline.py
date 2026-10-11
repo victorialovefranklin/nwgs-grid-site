@@ -5403,7 +5403,7 @@ def lead_time_decomposition(best_lag, raw_manifest, wastewater):
                             surveillance value of the signal was not realised.
 
     The literature almost always reports shedding lead alone, which overstates
-    usable warning time. Nothing here is modelled; all three terms are
+    usable warning time. Nothing here is modeled; all three terms are
     differences between observed dates.
     """
     if best_lag is None or len(best_lag) == 0:
@@ -5676,7 +5676,7 @@ def county_representativeness(wastewater, coverage, svi=None):
                         monitored counties in the same state. Positive means
                         this county is more vulnerable than its state's
                         monitored average, i.e. monitoring is skewed away from it.
-      representativeness  sewer_share penalised by the absolute SVI gap.
+      representativeness  sewer_share penalized by the absolute SVI gap.
 
     The SVI gap is a county-level proxy. A true within-sewershed demographic
     comparison needs block-group service-area boundaries, which CDC NWSS does
@@ -5824,13 +5824,22 @@ def assay_target_panel(path=ASSAY_TARGET_PATH):
 
     a["region_start"] = pd.to_numeric(a["region_start"], errors="coerce")
     a["region_end"] = pd.to_numeric(a["region_end"], errors="coerce")
+    # A citation is what makes a coordinate trustworthy, so rows whose citation
+    # or assay name is self-describing filler are refused outright. Publishing a
+    # placeholder primer coordinate would be worse than publishing nothing.
+    placeholder = (r"\b(?:demo|demonstration|example|sample|placeholder|dummy|test|"
+                   r"illustrative|fake|synthetic|simulated|tbd|todo|lorem|xxx|n/?a)\b")
+    looks_fake = (a["citation"].astype(str).str.contains(placeholder, case=False, regex=True, na=False)
+                  | a["assay_name"].astype(str).str.contains(placeholder, case=False, regex=True, na=False))
     ok = (a[required].notna().all(axis=1)
           & a["citation"].astype(str).str.strip().ne("")
-          & a["region_end"].ge(a["region_start"]))
+          & a["region_end"].ge(a["region_start"])
+          & ~looks_fake)
     dropped = int((~ok).sum())
+    n_fake = int((looks_fake & a["citation"].astype(str).str.strip().ne("")).sum())
     if dropped:
         print(f"[WARN] {dropped} assay-target row(s) dropped for missing citation, "
-              f"accession or coordinates.")
+              f"accession or coordinates" + (f", {n_fake} of which named a placeholder citation." if n_fake else "."))
     a = a[ok].copy()
     a["region_length"] = (a["region_end"] - a["region_start"] + 1).astype(int)
     a["curation_status"] = "curated_with_citation"
@@ -5876,8 +5885,8 @@ def assay_variation_overlay(panel, genomic_records):
 def fetch_amelag(url=AMELAG_URL):
     """Germany's AMELAG site-level wastewater series (Robert Koch-Institut, CC BY 4.0).
 
-    One of only two national wastewater programmes publishing genuinely
-    machine-readable site-level data under an open licence. Fetch failures are
+    One of only two national wastewater programs publishing genuinely
+    machine-readable site-level data under an open license. Fetch failures are
     non-fatal: this layer is supplementary and must never block a run.
     """
     try:
@@ -5886,7 +5895,7 @@ def fetch_amelag(url=AMELAG_URL):
         from io import StringIO
         a = pd.read_csv(StringIO(r.text), sep="\t")
         a["source"] = "RKI AMELAG"
-        a["licence"] = "CC BY 4.0"
+        a["license"] = "CC BY 4.0"
         a["source_url"] = url
         print(f"[OK] AMELAG: {len(a):,} rows")
         return a
@@ -6087,7 +6096,7 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
     data gives that denominator per country. Expressed as a share, the global
     picture is structurally different from the US one - most of the world's
     population is not reachable by this method at all, and the countries with
-    the least sewer connection are the ones with no programme.
+    the least sewer connection are the ones with no program.
 
     Requires the JMP extract as a frozen static input, because the JMP portal
     does not expose a stable machine-readable endpoint. Absent that file this
@@ -6138,7 +6147,7 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
             income_df.drop_duplicates("iso3"), on="iso3", how="left")
         print(f"[OK] income groups attached for {int(g['income_group'].notna().sum()):,} countries")
 
-    # Registry of national programmes known to publish openly licensed,
+    # Registry of national programs known to publish openly licensed,
     # machine-readable wastewater data. Being in this registry is NOT the same
     # as this pipeline having ingested it: only Germany is fetched today, and
     # the feed_status column states that plainly rather than implying coverage
