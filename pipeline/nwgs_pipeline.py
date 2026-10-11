@@ -6043,9 +6043,27 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
                       "could not locate the header row (no country + ISO3 pair in the first 12 rows)", url)
         return pd.DataFrame()
 
-    # JMP uses a two-row header; merge the row above into blank cells where needed.
+    # JMP usually uses a two-row header, but not always. Treating a data row as
+    # the second header row silently welds a value into the column label (the
+    # symptom is a label like "sewer connections 0.4342828184892937") and shifts
+    # the body down by a row. So decide from the content: a real sub-header row
+    # is mostly words, a data row is mostly numbers.
+    def mostly_numeric(vals):
+        filled = [v for v in vals if str(v).strip() and norm(v) != "nan"]
+        if not filled:
+            return False
+        numeric = sum(1 for v in filled if pd.to_numeric(pd.Series([v]), errors="coerce").notna().iloc[0])
+        return numeric / len(filled) > 0.5
+
     top = [norm(c) for c in df.iloc[hdr].tolist()]
-    sub = [norm(c) for c in df.iloc[hdr + 1].tolist()] if hdr + 1 < len(df) else [""] * len(top)
+    next_row = df.iloc[hdr + 1].tolist() if hdr + 1 < len(df) else []
+    two_row = bool(next_row) and not mostly_numeric(next_row)
+    sub = [norm(c) for c in next_row] if two_row else [""] * len(top)
+    body_start = hdr + 2 if two_row else hdr + 1
+    print(f"[OK] JMP header at row {hdr}; "
+          f"{'two-row header' if two_row else 'single-row header'}; "
+          f"data starts at row {body_start}")
+
     cols, carry = [], ""
     for t, s in zip(top, sub):
         if t and t != "nan":
@@ -6067,7 +6085,7 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
             uniq.append(c)
     cols = uniq
 
-    body = df.iloc[hdr + 2:].copy()
+    body = df.iloc[body_start:].copy()
     body.columns = cols[:body.shape[1]]
     body = body.loc[:, [c for c in body.columns if c and c != "nan"]]
 
@@ -6082,12 +6100,6 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
     c_iso = pick(r"^iso ?3")
     c_year = pick(r"^year")
     c_pop = pick(r"population")
-    c_sewer = pick(r"sewer")
-    if not c_country or not c_sewer:
-        record_source("WHO/UNICEF JMP", "FAILED",
-                      f"sheet parsed but no sewer column. Columns seen: {list(body.columns)[:20]}", url)
-        return pd.DataFrame()
-    print(f"[OK] JMP sanitation parsed from sheet '{sheet}' | sewer column: '{c_sewer}'")
 
     # Even with unique labels, a future layout could still hand back a frame.
     # Take the first column in that case rather than letting it raise.
@@ -6096,6 +6108,63 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
             return None
         s = body[name]
         return s.iloc[:, 0] if isinstance(s, pd.DataFrame) else s
+
+    # The sheet carries several sewer columns - national, urban and rural, and
+    # more than one service level. Taking the first match is a coin toss, and a
+    # wrong pick is invisible downstream: the income gradient still looks right
+    # while every denominator is wrong. So each candidate is scored against
+    # countries whose sewer connection is not in doubt, and the run publishes
+    # nothing rather than publish a column that fails them.
+    ANCHORS = {"DEU": "Germany", "NLD": "Netherlands", "GBR": "United Kingdom",
+               "ISR": "Israel", "KWT": "Kuwait"}
+    ANCHOR_FLOOR = 60.0          # all five are above 90% in reality
+
+    candidates = [c for c in body.columns if re.search(r"sewer", c)]
+    if not c_country or not candidates:
+        record_source("WHO/UNICEF JMP", "FAILED",
+                      f"sheet parsed but no sewer column. Columns seen: {list(body.columns)[:20]}", url)
+        return pd.DataFrame()
+
+    iso_s = one(c_iso).astype(str).str.strip().str.upper() if c_iso else None
+    name_s = one(c_country).astype(str).str.strip()
+
+    def anchor_median(col):
+        vals = pd.to_numeric(one(col), errors="coerce")
+        got = []
+        for iso, nm in ANCHORS.items():
+            if iso_s is not None:
+                m = iso_s.eq(iso)
+            else:
+                m = name_s.str.contains(nm, case=False, na=False)
+            v = vals[m].dropna()
+            if len(v):
+                got.append(float(v.iloc[-1]))
+        return (float(np.median(got)) if got else np.nan), len(got)
+
+    scored = []
+    for col in candidates:
+        med, n = anchor_median(col)
+        scored.append((col, med, n))
+        print(f"[JMP] candidate '{col}': anchor median "
+              f"{'n/a' if pd.isna(med) else f'{med:.1f}'} from {n} anchor countr"
+              f"{'y' if n == 1 else 'ies'}")
+
+    usable = [s for s in scored if not pd.isna(s[1])]
+    best = max(usable, key=lambda s: s[1]) if usable else None
+
+    if best is None or best[1] < ANCHOR_FLOOR:
+        detail = ("no sewer column passed the anchor check (countries with "
+                  "near-universal sewer connection should read far above "
+                  f"{ANCHOR_FLOOR:.0f}%). Candidates and their anchor medians: "
+                  + "; ".join(f"{c}={'n/a' if pd.isna(m) else f'{m:.1f}'}" for c, m, _ in scored)
+                  + ". Publishing nothing rather than a wrong denominator.")
+        print(f"[WARN] JMP: {detail}")
+        record_source("WHO/UNICEF JMP", "FAILED", detail, url)
+        return pd.DataFrame()
+
+    c_sewer = best[0]
+    print(f"[OK] JMP sanitation parsed from sheet '{sheet}' | sewer column: "
+          f"'{c_sewer}' | anchor median {best[1]:.1f}% across {best[2]} anchor countries")
 
     try:
         out = pd.DataFrame({
@@ -6121,7 +6190,9 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
     if out["year"].notna().any():
         out = (out.sort_values("year").groupby("country", as_index=False).tail(1))
     record_source("WHO/UNICEF JMP", "OK",
-                  f"{len(out):,} countries from sheet '{sheet}', sewer column '{c_sewer}'", url)
+                  f"{len(out):,} countries from sheet '{sheet}', sewer column '{c_sewer}' "
+                  f"(anchor check passed: median {best[1]:.1f}% across {best[2]} "
+                  f"countries with near-universal sewer connection)", url)
     return out.reset_index(drop=True)
 
 
@@ -6170,8 +6241,18 @@ def fetch_wdi_indicator(code="SH.STA.SMSS.ZS", date="2015:2024"):
         while page <= 20:
             url = (f"https://api.worldbank.org/v2/country/all/indicator/{code}"
                    f"?date={date}&format=json&per_page=2000&page={page}")
-            r = SESSION.get(url, timeout=120)
-            r.raise_for_status()
+            # The World Bank API times out intermittently; one slow page should
+            # not discard the whole indicator.
+            for attempt in range(3):
+                try:
+                    r = SESSION.get(url, timeout=120)
+                    r.raise_for_status()
+                    break
+                except Exception:
+                    if attempt == 2:
+                        raise
+                    print(f"[WARN] WDI {code} page {page}: attempt {attempt + 1} failed; retrying.")
+                    time.sleep(5 * (attempt + 1))
             payload = r.json()
             if not isinstance(payload, list) or len(payload) < 2 or not payload[1]:
                 break
