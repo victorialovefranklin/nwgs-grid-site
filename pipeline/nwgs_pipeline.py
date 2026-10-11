@@ -5373,6 +5373,13 @@ def pull_uniprot_functional_regions(entities):
 
 DORMANT_WEEKS = int(os.getenv("NWGS_DORMANT_WEEKS", "8"))
 FORECAST_HISTORY = PROC_DIR / "NWGS_FORECAST_HISTORY.csv"
+# The working copy above lives in the run's scratch directory, which on a CI
+# runner is destroyed when the job ends. The ledger only means anything if it
+# outlives the run that wrote it, so it is seeded from a committed file in the
+# repository and written back there after every run. Git history then carries
+# the proof that each prediction was recorded before its outcome existed.
+FORECAST_LEDGER_SEED = Path(os.getenv("NWGS_FORECAST_LEDGER",
+                                      str(STATIC_ROOT / "NWGS_FORECAST_LEDGER.csv")))
 ASSAY_TARGET_PATH = Path(os.getenv("NWGS_ASSAY_TARGET_PATH",
                                    str(STATIC_ROOT / "NWGS_ASSAY_TARGETS.csv")))
 AMELAG_URL = os.getenv(
@@ -5612,15 +5619,29 @@ def record_forecasts(national_week, run_id, horizons=(1, 2, 3, 4)):
     if new.empty:
         return new
 
-    if FORECAST_HISTORY.exists():
-        try:
-            hist = pd.read_csv(FORECAST_HISTORY)
-            # Never rewrite a prediction already on the ledger for this run_id.
-            hist = hist[~hist["run_id"].eq(run_id)]
-            new = pd.concat([hist, new], ignore_index=True)
-        except Exception as exc:
-            print(f"[WARN] forecast history unreadable, starting a new ledger: {exc}")
+    # Prefer the working copy; fall back to the committed seed, which is what
+    # carries the ledger across runs on a fresh runner.
+    prior = None
+    for src in (FORECAST_HISTORY, FORECAST_LEDGER_SEED):
+        if src.exists():
+            try:
+                prior = pd.read_csv(src)
+                print(f"[OK] forecast ledger loaded from {src.name}: {len(prior):,} prior rows")
+                break
+            except Exception as exc:
+                print(f"[WARN] forecast ledger at {src.name} unreadable ({exc}); trying the next source.")
+    if prior is None:
+        print("[INFO] no prior forecast ledger found; starting a new one.")
+    else:
+        # Never rewrite a prediction already on the ledger for this run_id.
+        prior = prior[~prior["run_id"].eq(run_id)] if "run_id" in prior.columns else prior
+        new = pd.concat([prior, new], ignore_index=True)
+
+    new = new.drop_duplicates(subset=["run_id", "pathogen", "horizon_weeks", "target_week"], keep="first")
+    FORECAST_HISTORY.parent.mkdir(parents=True, exist_ok=True)
     new.to_csv(FORECAST_HISTORY, index=False)
+    print(f"[OK] forecast ledger now holds {len(new):,} predictions across "
+          f"{new['run_id'].nunique()} run(s)")
     return new
 
 
