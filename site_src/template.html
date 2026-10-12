@@ -318,13 +318,130 @@ tr.unsup td{opacity:.62}
 /* Start here: orientation content, so the type is a touch larger and the
    blocks are visually distinct from the data pages. */
 .sh{font-size:1.15rem;margin:0 0 2px}
-.howsteps{margin:4px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:12px;max-width:none}
-.howsteps li{padding-left:4px;font-size:.98rem}
-.cando{border-left:3px solid var(--accent)}
-.cannot{border-left:3px solid var(--wine,#6e1f2b)}
-.cando .plainlist,.cannot .plainlist{padding-left:20px}
 .guidetbl td,.guidetbl th{vertical-align:top;padding:10px 12px}
 .guidetbl td.lead{font-weight:600;width:16rem}
+
+/* Start here: tinted section cards with an icon badge per heading. Tints are
+   defined for both themes so nothing relies on a light background. */
+:root{
+  --t-info-bg:#eef4fb; --t-info-line:#d4e1f2; --t-info-ico:#1d4f91;
+  --t-ok-bg:#eff7f2;   --t-ok-line:#d2e7da;   --t-ok-ico:#2e7d4f;
+  --t-no-bg:#fdf1f0;   --t-no-line:#f2d5d1;   --t-no-ico:#b2182b;
+  --t-gold-bg:#faf5ea; --t-gold-line:#ecdfc2; --t-gold-ico:#8a6520;
+  --t-slate-bg:#f5f6f9;--t-slate-line:#e2e6ec;--t-slate-ico:#3b4760;
+  --t-num-ink:#ffffff;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --t-info-bg:#15213a; --t-info-line:#28374f; --t-info-ico:#8fb6e8;
+  --t-ok-bg:#12271d;   --t-ok-line:#1f3c2d;   --t-ok-ico:#5fbf86;
+  --t-no-bg:#2a1518;   --t-no-line:#432127;   --t-no-ico:#e2525a;
+  --t-gold-bg:#272013; --t-gold-line:#40331c; --t-gold-ico:#e0bd74;
+  --t-slate-bg:#141d30;--t-slate-line:#27324b;--t-slate-ico:#a9b0c0;
+  --t-num-ink:#0c1424;
+}}
+:root[data-theme="dark"]{
+  --t-info-bg:#15213a; --t-info-line:#28374f; --t-info-ico:#8fb6e8;
+  --t-ok-bg:#12271d;   --t-ok-line:#1f3c2d;   --t-ok-ico:#5fbf86;
+  --t-no-bg:#2a1518;   --t-no-line:#432127;   --t-no-ico:#e2525a;
+  --t-gold-bg:#272013; --t-gold-line:#40331c; --t-gold-ico:#e0bd74;
+  --t-slate-bg:#141d30;--t-slate-line:#27324b;--t-slate-ico:#a9b0c0;
+  --t-num-ink:#0c1424;
+}
+
+.sh-top{align-items:start;margin-bottom:4px}
+.sh-hero h1{margin:0 0 6px}
+.sh-hero p{max-width:46rem;margin:0}
+.sh-goal{display:flex;gap:12px;align-items:flex-start;background:var(--t-info-bg);
+  border:1px solid var(--t-info-line);border-radius:var(--r);padding:16px 18px}
+.sh-goal h2{font-size:1.02rem;margin:0 0 4px;color:var(--ink)}
+.sh-goal p{margin:0;font-size:.93rem;color:var(--muted);max-width:none}
+
+.sh-ico{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
+  background:var(--surface);border:1px solid currentColor}
+.sh-ico svg{width:18px;height:18px}
+.sh-ico.t-info{color:var(--t-info-ico)}
+.sh-ico.t-ok{color:var(--t-ok-ico)}
+.sh-ico.t-no{color:var(--t-no-ico)}
+.sh-ico.t-gold{color:var(--t-gold-ico)}
+.sh-ico.t-slate{color:var(--t-slate-ico)}
+
+.sh-card{margin-top:16px}
+.grid>.sh-card{height:100%;margin-top:0}
+.sh-top{align-items:stretch}
+.sh-hero{display:flex;flex-direction:column;justify-content:center}
+.sh-card .sh-h{display:flex;align-items:center;justify-content:flex-start;gap:11px;border:0;padding:0;margin:0 0 10px}
+.sh-card .sh-h h2{font-size:1.14rem;margin:0}
+.sh-card p{max-width:none;text-align:left}
+.sh-sub{color:var(--muted);font-size:.95rem;margin:0 0 10px}
+.t-info-card{background:var(--t-info-bg);border-color:var(--t-info-line)}
+.t-ok-card{background:var(--t-ok-bg);border-color:var(--t-ok-line)}
+.t-no-card{background:var(--t-no-bg);border-color:var(--t-no-line)}
+.t-slate-card{background:var(--t-slate-bg);border-color:var(--t-slate-line)}
+.t-info-card .sh-h h2{color:var(--t-info-ico)}
+.t-ok-card .sh-h h2{color:var(--t-ok-ico)}
+.t-no-card .sh-h h2{color:var(--t-no-ico)}
+
+/* numbered steps */
+.sh-steps{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:12px;max-width:none}
+.sh-steps li{display:flex;gap:11px;align-items:flex-start;font-size:.96rem;line-height:1.52}
+.sh-num{flex:0 0 auto;display:grid;place-items:center;width:23px;height:23px;border-radius:50%;
+  background:var(--t-info-ico);color:var(--t-num-ink,#fff);font:700 .76rem/1 var(--body);margin-top:1px}
+
+/* check / cross lists */
+.sh-list{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:9px;max-width:none}
+.sh-list li{position:relative;padding-left:26px;font-size:.96rem;line-height:1.52}
+.sh-list li::before{position:absolute;left:0;top:0;font-weight:700}
+.sh-list.ok li::before{content:"\2713";color:var(--t-ok-ico)}
+.sh-list.no li::before{content:"\2715";color:var(--t-no-ico)}
+
+.sh-two{display:grid;grid-template-columns:1fr 1fr;gap:18px 26px}
+.sh-two p{margin:0}
+@media (max-width:860px){.sh-two{grid-template-columns:1fr}}
+
+/* Overview cards. The typographic scale follows the dashboard spec — larger
+   metrics, 13–14px tables, tabular numerals so columns of figures line up —
+   while headings stay in the brand display face. */
+.num{font-variant-numeric:tabular-nums}
+.ov .ov-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  border:0;padding:0;margin:0 0 10px}
+.ov .ov-h h2{font-size:1.1rem;margin:0;min-width:0;overflow-wrap:anywhere}
+.ov .ov-h>*{min-width:0}
+.ov .label,.ov-kpi .label{line-height:1.25;overflow-wrap:anywhere}
+.ov-kpi>div{flex:1 1 auto}
+.ov .ov-h h3{margin:0}
+.ov-band{font:600 .9rem/1 var(--body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+  margin:26px 0 2px;padding-top:16px;border-top:1px solid var(--line)}
+.ov-sub{font:600 .82rem/1 var(--body);text-transform:uppercase;letter-spacing:.055em;
+  color:var(--muted);margin:14px 0 8px}
+.ov-metric{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:2px 0 6px}
+.metric-value{font:700 2.45rem/1.05 var(--body);letter-spacing:-.02em;color:var(--ink)}
+.ov-kpi{display:flex;flex-wrap:wrap;gap:14px 22px;margin:4px 0 10px}
+.ov-kpi>div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ov-kpi b{font:700 1.5rem/1.1 var(--body);letter-spacing:-.015em}
+.ov-donut{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px}
+.ov-donut .chart{flex:0 0 140px;max-width:140px}
+.ov-key{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:.86rem}
+.ov-key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px}
+.ov-em{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 16px;margin-top:8px}
+@media (max-width:760px){.ov-em{grid-template-columns:1fr}}
+.ov-em>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ov-em-v{font:700 1.55rem/1.1 var(--body);letter-spacing:-.015em}
+.seg.sm button{font-size:.8rem;padding:5px 9px}
+.ov .mapbox{margin-top:8px}
+.grid>.ov{height:100%}
+.cov-wrap{display:grid;grid-template-columns:minmax(190px,auto) minmax(150px,auto) 1fr;gap:18px 28px;align-items:start}
+@media (max-width:900px){.cov-wrap{grid-template-columns:1fr}}
+.cov-wrap .ov-kpi{flex-direction:column;gap:12px;margin:0}
+.ov .alert p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ov-alerts{display:flex;flex-direction:column;gap:2px}
+@media (max-width:980px){.metric-value{font-size:2.1rem}}
+
+.sh-go{white-space:nowrap}
+.sh-chev{color:var(--muted);margin-left:6px;font-size:1.05rem;line-height:1}
+.sh-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;
+  vertical-align:middle;border:1px solid var(--hair)}
+.lvltbl td:first-child,.clstbl td:first-child{white-space:nowrap}
+.clstbl td,.clstbl th{padding:8px 8px}
 .qmark-inline{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--line);font:600 .6rem var(--body);color:var(--muted);vertical-align:middle}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{font:600 .7rem var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -548,6 +665,24 @@ function spark(el, vals, color, o={}){
   svg.append('path').datum(vals).attr('fill',color).attr('opacity',.12).attr('d',d3.area().x((d,i)=>x(i)).y0(y(o.base??0)).y1(d=>y(d)).curve(d3.curveMonotoneX));
   svg.append('path').datum(vals).attr('fill','none').attr('stroke',color).attr('stroke-width',1.6).attr('d',d3.line().x((d,i)=>x(i)).y(d=>y(d)).curve(d3.curveMonotoneX));
   svg.append('circle').attr('cx',x(vals.length-1)).attr('cy',y(vals[vals.length-1])).attr('r',3).attr('fill',color);
+}
+function donut(el, frac, slices, o={}){
+  // slices: [[value,color], ...] drawn clockwise from 12 o'clock.
+  el.innerHTML='';
+  const S=o.size||150, R=S/2, r=R*(o.inner??.62);
+  const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${S} ${S}`)
+    .attr('role','img').attr('aria-label',o.label||`${Math.round(frac*100)} percent`);
+  const g=svg.append('g').attr('transform',`translate(${R},${R})`);
+  const total=d3.sum(slices,d=>d[0])||1;
+  const arc=d3.arc().innerRadius(r).outerRadius(R-1);
+  let a0=0;
+  slices.forEach(([v,c])=>{const a1=a0+(v/total)*2*Math.PI;
+    g.append('path').attr('d',arc({startAngle:a0,endAngle:a1})).attr('fill',c);a0=a1});
+  g.append('text').attr('text-anchor','middle').attr('dy','-.05em')
+    .attr('font-family','var(--body)').attr('font-weight','700').attr('font-size',S*.21)
+    .attr('fill',css('--ink')).text(`${Math.round(frac*100)}%`);
+  if(o.sub) g.append('text').attr('text-anchor','middle').attr('dy','1.5em')
+    .attr('font-size',S*.085).attr('fill',css('--muted')).text(o.sub);
 }
 function hbars(el, rows, o={}){
   el.innerHTML='';const W=Math.max(260,Math.min(760,el.clientWidth||o.w||520)),bh=o.bh||20,gap=6,m={l:o.left||140,r:54};
@@ -800,27 +935,61 @@ function attritionPanel(){
 const RENDER={
 start(){
   const el=document.getElementById('v-start');
-  el.innerHTML=`<div class="head"><h1>Start here</h1>
-    <p class="muted">What wastewater surveillance is, what it can and cannot tell you, and how to find what you need on this site.</p></div>
+  const ico=(d,cls)=>`<span class="sh-ico ${cls}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
+  const I={
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6v.4"/>',
+    gear:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2M12 19.2v2M4.4 7.5l1.7 1M17.9 15.5l1.7 1M4.4 16.5l1.7-1M17.9 8.5l1.7-1"/>',
+    check:'<circle cx="12" cy="12" r="9"/><path d="M8.2 12.4l2.5 2.5 5.1-5.6"/>',
+    cross:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
+    lock:'<rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7"/>',
+    send:'<path d="M21 3L10.5 13.5"/><path d="M21 3l-6.6 18-3.9-7.5L3 9.6 21 3z"/>',
+    chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    bulb:'<path d="M9.2 17h5.6"/><path d="M10 20.5h4"/><path d="M12 3a6 6 0 0 0-3.4 10.9c.5.4.8 1 .8 1.6h5.2c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"/>',
+    shield:'<path d="M12 3l7 3v5.4c0 4.3-2.9 8-7 9.6-4.1-1.6-7-5.3-7-9.6V6l7-3z"/><path d="M9.2 12.2l2 2 3.6-4"/>',
+  };
+  const step=(n,t,b)=>`<li><span class="sh-num">${n}</span><div><b>${t}</b> ${b}</div></li>`;
+  const row=(q,v,label,what)=>`<tr><td class="lead" data-l="If you want to know">${q}</td>
+    <td class="sh-go" data-l="Go to"><a href="#${v}" data-go="${v}">${label}</a><span class="sh-chev" aria-hidden="true">›</span></td>
+    <td class="small" data-l="What you will find">${what}</td></tr>`;
+  const lvl=(l,m,p)=>`<tr><td data-l="Level"><span class="sh-dot" style="background:${lvColor(l)}"></span><b>${l}</b></td>
+    <td class="mono small" data-l="Means">${m}</td><td class="small" data-l="Plain reading">${p}</td></tr>`;
 
-  <article class="panel c12 plain"><h2 class="sh">The short version</h2>
-    <p>People shed viruses in their stool, often before they feel ill and whether or not they ever get tested. Everything that goes down a drain in a sewered neighborhood arrives at the same treatment plant. Testing that water tells you something about the whole community at once, without testing a single person.</p>
-    <p>This site collects what the U.S. Centers for Disease Control and Prevention publishes from that testing, standardizes it so places can be compared fairly, and rebuilds itself every week.</p>
-  </article>
-
-  <article class="panel c12"><h2 class="sh">How a sample becomes a number</h2>
-    <ol class="howsteps">
-      <li><b>Collection.</b> A sample is taken either as a <b>grab sample</b> — one bottle, one moment — or with a <b>composite autosampler</b>, a machine that draws small amounts continuously over 24 hours. Composite samples are steadier, because a grab sample can catch an unusual minute. Most sites sample about twice a week.</li>
-      <li><b>Where.</b> Usually at the inflow to a wastewater treatment plant, which covers everyone whose pipes lead there — that catchment is called a <b>sewershed</b>. Some samples are taken further up the network, at a manhole or a lift station, covering a smaller area such as a campus or a single neighborhood.</li>
-      <li><b>In the laboratory.</b> Virus particles are concentrated out of a large volume of dirty water, their genetic material is extracted, and a PCR test counts how many copies of a specific target are present. Some samples are also sequenced to identify variants.</li>
-      <li><b>Making sites comparable.</b> A raw concentration cannot be compared between two plants. One serves 5,000 people and another 500,000; rainfall dilutes one and not the other; laboratories use different methods. So each site is compared only against <b>its own history</b>. That is what a z-score does: it says how unusual today is for this place, in standard deviations. Zero is normal for that site. Above one is high for that site.</li>
-      <li><b>Combining.</b> County and national figures are the median across the standardized site values, never an average of raw concentrations.</li>
-    </ol>
-  </article>
+  el.innerHTML=`<div class="grid sh-top">
+    <div class="c8 sh-hero"><h1>Start here</h1>
+      <p class="muted">What wastewater surveillance is, what it can and cannot tell you, and how to find what you need on this site.</p></div>
+    <aside class="c4 sh-goal">${ico(I.shield,'t-info')}<div><h2>Our goal</h2>
+      <p>Turn publicly available CDC data into clear, reliable information so you can understand what is happening in your community and make informed decisions.</p></div></aside>
+  </div>
 
   <div class="grid">
-  <article class="panel c6 cando"><h2 class="sh">What it can tell you</h2>
-    <ul class="plainlist">
+  <article class="panel c5 sh-card t-info-card"><header class="sh-h">${ico(I.info,'t-info')}<h2>At a glance</h2></header>
+    <p>People shed viruses in their stool, often before they feel ill and whether or not they ever get tested. Everything that goes down a drain in a sewered neighborhood arrives at the same treatment plant. Testing that water tells you something about the whole community at once, without testing a single person.</p>
+    <p>This site collects what the U.S. Centers for Disease Control and Prevention publishes from that testing, standardizes it so places can be compared fairly, and rebuilds itself every week.</p>
+    ${(()=>{const sites=D.attrition_sites||[];
+      if(!sites.length) return '';
+      const act=sites.filter(x=>x.status==='active').length;
+      const cty=new Set(sites.map(x=>String(x.county_fips).padStart(5,'0'))).size;
+      return `<h3 class="ov-sub" style="margin-top:4px">This week's run</h3>
+      <div class="ov-kpi"><div><span class="label">Sites reporting</span><b class="num">${act.toLocaleString()}</b><span class="small muted">of ${sites.length.toLocaleString()} in the roster</span></div>
+        <div><span class="label">Counties</span><b class="num">${cty.toLocaleString()}</b></div>
+        <div><span class="label">Latest sample</span><b class="num">${dateFmt(D.latest_sample||D.activity_end)}</b></div></div>
+      <p class="small muted">Figures change every week as CDC revises its data. <a href="#dashboard" data-go="dashboard">See this week in full</a>.</p>`})()}
+  </article>
+
+  <article class="panel c7 sh-card"><header class="sh-h">${ico(I.gear,'t-slate')}<h2>How a sample becomes a number</h2></header>
+    <ol class="sh-steps">
+      ${step(1,'Collection.','A grab sample (one bottle, one moment) or a composite autosampler drawing continuously over 24 hours. Composites are steadier. Most sites sample about twice a week.')}
+      ${step(2,'Where.','Usually at the inflow to a treatment plant, covering everyone whose pipes lead there — a <b>sewershed</b>. Sometimes at a manhole or lift station, covering a smaller area.')}
+      ${step(3,'In the laboratory.','Virus is concentrated from a large volume, its genetic material extracted, and a PCR test counts copies of a specific target. Some samples are sequenced for variants.')}
+      ${step(4,'Making sites comparable.','Raw concentrations cannot be compared between plants. Each site is scored against <b>its own history</b> as a z-score: zero is normal for that site, above one is high for it.')}
+      ${step(5,'Combining.','County and national figures are the median across standardized site values, never an average of raw concentrations.')}
+    </ol>
+  </article>
+  </div>
+
+  <div class="grid">
+  <article class="panel c6 sh-card t-ok-card"><header class="sh-h">${ico(I.check,'t-ok')}<h2>What it can tell you</h2></header>
+    <ul class="sh-list ok">
       <li>Whether a pathogen is rising or falling in a community, including from people who never get tested.</li>
       <li>Signal from people with no symptoms, who would never appear in clinical data.</li>
       <li>A view that does not depend on who can reach a doctor, afford a test, or choose to report one.</li>
@@ -828,56 +997,60 @@ start(){
       <li>Comparison across places and weeks, once each site is standardized against itself.</li>
     </ul>
   </article>
-  <article class="panel c6 cannot"><h2 class="sh">What it cannot tell you</h2>
-    <ul class="plainlist">
-      <li><b>Not case counts.</b> A z-score of 2.0 does not convert into a number of infected people. Shedding varies enormously between individuals and over the course of an illness.</li>
+  <article class="panel c6 sh-card t-no-card"><header class="sh-h">${ico(I.cross,'t-no')}<h2>What it cannot tell you</h2></header>
+    <ul class="sh-list no">
+      <li><b>Not case counts.</b> A z-score of 2.0 does not convert into a number of infected people. Shedding varies enormously between individuals and over an illness.</li>
       <li><b>Nothing about any individual.</b> A sewershed mixes thousands of households. No sample identifies a person, an address or a household.</li>
       <li><b>Nothing about anyone not connected to a monitored sewer.</b> Septic tanks and unsewered homes are invisible to this method, however well it is run.</li>
       <li><b>Not a diagnosis.</b> A detection means genetic material reached the plant, not that a particular person is ill.</li>
-      <li><b>Not a substitute for clinical surveillance.</b> It is one signal alongside testing, hospital data and reporting, not a replacement for them.</li>
+      <li><b>Not a substitute for clinical surveillance.</b> It is one signal alongside testing, hospital data and reporting, not a replacement.</li>
     </ul>
   </article>
   </div>
 
-  <article class="panel c12"><h2 class="sh">A note on privacy</h2>
-    <p>Wastewater surveillance is usually described as anonymous, and at the scale of a treatment plant serving a whole city it effectively is. The question becomes real as the catchment gets smaller. Sampling a single building, a dormitory or a short stretch of sewer narrows the group of people a result could describe, and a positive result can start to feel like it is about identifiable people rather than a population.</p>
-    <p>Everything on this site comes from CDC's published, aggregated data at treatment-plant and county level. No sample here is tied to a person, a household or an address, and no sub-building sampling is used or reported. The point is worth stating plainly rather than leaving implied: the method's ethics depend on the size of the catchment, and that is a choice programs make, not a property of the science.</p>
+  <article class="panel c12 sh-card t-slate-card"><header class="sh-h">${ico(I.lock,'t-slate')}<h2>A note on privacy</h2></header>
+    <div class="sh-two">
+      <p>Wastewater surveillance is usually described as anonymous, and at the scale of a treatment plant serving a whole city it effectively is. The question becomes real as the catchment gets smaller. Sampling a single building, a dormitory or a short stretch of sewer narrows the group of people a result could describe, and a positive result can start to feel like it is about identifiable people rather than a population.</p>
+      <p>Everything on this site comes from CDC's published, aggregated data at treatment-plant and county level. No sample here is tied to a person, a household or an address, and no sub-building sampling is used or reported. The method's ethics depend on the size of the catchment, and that is a choice programs make, not a property of the science.</p>
+    </div>
   </article>
 
-  <article class="panel c12"><h2 class="sh">How to use this site</h2>
-    <p>Each page answers a different question. If you are not sure where to begin, the first row below covers most visits.</p>
+  <article class="panel c12 sh-card"><header class="sh-h">${ico(I.send,'t-info')}<h2>How to use this site</h2></header>
+    <p class="sh-sub">Each page answers a different question. If you are not sure where to begin, the first row below covers most visits.</p>
     <div class="tbl"><table class="stack guidetbl"><tr><th>If you want to know…</th><th>Go to</th><th>What you will find</th></tr>
-      <tr><td class="lead" data-l="If you want to know">What is happening right now</td><td data-l="Go to"><a href="#dashboard" data-go="dashboard">Dashboard</a></td><td data-l="What you will find" class="small">Current level for each respiratory virus nationally, the direction of travel, and how many counties are high.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">What is happening where I live</td><td data-l="Go to"><a href="#map" data-go="map">Surveillance map</a></td><td data-l="What you will find" class="small">A county map you can click. Select a county to see its level, its history and how many sites report there.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">Whether my state has counties at a high level</td><td data-l="Go to"><a href="#alerts" data-go="alerts">Alerts</a></td><td data-l="What you will find" class="small">Every state with counties above the high threshold, listed county by county.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">Whether wastewater gives advance warning</td><td data-l="Go to"><a href="#leadtime" data-go="leadtime">Lead time</a></td><td data-l="What you will find" class="small">Warning time split into the part that is biology and the part that is reporting delay.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">Who the system reaches, and who it misses</td><td data-l="Go to"><a href="#equity" data-go="equity">Coverage &amp; equity</a></td><td data-l="What you will find" class="small">Coverage against social vulnerability, how representative each county's monitoring is, and which sites have stopped reporting.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">How a term or number is defined</td><td data-l="Go to"><a href="#glossary" data-go="glossary">Glossary</a></td><td data-l="What you will find" class="small">Plain-language definitions of every term used here. The <span class="qmark-inline">?</span> marks across the site link straight to the right entry.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">How the numbers were produced</td><td data-l="Go to"><a href="#methods" data-go="methods">Methods &amp; sources</a></td><td data-l="What you will find" class="small">The pipeline step by step, every dataset used, and the full reference list.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">Whether this week's run is trustworthy</td><td data-l="Go to"><a href="#audit" data-go="audit">Audit log</a></td><td data-l="What you will find" class="small">Every automated check, whether each data source loaded, and any warning attached to this run.</td></tr>
-      <tr><td class="lead" data-l="If you want to know">To be emailed when something changes</td><td data-l="Go to"><a href="#myalerts" data-go="myalerts">My alerts</a></td><td data-l="What you will find" class="small">Save a pathogen, a state and a level. You get an email when the weekly run matches it.</td></tr>
+      ${row('What is happening right now','dashboard','Dashboard','Current level for each respiratory virus nationally, the direction of travel, and how many counties are high.')}
+      ${row('What is happening where I live','map','Surveillance map','A county map you can click. Select a county to see its level, its history and how many sites report there.')}
+      ${row('Whether my state has counties at a high level','alerts','Alerts','Every state with counties above the high threshold, listed county by county.')}
+      ${row('Whether wastewater gives advance warning','leadtime','Lead time','Warning time split into the part that is biology and the part that is reporting delay.')}
+      ${row('Who the system reaches, and who it misses','equity','Coverage &amp; equity','Coverage against social vulnerability, how representative each county\'s monitoring is, and which sites have stopped reporting.')}
+      ${row('How a term or number is defined','glossary','Glossary','Plain-language definitions of every term used here. The <span class="qmark-inline">?</span> marks across the site link straight to the right entry.')}
+      ${row('How the numbers were produced','methods','Methods &amp; sources','The pipeline step by step, every dataset used, and the full reference list.')}
+      ${row('Whether this week\'s run is trustworthy','audit','Audit log','Every automated check, whether each data source loaded, and any warning attached to this run.')}
+      ${row('To be emailed when something changes','myalerts','My alerts','Save a pathogen, a state and a level. You get an email when the weekly run matches it.')}
     </table></div>
   </article>
 
-  <article class="panel c12"><h2 class="sh">Reading the levels</h2>
-    <p>Levels appear throughout the site. They describe how unusual the current reading is <b>for that place</b>, not how many people are sick.</p>
-    <div class="tbl"><table class="guidetbl"><tr><th>Level</th><th>Means</th><th>Plain reading</th></tr>
-      <tr><td data-l="Level">${chip('Very Low')}</td><td class="mono small" data-l="Means">z ≤ −1</td><td class="small" data-l="Plain reading">Well below normal for this place.</td></tr>
-      <tr><td data-l="Level">${chip('Low')}</td><td class="mono small" data-l="Means">−1 &lt; z ≤ −0.25</td><td class="small" data-l="Plain reading">Below its usual range.</td></tr>
-      <tr><td data-l="Level">${chip('Typical')}</td><td class="mono small" data-l="Means">−0.25 &lt; z ≤ 0.25</td><td class="small" data-l="Plain reading">About normal for this place.</td></tr>
-      <tr><td data-l="Level">${chip('Elevated')}</td><td class="mono small" data-l="Means">0.25 &lt; z ≤ 1</td><td class="small" data-l="Plain reading">Above its usual range.</td></tr>
-      <tr><td data-l="Level">${chip('High')}</td><td class="mono small" data-l="Means">z &gt; 1</td><td class="small" data-l="Plain reading">Well above normal for this place.</td></tr>
+  <div class="grid">
+  <article class="panel c6 sh-card"><header class="sh-h">${ico(I.chart,'t-gold')}<h2>Reading the levels</h2></header>
+    <p class="sh-sub">Levels appear throughout the site. They describe how unusual the current reading is <b>for that place</b>, not how many people are sick.</p>
+    <div class="tbl"><table class="guidetbl lvltbl"><tr><th>Level</th><th>Means (z-score)</th><th>Plain reading</th></tr>
+      ${lvl('Very Low','z ≤ −1','Well below normal for this place.')}
+      ${lvl('Low','−1 &lt; z ≤ −0.25','Below its usual range.')}
+      ${lvl('Typical','−0.25 &lt; z ≤ 0.25','About normal for this place.')}
+      ${lvl('Elevated','0.25 &lt; z ≤ 1','Above its usual range.')}
+      ${lvl('High','z &gt; 1','Well above normal for this place.')}
     </table></div>
-    <p class="note">Because every site is compared against itself, a county at <b>High</b> is not necessarily worse off than a county at <b>Typical</b> somewhere else. It means that county has moved further from its own normal. Comparing two places on absolute concentration would be misleading, which is why this site does not do it.</p>
+    <p class="note">Because every site is compared against itself, a county at <b>High</b> is not necessarily worse off than a county at <b>Typical</b> somewhere else. It means that county has moved further from its own normal.</p>
   </article>
 
-  <article class="panel c12"><h2 class="sh">Three things worth knowing before you rely on it</h2>
-    <ul class="plainlist">
-      <li><b>The data is never quite current.</b> Samples take days to reach a laboratory, be tested and be published. The date shown at the top of every page is the latest <i>sample</i> date, not today.</li>
-      <li><b>Coverage is uneven and it changes.</b> Some counties have never had a monitored site; others had one and lost it. <a href="#equity" data-go="equity">Coverage &amp; equity</a> shows where, and the <a href="#map" data-go="map">map</a> marks counties with no data separately from counties that are quiet.</li>
-      <li><b>Every number comes from one weekly snapshot.</b> Figures change as CDC revises its data. If you cite anything here, cite the run identifier and date shown in the header so the exact numbers can be recovered later.</li>
-    </ul>
+  <article class="panel c6 sh-card"><header class="sh-h">${ico(I.bulb,'t-gold')}<h2>Three things worth knowing</h2></header>
+    <ol class="sh-steps">
+      ${step(1,'The data is never quite current.','Samples take days to reach a laboratory, be tested and be published. The date shown at the top of every page is the latest <i>sample</i> date, not today.')}
+      ${step(2,'Coverage is uneven and it changes.','Some counties have never had a monitored site; others had one and lost it. <a href="#equity" data-go="equity">Coverage &amp; equity</a> shows where, and the <a href="#map" data-go="map">map</a> marks counties with no data separately from counties that are quiet.')}
+      ${step(3,'Every number comes from one weekly snapshot.','Figures change as CDC revises its data. If you cite anything here, cite the run identifier and date shown in the header so the exact numbers can be recovered later.')}
+    </ol>
   </article>
+  </div>
 
   <p class="note srcline"><b>Sources.</b> All wastewater data on this site comes from the CDC National Wastewater Surveillance System via <a href="https://data.cdc.gov" target="_blank" rel="noopener">data.cdc.gov</a>; clinical comparison data from CDC's National Syndromic Surveillance Program. For the program's own description of its scale and growth, see Mark-Carew M, et al., <a href="https://wwwnc.cdc.gov/eid/article/32/13/26-1118_article" target="_blank" rel="noopener">Progress and Expansion of the National Wastewater Surveillance System, United States, 2020&ndash;2024</a>, <i>Emerging Infectious Diseases</i> 2026;32(Suppl). Full dataset list and references on <a href="#methods" data-go="methods">Methods &amp; sources</a>.</p>`;
   try{noWidows(el)}catch(e){}
@@ -886,30 +1059,286 @@ start(){
 dashboard(){
   const el=document.getElementById('v-dashboard');
   const arrow=t=>t==='Increasing'?'<span class="trend-up">▲ Increasing</span>':t==='Decreasing'?'<span class="trend-down">▼ Decreasing</span>':'<span class="trend-flat">● Stable</span>';
+  const id=p=>p.replace(/\W/g,'');
+  const LVRANGE={'Very Low':'z ≤ −1','Low':'−1 &lt; z ≤ −0.25','Typical':'−0.25 &lt; z ≤ 0.25','Elevated':'0.25 &lt; z ≤ 1','High':'z &gt; 1'};
+  // Trend-line colors come from the theme tokens so the chart stays legible in
+  // dark mode; hardcoded hexes went invisible on the dark surface.
+  const TCOL=[css('--vl'),css('--ok'),css('--hi')];
+
+  /* ---- Surveillance coverage, computed from the site roster in this run ----
+     Every figure below is a count of rows in D.attrition_sites. Nothing here is
+     an estimate, and when the roster is absent the panel says so rather than
+     showing a number. */
+  const sites=D.attrition_sites||[];
+  let covPanel;
+  if(!sites.length){
+    covPanel=`<article class="panel c12 ov"><header class="ov-h"><h2>Surveillance coverage</h2></header>
+      ${notLoaded('Surveillance coverage','the per-site reporting roster built by the weekly pipeline',
+        'The site roster is produced by the coverage-attrition step; without it the number of reporting sites cannot be counted, and this panel shows nothing rather than an estimate.')}</article>`;
+  }else{
+    const total=sites.length;
+    const active=sites.filter(s=>s.status==='active').length;
+    const dormant=total-active;
+    const shareActive=active/total;
+    const counties=new Set(sites.map(s=>String(s.county_fips).padStart(5,'0'))).size;
+    const byState={};
+    sites.forEach(s=>{const k=s.state_code||'—';(byState[k]=byState[k]||{n:0,a:0}).n++;if(s.status==='active')byState[k].a++});
+    const top=Object.entries(byState).sort((a,b)=>b[1].n-a[1].n).slice(0,10);
+    covPanel=`<article class="panel c12 ov"><header class="ov-h"><h2>Surveillance coverage</h2>
+        <button class="qmark" data-gloss="sewershed" aria-label="What is a monitored site?">?</button></header>
+      <div class="cov-wrap">
+        <div class="ov-kpi"><div><span class="label">Sites in roster</span><b class="num">${total.toLocaleString()}</b></div>
+          <div><span class="label">Reporting now</span><b class="num">${active.toLocaleString()}</b><span class="small muted">${pct(shareActive)} of the roster</span></div>
+          <div><span class="label">Counties represented</span><b class="num">${counties.toLocaleString()}</b></div></div>
+        <div class="ov-donut"><div class="chart" id="ov-donut"></div>
+          <ul class="ov-key"><li><i style="background:var(--ok)"></i>Reporting (${active.toLocaleString()})</li>
+          <li><i style="background:var(--nodata)"></i>Dormant (${dormant.toLocaleString()})</li></ul></div>
+        <div><h3 class="ov-sub" style="margin-top:0">Sites by state, top 8</h3><div class="chart" id="ov-states"></div></div>
+      </div>
+      <p class="small muted"><b>Dormant</b> means reported before but not within the dormancy window — not closed. Roster for this run, so not CDC's all-time totals. <a href="#equity" data-go="equity">Detail</a>.</p>
+    </article>`;
+  }
+
+  /* ---- Clinical alignment, summarised from the lag table ---- */
+  const sl=D.statelag||[];
+  const sig=sl.filter(r=>r.significant_fdr);
+  const medLag=sig.length?d3.median(sig,r=>r.lag_weeks):null;
+  const clinical=sl.length?`<article class="panel c4 ov"><header class="ov-h"><h2>Clinical alignment</h2>
+      <a href="#analytics" data-go="analytics" class="small">Full analysis</a></header>
+    <p class="small">Each state–pathogen pair is cross-correlated against CDC's National Syndromic Surveillance Program <b>emergency-department visit</b> percentage. This panel counts what the test found; it does not assume wastewater leads.</p>
+    <div class="ov-kpi"><div><span class="label">Pairs tested</span><b class="num">${sl.length.toLocaleString()}</b></div>
+      <div><span class="label">Significant</span><b class="num">${sig.length.toLocaleString()}</b><span class="small muted">after FDR correction</span></div>
+      <div><span class="label">Median best lag</span><b class="num">${medLag==null?'—':fmt(medLag,0)+' wk'}</b></div></div>
+    <p class="small muted">A best lag of zero means shorter than one week, not absent: this analysis runs on weekly data. <a href="#leadtime" data-go="leadtime">Lead time</a> separates the biological lead from the reporting delay that consumes it.</p>
+  </article>`:`<article class="panel c4 ov"><header class="ov-h"><h2>Clinical alignment</h2></header>
+    ${notLoaded('Clinical alignment','CDC NSSP emergency-department visit data paired with wastewater weeks','Both series must be present in the same run for a cross-correlation to be computed.')}</article>`;
+
+  /* ---- Second screen: a compact panel per analytical area. Each one shows
+     the headline figures from that page and links through; the full analysis
+     stays on its own page rather than being duplicated here. ---- */
+  const kpi=rows=>`<div class="ov-kpi">${rows.map(([l,v,s])=>`<div><span class="label">${l}</span><b class="num">${v}</b>${s?`<span class="small muted">${s}</span>`:''}</div>`).join('')}</div>`;
+  const panel=(cls,title,href,label,body)=>`<article class="panel ${cls} ov"><header class="ov-h"><h2>${title}</h2><a href="#${href}" data-go="${href}" class="small">${label} →</a></header>${body}</article>`;
+
+  // Spatial clusters map
+  const CLC={'High-High':'--hi','Low-Low':'--vl','High-Low':'--el','Low-High':'--lo','Not Significant':'--typ'};
+  const spAll=D.spatial||[];
+  const pClusterMap=spAll.length?`<article class="panel c8 ov"><header class="ov-h"><h2>Spatial clusters</h2>
+      <a href="#map" data-go="map" class="small">Open full map →</a></header>
+    <p class="small">Local Moran's I on a six-nearest-neighbour graph. A cluster is a county that is high <i>and</i> surrounded by high ones — a pattern a single-county threshold cannot see.</p>
+    <div class="seg sm" id="ov-cpath">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
+    <div class="mapbox" id="ov-cmap"></div>
+    ${legend([[css('--hi'),'High-High'],[css('--vl'),'Low-Low'],[css('--el'),'High-Low'],[css('--lo'),'Low-High'],[css('--typ'),'Not significant'],[css('--nodata'),'No recent data']])}
+  </article>`:'';
+
+  // Lead time
+  const ltn=D.leadtime_national||[], ltAll=D.leadtime||[];
+  const ltSup=ltAll.filter(r=>r.lead_supported).length;
+  const ltUse=ltAll.filter(r=>r.usable).length;
+  const ltLag=ltAll.length?d3.median(ltAll,r=>r.reporting_lag_weeks):null;
+  const pLead=ltAll.length?panel('c4','Lead time','leadtime','Decomposition',
+    `<p class="small">Warning time split into the part that is biology and the part that is reporting delay. Only the third number tells a health department whether a signal arrived in time.</p>
+     ${kpi([['Pairs with a supported lead',ltSup.toLocaleString(),`of ${ltAll.length.toLocaleString()} tested`],
+            ['Usable operational lead',ltUse.toLocaleString(),'above zero'],
+            ['Median reporting lag',(ltLag==null||!isFinite(ltLag))?'—':fmt(ltLag,1)+' wk','sample to publication']])}
+     ${(ltLag==null||!isFinite(ltLag))?'<p class="small muted">Reporting lag is unavailable in this run, so operational lead cannot be computed. The decomposition page explains why.</p>':''}`)
+    :panel('c4','Lead time','leadtime','Decomposition',notLoaded('Lead-time decomposition','CDC NWSS and NSSP data with each dataset’s update metadata','Both inputs must be present in the same run.'));
+
+  // Predictive models
+  const mods=D.models||[];
+  const pModels=mods.length?panel('c4','Predictive models','predictive','Benchmarks',
+    `<p class="small">Held-out accuracy. Each model was trained on earlier weeks and tested on a later period it had never seen.</p>
+     <div class="chart" id="ov-models"></div>
+     <p class="small muted">Full model R². Compared against a clinical-persistence baseline on the same weeks.</p>`)
+    :panel('c4','Predictive models','predictive','Benchmarks',notLoaded('Model benchmarks','the held-out evaluation step','Models are only scored on weeks they never saw.'));
+
+  // Spatial clustering
+  const sp=D.spatial||[];
+  const hh=p=>Object.values(D.clusters[p]||{}).filter(c=>c==='High-High').length;
+  const pSpatial=sp.length?panel('c4','Cluster statistics','map','Method',
+    `<div class="tbl"><table class="guidetbl clstbl"><tr><th>Pathogen</th><th class="n">Moran's&nbsp;I</th><th class="n">High&#8209;High</th></tr>
+     ${sp.map(s=>`<tr><td>${esc(s.pathogen)}</td><td class="n num">${fmt(s.morans_i,3)}</td><td class="n num">${hh(s.pathogen).toLocaleString()}</td></tr>`).join('')}</table></div>
+     <p class="small muted">Computed across ${sp.map(s=>Number(s.n_counties).toLocaleString()).join(' / ')} counties respectively.</p>
+     <p class="small"><b>Moran's I</b> runs from −1 to +1. Zero means activity is scattered at random across counties; positive means like sits next to like. ${(()=>{const pos=sp.filter(x=>x.morans_i>0).length;
+       return pos===sp.length?`All ${sp.length} pathogens are positive in this run, so activity is spatially structured rather than scattered at random.`
+            : pos? `${pos} of ${sp.length} pathogens are positive in this run; the rest show no spatial structure at this scale.`
+            : `None are positive in this run, so activity shows no spatial structure at this scale.`})()}</p>
+     <p class="small"><b>High-High</b> counts counties that are themselves high <i>and</i> surrounded by high neighbours, at a simulated p below 0.05. These are the clusters worth investigating, as distinct from a single county crossing a threshold on its own.</p>
+     <p class="small muted">Computed on a six-nearest-neighbour graph in EPSG:5070, which avoids the island problem that contiguity-based weights create for counties with no shared border.</p>`)
+    :panel('c4','Spatial clustering','map','Open map',notLoaded('Spatial clustering','county activity with a spatial weights graph','Clustering needs enough neighbouring counties reporting in the same window.'));
+
+  // Coverage & equity
+  const eq=D.equity||[], rep=D.rep_national;
+  const pEquity=(eq.length||rep)?panel('c4','Coverage &amp; equity','equity','Full analysis',
+    `<p class="small">Who the system reaches. A county with no data is not a county with no transmission.</p>
+     ${rep?kpi([['Counties monitored',Number(rep.counties_monitored).toLocaleString(),`of ${Number(rep.counties_total).toLocaleString()}`],
+                ['Population in a monitored sewershed',fmt(rep.pct_population_in_sewershed,1)+'%',''],
+                ['Median sewer share',fmt(rep.median_sewer_share_monitored,2),'where monitored']]):''}
+     ${eq.length?`<h3 class="ov-sub">Analysis-ready by vulnerability quartile</h3><div class="chart" id="ov-equity"></div><p class="small muted">Q1 is the least vulnerable quartile, Q4 the most.</p>`:''}`)
+    :panel('c4','Coverage &amp; equity','equity','Full analysis',notLoaded('Coverage and equity','CDC/ATSDR Social Vulnerability Index joined to county coverage','The SVI file must be present for the coverage model to run.'));
+
+  // Genomics & AMR
+  const amr=D.amr||[], gsum=D.genomic||[];
+  const pAmr=(amr.length||gsum.length)?panel('c4','Genomics &amp; AMR','genomics','Detections',
+    `<p class="small">Resistance-gene targets measured in wastewater, and public genome records for the tracked pathogens.</p>
+     ${kpi([['ARG targets',amr.length.toLocaleString(),''],
+            ['Genome records',gsum.length?gsum.reduce((a,b)=>a+(+b.records||0),0).toLocaleString():'—','from NCBI']])}
+     ${amr.length?`<h3 class="ov-sub">Detection rate by target</h3><div class="chart" id="ov-amr"></div>`:''}`)
+    :panel('c4','Genomics &amp; AMR','genomics','Detections',notLoaded('Genomics and AMR','the AMR target panel and NCBI genome records','Both are optional modules and may be disabled for a run.'));
+
+  // Protein structures
+  const st=D.structures||[];
+  const pStruct=st.length?panel('c4','Protein structures','structures','Reference set',
+    `<p class="small">Experimentally determined reference structures with cited functional annotations. Descriptive only — nothing here is predicted, scored or ranked.</p>
+     ${(()=>{const nreg=D.regions?Object.values(D.regions).reduce((a,b)=>a+b.length,0):0;
+       return kpi(nreg?[['Structures',st.length.toLocaleString(),'from RCSB PDB'],
+                        ['Annotated regions',nreg.toLocaleString(),'aligned to PDB coordinates']]
+                      :[['Structures',st.length.toLocaleString(),'from RCSB PDB']])})()}
+     ${(D.regions&&Object.keys(D.regions).length)?'':'<p class="small muted">UniProt functional regions were retrieved for this run, but none could be aligned to PDB residue numbering, so no annotated regions are shown rather than showing unaligned ones.</p>'}
+     <p class="small muted">${st.slice(0,4).map(s=>`${esc(s.pathogen)} <span class="mono">${esc(s.pdb_entry_id)}</span>`).join(' · ')}${st.length>4?' …':''}</p>`)
+    :panel('c4','Protein structures','structures','Reference set',notLoaded('Reference structures','RCSB PDB and UniProt','The structural module is optional and may be disabled for a run.'));
+
+  // Validation
+  const pAudit=panel('c4','Validation for this run','audit','Audit log',
+    `<p class="small">Every automated check the pipeline ran before anything was published. Nothing on the site updates while a check is failing.</p>
+     ${kpi([['Passed',Number(R.n_pass).toLocaleString(),''],
+            ['Warnings',Number(R.n_warning).toLocaleString(),'explained in the log'],
+            ['Failed',Number(R.n_fail).toLocaleString(),Number(R.n_fail)?'publication blocked':'none']])}
+     <p class="small muted">Run <span class="mono">${esc(R.run_id)}</span> · data through ${dateFmt(R.data_as_of)}. Each run is archived as a release so these numbers stay recoverable.</p>`);
+
   el.innerHTML=`
   <div class="head"><h1>Respiratory virus signals in U.S. wastewater</h1>
   <p class="muted">Site-standardized wastewater activity for the four weeks ending ${dateFmt(D.activity_end)}, with clinical alignment, spatial clustering and coverage equity from the same weekly run.</p></div>
+
   <div class="grid">${ROUTINE.map(p=>{const s=S[p];const l=level(s.recent_median_site_z);return `
-    <article class="panel card-p c4"><div class="top"><h2>${p}</h2>${chip(l)}</div>
-      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="big">${fmt(s.recent_median_site_z)}</span><span class="small muted">median site z</span><span class="small">${arrow(s.trend)}</span></div>
-      <div class="chart" id="sp-${p.replace(/\W/g,'')}"></div>
-      <div class="kv small"><div><span class="label">Sites, all&nbsp;time</span><b>${s.sites.toLocaleString()}</b></div><div><span class="label">Counties, all&nbsp;time</span><b>${s.counties_represented.toLocaleString()}</b></div><div><span class="label">High, this window</span><b style="color:var(--hi)">${highCount(p)}</b></div></div>
-      <p class="small muted">Change vs previous window: <span class="num">${s.change_vs_previous_window_z>0?'+':''}${fmt(s.change_vs_previous_window_z)}</span> z · last 52 weeks shown</p>
+    <article class="panel card-p c3 ov"><div class="top"><h2>${p}</h2>${chip(l)}</div>
+      <span class="label">Median site z-score</span>
+      <div class="ov-metric"><span class="metric-value num">${fmt(s.recent_median_site_z)}</span>
+        <span class="small">${arrow(s.trend)}<br><span class="muted num">${s.change_vs_previous_window_z>0?'+':''}${fmt(s.change_vs_previous_window_z)} vs previous window</span></span></div>
+      <div class="chart" id="sp-${id(p)}"></div>
+      <div class="kv small"><div><span class="label">Sites</span><b class="num">${s.sites.toLocaleString()}</b></div><div><span class="label">Counties</span><b class="num">${s.counties_represented.toLocaleString()}</b></div><div><span class="label">High now</span><b class="num" style="color:var(--hi)">${highCount(p)}</b></div></div>
     </article>`}).join('')}
+    <article class="panel c3 ov"><header class="ov-h"><h2>Latest alerts</h2><a href="#alerts" data-go="alerts" class="small">All ${D.alerts.length} →</a></header>
+      <div>${[...D.alerts].sort((a,b)=>['high','moderate','info'].indexOf(a.severity)-['high','moderate','info'].indexOf(b.severity)).filter((a,i,arr)=>a.severity!=='high'||arr.filter(x=>x.severity==='high').indexOf(a)<2).slice(0,3).map(alertRow).join('')}</div>
+    </article>
   </div>
+
   <div class="grid">
-    <div class="c7 stackcol"><article class="panel"><header><h2>Emerging pathogen detections</h2><span class="small muted">share of site-weeks testing positive, latest four weeks</span></header>
-      <div class="grid" style="gap:12px">${EMERGING.map(p=>{const s=S[p];return `<div class="c4" style="display:flex;flex-direction:column;gap:6px;min-width:0"><span class="label">${p}</span><span class="big" style="font-size:1.6rem">${pct(s.recent_detection_rate)}</span><div class="chart" id="se-${p.replace(/\W/g,'')}"></div><span class="small muted">share of site-weeks testing positive in the latest four weeks · ${s.sites.toLocaleString()} sites have reported since ${dateFmt(s.first_observation)}, not all of them in this window</span></div>`}).join('')}</div>
+    <article class="panel c7 ov"><header class="ov-h"><h2>U.S. county activity</h2>
+      <a href="#map" data-go="map" class="small">Open full map →</a></header>
+      <div class="seg sm" id="ov-path">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
+      <div class="mapbox" id="ov-map"></div>
+      <div id="ov-legend"></div>
+      <p class="small muted">Counties with no monitored site are shown separately from counties that are quiet.</p>
     </article>
-    <article class="panel readme"><h2>How to read the levels</h2><p class="small">Levels compare each site with its own history (within-site log-concentration z-score), then take the county or national median. They describe relative change, not case counts.</p>
-      <div class="legend">${LEVELS.map(l=>`<span>${chip(l)}</span>`).join('')}</div></article></div>
-    <article class="panel c5"><header><h2>Latest alerts</h2><a href="#alerts" data-go="alerts" class="small">All ${D.alerts.length} alerts</a></header>
-      <div>${[...D.alerts].sort((a,b)=>['high','moderate','info'].indexOf(a.severity)-['high','moderate','info'].indexOf(b.severity)).filter((a,i,arr)=>a.severity!=='high'||arr.filter(x=>x.severity==='high').indexOf(a)<2).slice(0,5).map(alertRow).join('')}</div>
+
+    <article class="panel c5 ov"><header class="ov-h"><h2>National trends</h2>
+      <a href="#analytics" data-go="analytics" class="small">Trends &amp; timing →</a></header>
+      <div class="seg sm" id="ov-range"><button aria-pressed="true" data-w="52">1Y</button><button aria-pressed="false" data-w="104">2Y</button><button aria-pressed="false" data-w="0">All</button></div>
+      <div class="chart" id="ov-trend"></div>
+      ${legend(ROUTINE.map((p,i)=>[TCOL[i],p]))}
+      <p class="small muted">Median site z-score per week across all reporting sites.</p>
+    </article>
+
+  </div>
+
+  <div class="grid">${covPanel}</div>
+
+  <div class="grid">
+    <article class="panel c4 ov"><header class="ov-h"><h2>Emerging pathogen detections</h2></header>
+      <p class="small muted">Share of <b>site-weeks</b> testing positive in the latest four weeks. This is not the share of people infected, and a detection does not establish local spread.</p>
+      <div class="ov-em">${EMERGING.map(p=>{const s=S[p];return `<div><span class="label">${p}</span><span class="ov-em-v num">${pct(s.recent_detection_rate)}</span><div class="chart" id="se-${id(p)}"></div><span class="small muted">${s.sites.toLocaleString()} sites have reported since ${dateFmt(s.first_observation)}</span></div>`}).join('')}</div>
+    </article>
+
+    ${clinical}
+
+    <article class="panel c4 ov"><header class="ov-h"><h2>How to read the levels</h2>
+      <a href="#start" data-go="start" class="small">Start here →</a></header>
+      <p class="small">Levels compare each site with its own history (within-site log-concentration z-score), then take the county or national median. They describe relative change, not case counts.</p>
+      <div class="tbl"><table class="guidetbl lvltbl"><tr><th>Level</th><th>Median site z-score</th></tr>
+        ${LEVELS.map(l=>`<tr><td><span class="sh-dot" style="background:${lvColor(l)}"></span><b>${l}</b></td><td class="mono small">${LVRANGE[l]}</td></tr>`).join('')}
+      </table></div>
+      <p class="small muted">Two places at the same level are each unusual relative to themselves, not to each other.</p>
     </article>
   </div>
-  <p class="note srcline"><b>Sources.</b> CDC National Wastewater Surveillance System (NWSS), six public pathogen datasets on data.cdc.gov, pulled for this run and listed with their dataset identifiers on <a href="#methods" data-go="methods">Methods &amp; sources</a>. Activity is standardized within each site against its own history before any county or national figure is taken.</p>`;
-  ROUTINE.forEach(p=>spark(document.getElementById('sp-'+p.replace(/\W/g,'')),D.trend[p].slice(-52).map(d=>d[1]),css('--accent')));
-  EMERGING.forEach(p=>spark(document.getElementById('se-'+p.replace(/\W/g,'')),D.emerging[p].slice(-52).map(d=>d[1]*100),css('--warn'),{zero:false,base:0,dom:[0,Math.max(3,d3.max(D.emerging[p].slice(-52),d=>d[1]*100))]}));
+
+  <h2 class="ov-band">Analysis from the same weekly run</h2>
+  <div class="grid">${pClusterMap}${pSpatial}</div>
+  <div class="grid">${pLead}${pModels}${pEquity}</div>
+  <div class="grid">${pAmr}${pStruct}${pAudit}</div>
+
+  <p class="note srcline"><b>Sources.</b> CDC National Wastewater Surveillance System (NWSS), six public pathogen datasets on data.cdc.gov, pulled for this run and listed with their dataset identifiers on <a href="#methods" data-go="methods">Methods &amp; sources</a>. Clinical comparison uses CDC's National Syndromic Surveillance Program emergency-department data. Activity is standardized within each site against its own history before any county or national figure is taken.</p>`;
+
+  ROUTINE.forEach(p=>spark(document.getElementById('sp-'+id(p)),D.trend[p].slice(-52).map(d=>d[1]),css('--accent')));
+  EMERGING.forEach(p=>spark(document.getElementById('se-'+id(p)),D.emerging[p].slice(-52).map(d=>d[1]*100),css('--warn'),{zero:false,base:0,dom:[0,Math.max(3,d3.max(D.emerging[p].slice(-52),d=>d[1]*100))]}));
+
+  /* national trends, with a range toggle */
+  let WIN=52;
+  const drawTrend=()=>{
+    const box=document.getElementById('ov-trend');if(!box)return;
+    lineChart(box,ROUTINE.map((p,i)=>({name:p,color:TCOL[i],
+      values:(WIN?D.trend[p].slice(-WIN):D.trend[p]).map(d=>[new Date(d[0]),d[1]])})),{h:210,zero:true,bands:true});
+  };
+  drawTrend();
+  const rangeSeg=document.getElementById('ov-range');
+  if(rangeSeg) rangeSeg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    WIN=+b.dataset.w;rangeSeg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));drawTrend()});
+
+  /* county activity map, with a pathogen toggle */
+  let MP=ROUTINE[0];
+  const drawMap=()=>{
+    const box=document.getElementById('ov-map');if(!box)return;
+    const A=D.activity[MP]||{};
+    countyMap(box,f=>{const v=A[f];return v?lvColor(level(v[0])):css('--nodata')},
+      f=>{const v=A[f];return `<b>${cname(f)}</b><div>${v?`${level(v[0])} · z ${fmt(v[0])} · ${v[1]} site${v[1]===1?'':'s'}`:'No monitored site'}</div>`},
+      {label:`${MP} county activity map`});
+    const lg=document.getElementById('ov-legend');if(lg) lg.innerHTML=levelLegend();
+  };
+  drawMap();
+  const pathSeg=document.getElementById('ov-path');
+  if(pathSeg) pathSeg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    MP=b.dataset.p;pathSeg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));drawMap()});
+
+  /* spatial cluster map */
+  if(spAll.length){
+    let CP=ROUTINE[0];
+    const drawCl=()=>{
+      const box=document.getElementById('ov-cmap');if(!box)return;
+      const C=D.clusters[CP]||{}, A=D.activity[CP]||{};
+      countyMap(box,f=>C[f]?css(CLC[C[f]]||'--typ'):css('--nodata'),
+        f=>{const c=C[f];return `<b>${cname(f)}</b><div>${c?esc(c):'No recent data'}</div>${A[f]?`<div>z ${fmt(A[f][0])}</div>`:''}`},
+        {label:`${CP} spatial cluster map`});
+    };
+    drawCl();
+    const cseg=document.getElementById('ov-cpath');
+    if(cseg) cseg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+      CP=b.dataset.p;cseg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));drawCl()});
+  }
+
+  /* second-screen charts */
+  if(mods.length) hbars(document.getElementById('ov-models'),
+    mods.map(m=>({label:m.pathogen,v:+m.full_model_r2,color:css('--brand-accent')})),
+    {left:84,bh:14,min:0,max:1,fmt:v=>fmt(v,2)});
+  if(eq.length) hbars(document.getElementById('ov-equity'),
+    eq.slice().sort((a,b)=>a.svi_quartile-b.svi_quartile)
+      .map(q=>({label:String(q.svi_quartile).split(' ')[0],v:+q.pct_analysis_ready,color:css('--accent')})),
+    {left:38,bh:14,min:0,max:100,fmt:v=>fmt(v,0)+'%'});
+  if(amr.length) hbars(document.getElementById('ov-amr'),
+    amr.slice().sort((a,b)=>b.detection_rate-a.detection_rate)
+      .map(t=>({label:t.target,v:+t.detection_rate*100,color:css('--warn')})),
+    {left:70,bh:12,min:0,max:100,fmt:v=>fmt(v,0)+'%'});
+
+  /* coverage donut + state bars */
+  if(sites.length){
+    const active=sites.filter(s=>s.status==='active').length;
+    donut(document.getElementById('ov-donut'),active/sites.length,
+      [[active,css('--ok')],[sites.length-active,css('--nodata')]],{size:140,sub:'sites reporting'});
+    const byState={};
+    sites.forEach(s=>{const k=s.state_code||'—';byState[k]=(byState[k]||0)+1});
+    hbars(document.getElementById('ov-states'),
+      Object.entries(byState).sort((a,b)=>b[1]-a[1]).slice(0,8)
+        .map(([k,v])=>({label:(STATE_NAMES[k]||k),v,color:css('--brand-accent')})),
+      {left:86,bh:13,fmt:v=>v.toLocaleString()});
+  }
 },
 
 map(){
