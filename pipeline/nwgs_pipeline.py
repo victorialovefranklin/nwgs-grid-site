@@ -6115,9 +6115,20 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
     # while every denominator is wrong. So each candidate is scored against
     # countries whose sewer connection is not in doubt, and the run publishes
     # nothing rather than publish a column that fails them.
+    # Two tests, because one is not enough. The JMP sheet carries the same
+    # "sewer connections" label three times - national, rural and urban - and a
+    # near-universally sewered country reads ~100% in all three, so the high
+    # anchors alone cannot tell them apart. Picking the highest scorer selects
+    # the URBAN column, which overstates every country: it put the United
+    # States at 95.6% when the national figure is about 80% (EPA: roughly one
+    # household in five is on a septic system).
     ANCHORS = {"DEU": "Germany", "NLD": "Netherlands", "GBR": "United Kingdom",
                "ISR": "Israel", "KWT": "Kuwait"}
     ANCHOR_FLOOR = 60.0          # all five are above 90% in reality
+    # A country that is mostly but not wholly sewered separates national from
+    # urban. The band is wide enough to absorb edition-to-edition revisions.
+    MIDRANGE = ("USA", "United States")
+    MID_LO, MID_HI = 65.0, 92.0
 
     candidates = [c for c in body.columns if re.search(r"sewer", c)]
     if not c_country or not candidates:
@@ -6141,22 +6152,50 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
                 got.append(float(v.iloc[-1]))
         return (float(np.median(got)) if got else np.nan), len(got)
 
+    def midrange_value(col):
+        vals = pd.to_numeric(one(col), errors="coerce")
+        iso, nm = MIDRANGE
+        m = iso_s.eq(iso) if iso_s is not None else name_s.str.contains(nm, case=False, na=False)
+        v = vals[m].dropna()
+        return float(v.iloc[-1]) if len(v) else np.nan
+
     scored = []
     for col in candidates:
         med, n = anchor_median(col)
-        scored.append((col, med, n))
+        mid = midrange_value(col)
+        scored.append((col, med, n, mid))
         print(f"[JMP] candidate '{col}': anchor median "
               f"{'n/a' if pd.isna(med) else f'{med:.1f}'} from {n} anchor countr"
-              f"{'y' if n == 1 else 'ies'}")
+              f"{'y' if n == 1 else 'ies'}; {MIDRANGE[1]} = "
+              f"{'n/a' if pd.isna(mid) else f'{mid:.1f}'}")
 
-    usable = [s for s in scored if not pd.isna(s[1])]
-    best = max(usable, key=lambda s: s[1]) if usable else None
+    passing = [x for x in scored if not pd.isna(x[1]) and x[1] >= ANCHOR_FLOOR]
+    # Prefer a column whose mid-range country lands in the national band; among
+    # those, the one closest to the expected national value.
+    in_band = [x for x in passing if not pd.isna(x[3]) and MID_LO <= x[3] <= MID_HI]
+    if in_band:
+        target = (MID_LO + MID_HI) / 2
+        best = min(in_band, key=lambda x: abs(x[3] - target))
+    elif passing:
+        # No column separates them. Take the first, since the JMP sheet lists
+        # the national block before the rural and urban ones, and say so.
+        best = passing[0]
+        print(f"[WARN] JMP: no sewer column put {MIDRANGE[1]} inside "
+              f"{MID_LO:.0f}-{MID_HI:.0f}%; falling back to the first column "
+              f"that passed the anchor check. The national/urban distinction "
+              f"could not be confirmed for this edition.")
+        record_source("WHO/UNICEF JMP", "OK",
+                      f"column '{best[0]}' chosen by position, not confirmed as the "
+                      f"national series; {MIDRANGE[1]} reads "
+                      f"{'n/a' if pd.isna(best[3]) else f'{best[3]:.1f}%'}", url)
+    else:
+        best = None
 
     if best is None or best[1] < ANCHOR_FLOOR:
         detail = ("no sewer column passed the anchor check (countries with "
                   "near-universal sewer connection should read far above "
                   f"{ANCHOR_FLOOR:.0f}%). Candidates and their anchor medians: "
-                  + "; ".join(f"{c}={'n/a' if pd.isna(m) else f'{m:.1f}'}" for c, m, _ in scored)
+                  + "; ".join(f"{c}={'n/a' if pd.isna(m) else f'{m:.1f}'}" for c, m, _, _ in scored)
                   + ". Publishing nothing rather than a wrong denominator.")
         print(f"[WARN] JMP: {detail}")
         record_source("WHO/UNICEF JMP", "FAILED", detail, url)
@@ -6164,7 +6203,8 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
 
     c_sewer = best[0]
     print(f"[OK] JMP sanitation parsed from sheet '{sheet}' | sewer column: "
-          f"'{c_sewer}' | anchor median {best[1]:.1f}% across {best[2]} anchor countries")
+          f"'{c_sewer}' | anchor median {best[1]:.1f}% across {best[2]} anchor countries"
+          f" | {MIDRANGE[1]} = {'n/a' if pd.isna(best[3]) else f'{best[3]:.1f}%'}")
 
     try:
         out = pd.DataFrame({
@@ -6192,7 +6232,8 @@ def fetch_jmp_sanitation(url=JMP_URL, out_dir=None):
     record_source("WHO/UNICEF JMP", "OK",
                   f"{len(out):,} countries from sheet '{sheet}', sewer column '{c_sewer}' "
                   f"(anchor check passed: median {best[1]:.1f}% across {best[2]} "
-                  f"countries with near-universal sewer connection)", url)
+                  f"countries with near-universal sewer connection; {MIDRANGE[1]} = "
+                  f"{'n/a' if pd.isna(best[3]) else f'{best[3]:.1f}%'}, the national band)", url)
     return out.reset_index(drop=True)
 
 
