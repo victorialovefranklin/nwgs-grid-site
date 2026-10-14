@@ -111,11 +111,11 @@ details>summary.btn::-webkit-details-marker{display:none}
    can be compared by eye. No fills or outlines — severity is carried by the
    weight and color of the number itself, which keeps a card with fourteen
    counties calm rather than making it a field of colored tags. */
-.clist{list-style:none;margin:3px 0 0;padding:0;display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0 18px}
-.clist li{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-  padding:3px 0;border-bottom:1px solid var(--hair);font-size:.82rem;min-width:0}
-.clist .cname{overflow-wrap:anywhere;color:var(--ink)}
+.clist{list-style:none;margin:2px 0 0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:0 16px}
+.clist li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  padding:2px 0;border-bottom:1px solid var(--hair);font-size:.82rem;min-width:0}
+.clist .cname{overflow-wrap:normal;word-break:keep-all;color:var(--ink);min-width:0}
 .clist .cz{font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--muted);flex:none}
 .clist li.z2 .cz{color:#9c4f10;font-weight:600}
 .clist li.z3 .cz{color:#8c1f1f;font-weight:700}
@@ -351,8 +351,8 @@ tr.unsup td{opacity:.62}
 .sh-top{align-items:start;margin-bottom:4px}
 .sh-hero h1{margin:0 0 6px}
 .sh-hero p{max-width:46rem;margin:0}
-.sh-goal{display:flex;gap:12px;align-items:flex-start;background:var(--t-info-bg);
-  border:1px solid var(--t-info-line);border-radius:var(--r);padding:16px 18px}
+.sh-goal{display:flex;gap:12px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--t-info-line);border-radius:var(--r);padding:16px 18px;background:var(--surface)}
 .sh-goal h2{font-size:1.02rem;margin:0 0 4px;color:var(--ink)}
 .sh-goal p{margin:0;font-size:.93rem;color:var(--muted);max-width:none}
 
@@ -373,10 +373,10 @@ tr.unsup td{opacity:.62}
 .sh-card .sh-h h2{font-size:1.14rem;margin:0}
 .sh-card p{max-width:none;text-align:left}
 .sh-sub{color:var(--muted);font-size:.95rem;margin:0 0 10px}
-.t-info-card{background:var(--t-info-bg);border-color:var(--t-info-line)}
-.t-ok-card{background:var(--t-ok-bg);border-color:var(--t-ok-line)}
-.t-no-card{background:var(--t-no-bg);border-color:var(--t-no-line)}
-.t-slate-card{background:var(--t-slate-bg);border-color:var(--t-slate-line)}
+.t-info-card{background:var(--surface);border-color:var(--t-info-line)}
+.t-ok-card{background:var(--surface);border-color:var(--t-ok-line)}
+.t-no-card{background:var(--surface);border-color:var(--t-no-line)}
+.t-slate-card{background:var(--surface);border-color:var(--t-slate-line)}
 .t-info-card .sh-h h2{color:var(--t-info-ico)}
 .t-ok-card .sh-h h2{color:var(--t-ok-ico)}
 .t-no-card .sh-h h2{color:var(--t-no-ico)}
@@ -443,9 +443,23 @@ tr.unsup td{opacity:.62}
 .lvltbl td:first-child,.clstbl td:first-child{white-space:nowrap}
 .clstbl td,.clstbl th{padding:8px 8px}
 .qmark-inline{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--line);font:600 .6rem var(--body);color:var(--muted);vertical-align:middle}
-table{width:100%;border-collapse:collapse;font-size:.86rem}
-th{font:600 .7rem var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+/* Alerts: the cards are ordered by how many counties they carry, so similar
+   sizes land in the same row. What was left was slack inside each card, not
+   between them, so the internal rhythm is tightened here. */
+.statecard{gap:8px}
+.statecard header{margin-bottom:2px}
+.statecard .pblock{margin:0}
+.statecard .ptitle{margin-bottom:1px}
+.statecard .btn{align-self:flex-start;margin-top:2px}
+
+/* Traditional ruled tables: horizontal rules, vertical column rules and an
+   outer frame. The responsive .stack rules below clear all of these when a
+   table collapses into blocks on a narrow screen. */
+table{width:100%;border-collapse:collapse;font-size:.86rem;border:1px solid var(--line)}
+th{font:600 .7rem var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top}
+th:last-child,td:last-child{border-right:none}
+tr:last-child td{border-bottom:none}
 td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
 tr:last-child td{border-bottom:none}
 .nw{white-space:nowrap}
@@ -453,8 +467,9 @@ tr:last-child td{border-bottom:none}
 th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 @media (max-width:600px){
   table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:100%}
+  table.stack{border:none}
   table.stack tr:first-child{display:none}
-  table.stack tr{padding:10px 0;border-bottom:1px solid var(--line)}
+  table.stack tr{padding:10px 0;border-bottom:1px solid var(--line);border-right:none}
   table.stack tr:last-child{border-bottom:none}
   table.stack td{border:none;padding:2px 0;max-width:none!important;text-align:left}
   table.stack td[data-l]::before{content:attr(data-l);display:block;font:600 .66rem/1.6 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -809,7 +824,7 @@ function noWidows(root){
 function notLoaded(what, source, detail){
   return `<div class="notloaded" role="status">
     <p class="nl-head">⚠ ${esc(what)} is not loaded in this run</p>
-    <p><b>No data is shown, and none is estimated, simulated or carried over from a previous run.</b> An empty panel here means the source did not load — not that the measurement came back empty.</p>
+    <p><b>No data is shown, and none is estimated, simulated or carried over from a previous run.</b> An empty panel here means the source did not load, not that the measurement came back empty.</p>
     <p class="small"><b>Source:</b> ${source}</p>
     ${detail?`<p class="small">${detail}</p>`:''}
     <p class="small muted">Whether each source loaded is recorded for every run on the <a href="#audit" data-go="audit">Audit log</a>. The next weekly update retries automatically.</p>
@@ -818,7 +833,7 @@ function notLoaded(what, source, detail){
 
 /* ---------- assay-target vulnerability ---------- */
 function assayPanel(){
-  const why=`<p>A validated diagnostic assay binds a specific stretch of the pathogen genome. When that stretch accumulates sequence variation, the assay can quietly lose sensitivity — the pathogen is present, and the test stops reporting it. A documented example: Beck et al. reported measles variants carrying mismatches at a priming site of a widely used diagnostic real-time RT-PCR assay, which reduced sensitivity for templates at low copy number; the authors developed an alternate priming strategy that restored it (<a href="https://doi.org/10.2807/1560-7917.ES.2024.29.28.2400410" target="_blank" rel="noopener">Beck et al., <i>Eurosurveillance</i> 2024;29(28):2400410</a>).</p>
+  const why=`<p>A validated diagnostic assay binds a specific stretch of the pathogen genome. When that stretch accumulates sequence variation, the assay can quietly lose sensitivity. The pathogen is present, and the test stops reporting it. A documented example: Beck et al. reported measles variants carrying mismatches at a priming site of a widely used diagnostic real-time RT-PCR assay, which reduced sensitivity for templates at low copy number; the authors developed an alternate priming strategy that restored it (<a href="https://doi.org/10.2807/1560-7917.ES.2024.29.28.2400410" target="_blank" rel="noopener">Beck et al., <i>Eurosurveillance</i> 2024;29(28):2400410</a>).</p>
   <p>This failure mode is invisible in every public wastewater aggregate, CDC's included, because aggregates report <i>detections</i> and never report what the assay could no longer see. A detection rate that falls because an assay drifted looks identical to one that falls because transmission fell.</p>
   <p class="note"><b>What this panel is, and is not.</b> It reproduces published assay target coordinates alongside the public sequence record, each row carrying its own citation and the reference accession its coordinates are expressed against. Rows without a citation, accession or valid coordinate range are dropped rather than displayed. It is a quality-control reference for laboratories deciding whether to re-verify their own panels. It does not design, recommend, optimise or score any assay, and it is not a substitute for a laboratory's own verification.</p>`;
 
@@ -853,7 +868,7 @@ function assayPanel(){
 /* ---------- forecast scoreboard ---------- */
 function forecastPanel(){
   const defn=`<p class="note"><b>How this works, and what it is for.</b> Each weekly run writes its forecasts to a ledger keyed by run identifier <i>before</i> the outcome exists, and a later run scores them against what was actually observed. A prediction already on the ledger for a given run is never rewritten, so the scoreboard cannot be retrofitted after the fact.</p>
-  <p class="note"><b>The models here are deliberately plain</b> — a persistence baseline and a linear extrapolation of the trailing four weeks. The contribution is not the model but the ledger: the field has no public wastewater forecasting hub or standing benchmark, so there is nowhere to find out whether anyone's forecast actually worked. A stronger model can be added later and scored on the same ledger against the same frozen history. Negative skill is reported as readily as positive skill; a trend term that makes forecasts worse is a result, not a bug.</p>`;
+  <p class="note"><b>The models here are deliberately plain:</b> a persistence baseline and a linear extrapolation of the trailing four weeks. The contribution is not the model but the ledger: the field has no public wastewater forecasting hub or standing benchmark, so there is nowhere to find out whether anyone's forecast actually worked. A stronger model can be added later and scored on the same ledger against the same frozen history. Negative skill is reported as readily as positive skill; a trend term that makes forecasts worse is a result, not a bug.</p>`;
   if(!D.forecast_board||!D.forecast_board.length)
     return `<article class="panel c12"><header><h2>Forecast scoreboard</h2></header>
       <p><b>This is not a failed load.</b> The ledger is being written correctly, but nothing has matured yet: a forecast made this week cannot be scored until the week it predicted has actually arrived. The first scores appear once the shortest horizon comes due. No placeholder scores are shown in the meantime.</p>${defn}</article>`;
@@ -979,7 +994,7 @@ start(){
   <article class="panel c7 sh-card"><header class="sh-h">${ico(I.gear,'t-slate')}<h2>How a sample becomes a number</h2></header>
     <ol class="sh-steps">
       ${step(1,'Collection.','A grab sample (one bottle, one moment) or a composite autosampler drawing continuously over 24 hours. Composites are steadier. Most sites sample about twice a week.')}
-      ${step(2,'Where.','Usually at the inflow to a treatment plant, covering everyone whose pipes lead there — a <b>sewershed</b>. Sometimes at a manhole or lift station, covering a smaller area.')}
+      ${step(2,'Where.','Usually at the inflow to a treatment plant, covering everyone whose pipes lead there, a <b>sewershed</b>. Sometimes at a manhole or lift station, covering a smaller area.')}
       ${step(3,'In the laboratory.','Virus is concentrated from a large volume, its genetic material extracted, and a PCR test counts copies of a specific target. Some samples are sequenced for variants.')}
       ${step(4,'Making sites comparable.','Raw concentrations cannot be compared between plants. Each site is scored against <b>its own history</b> as a z-score: zero is normal for that site, above one is high for it.')}
       ${step(5,'Combining.','County and national figures are the median across standardized site values, never an average of raw concentrations.')}
@@ -1095,7 +1110,7 @@ dashboard(){
           <li><i style="background:var(--nodata)"></i>Dormant (${dormant.toLocaleString()})</li></ul></div>
         <div><h3 class="ov-sub" style="margin-top:0">Sites by state, top 8</h3><div class="chart" id="ov-states"></div></div>
       </div>
-      <p class="small muted"><b>Dormant</b> means reported before but not within the dormancy window — not closed. Roster for this run, so not CDC's all-time totals. <a href="#equity" data-go="equity">Detail</a>.</p>
+      <p class="small muted"><b>Dormant</b> means reported before but not within the dormancy window, not closed. Roster for this run, so not CDC's all-time totals. <a href="#equity" data-go="equity">Detail</a>.</p>
     </article>`;
   }
 
@@ -1124,7 +1139,7 @@ dashboard(){
   const spAll=D.spatial||[];
   const pClusterMap=spAll.length?`<article class="panel c8 ov"><header class="ov-h"><h2>Spatial clusters</h2>
       <a href="#map" data-go="map" class="small">Open full map →</a></header>
-    <p class="small">Local Moran's I on a six-nearest-neighbour graph. A cluster is a county that is high <i>and</i> surrounded by high ones — a pattern a single-county threshold cannot see.</p>
+    <p class="small">Local Moran's I on a six-nearest-neighbour graph. A cluster is a county that is high <i>and</i> surrounded by high ones, a pattern a single-county threshold cannot see.</p>
     <div class="seg sm" id="ov-cpath">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
     <div class="mapbox" id="ov-cmap"></div>
     ${legend([[css('--hi'),'High-High'],[css('--vl'),'Low-Low'],[css('--el'),'High-Low'],[css('--lo'),'Low-High'],[css('--typ'),'Not significant'],[css('--nodata'),'No recent data']])}
@@ -1188,7 +1203,7 @@ dashboard(){
   // Protein structures
   const st=D.structures||[];
   const pStruct=st.length?panel('c4','Protein structures','structures','Reference set',
-    `<p class="small">Experimentally determined reference structures with cited functional annotations. Descriptive only — nothing here is predicted, scored or ranked.</p>
+    `<p class="small">Experimentally determined reference structures with cited functional annotations. Descriptive only: nothing here is predicted, scored or ranked.</p>
      ${(()=>{const nreg=D.regions?Object.values(D.regions).reduce((a,b)=>a+b.length,0):0;
        return kpi(nreg?[['Structures',st.length.toLocaleString(),'from RCSB PDB'],
                         ['Annotated regions',nreg.toLocaleString(),'aligned to PDB coordinates']]
@@ -1425,14 +1440,14 @@ leadtime(){
     <p class="muted">Early warning is usually reported as one number. It is actually three, and only the third one tells a health department whether the signal arrived in time to act on.</p></div>
   <article class="panel c12 plain">
     <p>People shed viruses into wastewater before they feel sick enough to go to a hospital. That is the promise of this method: sewage can show an outbreak building before clinics do. The usual way of saying this is “wastewater gives one to three weeks of warning.”</p>
-    <p>But that sentence quietly skips a step. The virus reaching the sewer is not the same as <i>somebody knowing about it</i>. The sample has to be collected, shipped, tested, reported to the state, passed to CDC and published. All of that takes time too — and that time comes out of the warning, not in addition to it.</p>
+    <p>But that sentence quietly skips a step. The virus reaching the sewer is not the same as <i>somebody knowing about it</i>. The sample has to be collected, shipped, tested, reported to the state, passed to CDC and published. All of that takes time too, and that time comes out of the warning rather than adding to it.</p>
     <p>So this page measures three things instead of one:</p>
     <ul class="plainlist">
-      <li><b>Shedding lead</b> <button class="qmark" data-gloss="shedding-lead" aria-label="Define shedding lead">?</button> — how far ahead the sewage signal actually is. Pure biology.</li>
-      <li><b>Reporting lag</b> <button class="qmark" data-gloss="reporting-lag" aria-label="Define reporting lag">?</button> — how long it takes that signal to become public. Pure logistics.</li>
-      <li><b>Operational lead</b> <button class="qmark" data-gloss="operational-lead" aria-label="Define operational lead">?</button> — what is left over. This is the real warning time.</li>
+      <li><b>Shedding lead</b> <button class="qmark" data-gloss="shedding-lead" aria-label="Define shedding lead">?</button>: how far ahead the sewage signal actually is. Pure biology.</li>
+      <li><b>Reporting lag</b> <button class="qmark" data-gloss="reporting-lag" aria-label="Define reporting lag">?</button>: how long it takes that signal to become public. Pure logistics.</li>
+      <li><b>Operational lead</b> <button class="qmark" data-gloss="operational-lead" aria-label="Define operational lead">?</button>: what is left over. This is the real warning time.</li>
     </ul>
-    <p>If a virus shows up in sewage two weeks early, but it takes two weeks to publish the result, the <b>real warning time is zero</b>. The signal was there. Nobody could have used it. That is not a failure of wastewater surveillance — it is a failure of the pipeline around it, and it is fixable in a way that biology is not.</p>
+    <p>If a virus shows up in sewage two weeks early, but it takes two weeks to publish the result, the <b>real warning time is zero</b>. The signal was there. Nobody could have used it. That is not a failure of wastewater surveillance. It is a failure of the pipeline around it, and it is fixable in a way that biology is not.</p>
     <p><b>Why this matters:</b> a health department deciding whether to fund a wastewater program needs the third number, not the first. Reporting a two-week lead when the usable lead is zero promises something the system cannot deliver.</p></article>`;
   const explain=`<article class="panel c12"><header><h2>What the three terms mean</h2></header>
     <div class="tbl"><table class="stack"><tr><th>Term</th><th>Definition</th><th>What it is measured from</th></tr>
@@ -1440,7 +1455,7 @@ leadtime(){
       <tr><td class="lead" data-l="Term"><b>Reporting lag</b></td><td data-l="Definition" class="small">Weeks between a sample being collected and its value appearing in the public CDC dataset.</td><td data-l="Measured from" class="small">The CDC dataset's own <span class="mono">rowsUpdatedAt</span> metadata minus the latest sample week present in that dataset.</td></tr>
       <tr><td class="lead" data-l="Term"><b>Operational lead</b></td><td data-l="Definition" class="small">Shedding lead minus reporting lag. Can be zero or negative.</td><td data-l="Measured from" class="small">Difference of the two rows above. Nothing is modeled; all three are differences between observed dates.</td></tr>
     </table></div>
-    <p class="note"><b>A lag of zero here means "shorter than one week," not "no lead."</b> This analysis runs on weekly data, so any lead shorter than seven days collapses to zero. Daily-resolution work finds a real but short lead: Schenk et al. reported wastewater preceding COVID-19 hospital admissions by 2&ndash;12 days, median 4 days, across 189 U.S. sites (<a href="https://doi.org/10.1371/journal.pone.0313927" target="_blank" rel="noopener">PLOS ONE 2024;19(11):e0313927</a>). A synchronous result at weekly resolution is consistent with that, and it carries a sharper operational point: a lead measured in days cannot survive a reporting pipeline measured in weeks.</p><p class="note">Published lead-time figures are almost always shedding lead alone, which overstates usable warning time because it ignores the pipeline between the laboratory and the public dataset. A negative operational lead does not mean wastewater carries no signal — it means that in this run, for this pathogen and state, the signal became public after the clinical rise it was meant to anticipate.</p></article>`;
+    <p class="note"><b>A lag of zero here means "shorter than one week," not "no lead."</b> This analysis runs on weekly data, so any lead shorter than seven days collapses to zero. Daily-resolution work finds a real but short lead: Schenk et al. reported wastewater preceding COVID-19 hospital admissions by 2&ndash;12 days, median 4 days, across 189 U.S. sites (<a href="https://doi.org/10.1371/journal.pone.0313927" target="_blank" rel="noopener">PLOS ONE 2024;19(11):e0313927</a>). A synchronous result at weekly resolution is consistent with that, and it carries a sharper operational point: a lead measured in days cannot survive a reporting pipeline measured in weeks.</p><p class="note">Published lead-time figures are almost always shedding lead alone, which overstates usable warning time because it ignores the pipeline between the laboratory and the public dataset. A negative operational lead does not mean wastewater carries no signal. It means that in this run, for this pathogen and state, the signal became public after the clinical rise it was meant to anticipate.</p></article>`;
 
   if(!D.leadtime||!D.leadtime.length){
     el.innerHTML=head+explain+`<article class="panel c12"><header><h2>Lead-time decomposition</h2></header>
@@ -1524,7 +1539,7 @@ equity(){
     <div class="statgrid"><div class="stat"><span class="label">Odds ratio per 0.10 SVI</span><span class="big">${fmt(g.glm_odds_ratio,3)}</span></div><div class="stat"><span class="label">95% CI</span><span class="big" style="font-size:1.4rem">${fmt(g.glm_or_95ci_low,3)}–${fmt(g.glm_or_95ci_high,3)}</span></div><div class="stat"><span class="label">p value</span><span class="big" style="font-size:1.4rem">${pFmt(g.glm_p_value)}</span></div></div>
     <div class="mapbox" id="e-map"></div>${legend([['var(--accent)','Analysis-ready'],['var(--lo)','Observed, not ready'],['var(--nodata)','No surveillance']])}
     <p class="note">Analysis-ready = at least 52 qualifying weeks and at least 70% completeness across the active span. Association, not cause.</p>
-    <p class="note"><b>A closely related analysis is already published, and this model is presented against it.</b> <a href="https://doi.org/10.1016/j.focus.2025.100434" target="_blank" rel="noopener">Alkhouri NB, Fisher V, Abuelezam NN, <i>AJPM Focus</i> 2025;5(1):100434</a> examined NWSS coverage across 859 of 3,143 U.S. counties (about 106 million people) using generalized linear mixed models with state as a random effect and American Community Survey measures, and reported county percent White positively associated with having surveillance in the fully adjusted model (OR 1.36, 95% CI 1.10&ndash;1.69), with state accounting for 22.3% of the variance. <b>The design here is related but not identical:</b> the outcome is <i>analysis-ready</i> coverage rather than presence of any surveillance, and the predictor is the composite CDC/ATSDR SVI rather than individual ACS measures. The contribution here is not the finding but the frame: the model is refitted on every county in the weekly run, the inputs are published as analysis-ready tables, and the result is recomputed and re-versioned each week rather than fixed at one point in time. The two measures below — representativeness and attrition — are the parts of this page with no published equivalent.</p></article></div>
+    <p class="note"><b>A closely related analysis is already published, and this model is presented against it.</b> <a href="https://doi.org/10.1016/j.focus.2025.100434" target="_blank" rel="noopener">Alkhouri NB, Fisher V, Abuelezam NN, <i>AJPM Focus</i> 2025;5(1):100434</a> examined NWSS coverage across 859 of 3,143 U.S. counties (about 106 million people) using generalized linear mixed models with state as a random effect and American Community Survey measures, and reported county percent White positively associated with having surveillance in the fully adjusted model (OR 1.36, 95% CI 1.10&ndash;1.69), with state accounting for 22.3% of the variance. <b>The design here is related but not identical:</b> the outcome is <i>analysis-ready</i> coverage rather than presence of any surveillance, and the predictor is the composite CDC/ATSDR SVI rather than individual ACS measures. The contribution here is not the finding but the frame: the model is refitted on every county in the weekly run, the inputs are published as analysis-ready tables, and the result is recomputed and re-versioned each week rather than fixed at one point in time. The two measures below, representativeness and attrition, are the parts of this page with no published equivalent.</p></article></div>
   ${repPanel()}
   ${attritionPanel()}`;
   hbars(document.getElementById('e-bars'),D.equity.map(q=>({label:q.svi_quartile.replace(' vulnerability',''),v:q.pct_analysis_ready})),{min:0,max:100,left:120,bh:38,fmt:v=>v.toFixed(1)+'%'});
@@ -1551,14 +1566,14 @@ global(){
   const head=`<div class="head"><h1>Global coverage <button class="qmark" data-gloss="global-coverage" aria-label="What does global coverage mean?">?</button></h1>
     <p class="muted">Wastewater surveillance can only ever see people whose waste reaches a monitored sewer. This page asks a different question from the rest of the site: not “what is rising,” but “who could this method ever detect in the first place?”</p></div>
   <article class="panel c12 plain">
-    <p>Testing sewage for disease works by catching what a community flushes. If a household is not connected to a sewer system — if it uses a pit latrine, a septic tank, or no sanitation at all — nothing that household sheds ever arrives at a treatment plant, so no amount of testing will ever detect it.</p>
+    <p>Testing sewage for disease works by catching what a community flushes. If a household is not connected to a sewer system, whether it uses a pit latrine, a septic tank or no sanitation at all, nothing that household sheds ever arrives at a treatment plant, so no amount of testing will ever detect it.</p>
     <p>That makes sewer connection a hard ceiling on this method. Worldwide, <b>most people are not connected to a sewer.</b> So before asking whether a country has a wastewater surveillance program, this page asks how much of that country's population such a program could observe even if it were perfectly run and fully funded.</p>
     <p><b>Why it matters for policy:</b> the countries with the least sewer connection are generally the countries with the least surveillance capacity. The populations this method can least observe are the same populations least likely to have a program trying to observe them. Investment in wastewater surveillance alone will not close that gap, because the gap is in sanitation infrastructure, not in laboratories.</p>
     <p><b>Why it matters for researchers:</b> a national wastewater figure is a statement about the sewered population, not the whole population. Comparing two countries' numbers without comparing their sewer coverage compares two different denominators.</p></article>`;
   const sources=`<article class="panel c12"><header><h2>Why this layer is built this way</h2></header>
     <p>Absolute wastewater concentrations are not portable between countries: normalization targets, units and laboratory methods diverge, so a figure from one national program cannot be placed on the same axis as another's. Only <b>within-site relative</b> metrics transfer, which is the standardization this project already uses throughout.</p>
-    <p>Of the national programs publishing wastewater data, only two currently publish it in a genuinely machine-readable, openly licensed form: <b>Germany</b>'s AMELAG (Robert Koch-Institut, CC BY 4.0, versioned with a DOI) and the <b>Netherlands</b>' RIVM open data. Sequences and phylogenetics in this project come from <b>NCBI Virus, GenBank and the SRA</b> — public-domain INSDC records that may be redistributed, which is why every sequence shown here can be downloaded, checked and reused by anyone.</p>
-    <p><b>Sources for this page.</b> Sewer-connected share and population: <a href="https://washdata.org/data/downloads" target="_blank" rel="noopener">WHO/UNICEF Joint Monitoring Program</a> household world workbook, downloaded and parsed each run, with the raw workbook frozen alongside the run. Income classification: <a href="https://api.worldbank.org/v2/country?format=json" target="_blank" rel="noopener">World Bank country API</a>, fetched each run rather than hard-coded, because those classifications are revised annually. German site-level data: <a href="https://github.com/robert-koch-institut/Abwassersurveillance_AMELAG" target="_blank" rel="noopener">RKI AMELAG</a>. The “Status in this run” column states, per country, whether a feed was actually ingested or is only a known feed not yet wired in — a registry entry is not data in hand.</p>
+    <p>Of the national programs publishing wastewater data, only two currently publish it in a genuinely machine-readable, openly licensed form: <b>Germany</b>'s AMELAG (Robert Koch-Institut, CC BY 4.0, versioned with a DOI) and the <b>Netherlands</b>' RIVM open data. Sequences and phylogenetics in this project come from <b>NCBI Virus, GenBank and the SRA</b>, which are public-domain INSDC records that may be redistributed, which is why every sequence shown here can be downloaded, checked and reused by anyone.</p>
+    <p><b>Sources for this page.</b> Sewer-connected share and population: <a href="https://washdata.org/data/downloads" target="_blank" rel="noopener">WHO/UNICEF Joint Monitoring Program</a> household world workbook, downloaded and parsed each run, with the raw workbook frozen alongside the run. Income classification: <a href="https://api.worldbank.org/v2/country?format=json" target="_blank" rel="noopener">World Bank country API</a>, fetched each run rather than hard-coded, because those classifications are revised annually. German site-level data: <a href="https://github.com/robert-koch-institut/Abwassersurveillance_AMELAG" target="_blank" rel="noopener">RKI AMELAG</a>. The “Status in this run” column states, per country, whether a feed was actually ingested or is only a known feed not yet wired in. A registry entry is not data in hand.</p>
     </article>`;
 
   if(!D.global_coverage||!D.global_coverage.length){
@@ -1593,7 +1608,7 @@ global(){
       ${inc.map(i=>`<tr><td>${esc(i.income_group)}</td><td class="n">${i.countries}</td><td class="n">${i.countries_with_open_feed}</td><td class="n">${fmt(i.median_sewer_connected_pct,0)}%</td><td class="n">${fmt(i.pct_population_observable,0)}%</td></tr>`).join('')}</table></div>
     <p class="note">The gradient is the finding: where sewer connection is lowest, surveillance capacity is lowest too, so the populations least observable by this method are also the least likely to be covered by a program that could observe them.</p></article>`:''}
   ${hasSM?`<article class="panel c12"><header><h2>Sanitation is not the same as visibility</h2></header>
-    <p>“Safely managed sanitation” (World Bank <span class="mono">SH.STA.SMSS.ZS</span>) counts septic tanks and improved latrines as success — and rightly so, as public health. But neither reaches a treatment plant, so neither can be observed by testing wastewater. The difference between the two columns below is, approximately, <b>the population with working sanitation that this method still cannot see.</b></p>
+    <p>“Safely managed sanitation” (World Bank <span class="mono">SH.STA.SMSS.ZS</span>) counts septic tanks and improved latrines as success, and rightly so as public health. But neither reaches a treatment plant, so neither can be observed by testing wastewater. The difference between the two columns below is, approximately, <b>the population with working sanitation that this method still cannot see.</b></p>
     <div class="statgrid">
       <div class="stat"><span class="label">Population with sanitation but not sewered</span><span class="big">${smPop?Math.round(smPop).toLocaleString():'—'}</span><span class="small muted">across ${smN} countries reporting both</span></div>
       <div class="stat"><span class="label">Median gap</span><span class="big">${fmt(d3.median(withSM,c=>c.sanitation_not_observable_pct),1)}%</span><span class="small muted">safely managed minus sewer-connected</span></div>
@@ -1701,7 +1716,7 @@ structures(){
   el.addEventListener('click',async e=>{const b=e.target.closest('[data-mol]');if(!b)return;
     const id=b.dataset.mol,reg=b.dataset.start?{chain:b.dataset.chain,start:+b.dataset.start,end:+b.dataset.end,name:b.dataset.rname}:null;
     document.getElementById('mol-t').textContent=`${b.dataset.name} (PDB ${id})`;
-    document.getElementById('mol-r').textContent=reg?` — highlighting ${reg.name}, chain ${reg.chain} ${reg.start===reg.end?reg.start:`${reg.start}–${reg.end}`}`:'';
+    document.getElementById('mol-r').textContent=reg?`: highlighting ${reg.name}, chain ${reg.chain} ${reg.start===reg.end?reg.start:`${reg.start}–${reg.end}`}`:'';
     document.getElementById('mol-alt').href=`https://www.rcsb.org/3d-view/${id}`;
     const v=document.getElementById('mol-v');v.innerHTML='<p class="muted small" style="padding:16px">Loading 3D model…</p>';
     try{dlg.showModal()}catch(_){dlg.setAttribute('open','')}
@@ -1769,7 +1784,7 @@ structures(){
         leg.onclick=ev=>{const b=ev.target.closest('[data-focus]');if(!b)return;
           const f=b.dataset.focus==='all'?null:all[+b.dataset.focus];
           leg.querySelectorAll('.mbtn').forEach(x=>x.classList.toggle('on',x===b));
-          document.getElementById('mol-r').textContent=f?` — ${f.feature_description}, chain ${f.pdb_chain} ${resiOf(f)}`:' — all annotated regions';
+          document.getElementById('mol-r').textContent=f?`: ${f.feature_description}, chain ${f.pdb_chain} ${resiOf(f)}`:': all annotated regions';
           paint(f)};
       }else{leg.hidden=true;leg.innerHTML=''}
       paint(reg?all.find(r=>r.pdb_chain===reg.chain&&r.pdb_start===reg.start&&r.pdb_end===reg.end)||null:null);
@@ -1835,7 +1850,7 @@ about(){
   <figure class="panel c4 portrait"><img src="img/vlf-portrait.jpg" alt="Portrait of Victoria Love Franklin" width="1080" height="1439" loading="lazy"></figure>
   <article class="panel c8 bio"><h2>Victoria Love Franklin, PSM, CPT</h2>
     <p class="role">Developer · PhD Student, Data Science · Research Scholar</p>
-    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened into Data Science with a cybersecurity concentration, while continuing to research <b>structural biology</b> — the protein-level side of the pathogens this system tracks. Her work spans five federal laboratories (Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine), as well as local government and industry.</p>
+    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened into Data Science with a cybersecurity concentration, while continuing to research <b>structural biology</b>, the protein-level side of the pathogens this system tracks. Her work spans five federal laboratories (Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine), as well as local government and industry.</p>
     <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance. She has since trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and AI. That biomedical and structural grounding is why NWGS Grid™ carries reference protein structures and their curated functional regions alongside the surveillance data.</p>
     <div class="controls">
       <a class="btn primary" href="${mail('NWGS Grid inquiry')}">Email Victoria</a>
@@ -1848,14 +1863,14 @@ about(){
   <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><h2>Why I built NWGS Grid™</h2>
     <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor.</p>
     <p>But that signal is spread across separate CDC datasets, clinical feeds and vulnerability indices. It changes every week, and it reaches some communities far better than others. I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses.</p>
-    <p><b>NWGS Grid™ is independent work.</b> Victoria created and built every part of it — the pipeline, the validation checks, the weekly automation and this site — outside any employer, fellowship or sponsored program, using only public data.</p>
+    <p><b>NWGS Grid™ is independent work.</b> Victoria created and built every part of it: the pipeline, the validation checks, the weekly automation and this site, outside any employer, fellowship or sponsored program, using only public data.</p>
     <p>That last question is personal. In my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.</p>
     <p class="sig">— Victoria</p></article>
   <article class="panel c12"><h2>Credentials &amp; affiliations</h2>
     <h3>Education &amp; training</h3>
     <ul class="creds">
       <li><b>Ph.D. student, Data Science</b> (Cybersecurity concentration), Meharry Medical College, expected 2027 · Doctoral Research Scholar, SACS Cybersecurity Research Center</li>
-      <li><b>Biomedical Data Science</b> — doctoral training origin at Meharry Medical College; continuing research in <b>structural biology</b></li>
+      <li><b>Biomedical Data Science</b>: doctoral training origin at Meharry Medical College; continuing research in <b>structural biology</b></li>
       <li><b>ORISE Genomic Epidemiology Fellow</b>, U.S. Air Force School of Aerospace Medicine (2024–2025)</li>
       <li><b>mNGS wet-lab and dry-lab research trainee</b>, Chan Zuckerberg Biohub · Meharry Medical College (2026)</li>
       <li><b>Professional Science Master’s</b>, Applied Geospatial Information Systems, Tennessee State University</li>
@@ -1874,13 +1889,13 @@ about(){
     <h3>Selected wastewater work</h3>
     <ul class="creds">
       <li>APHL ID Lab Con 2027: three NWGS Grid abstracts submitted (one oral, two posters) · <b>pending review and selection</b></li>
-      <li><b>Poster presenter</b>, <b>Wastewater Disease Surveillance Summit</b> (2025) — Franklin et al., “Using GIS and Metagenomics to Enhance Wastewater Surveillance.”</li>
-      <li><b>First Place</b>, School of Applied Computational Sciences, <b>69th Annual Research Day</b>, Meharry Medical College (2025) — for Franklin et al., “Using GIS and Metagenomics to Enhance Wastewater Surveillance.”</li>
+      <li><b>Poster presenter</b>, <b>Wastewater Disease Surveillance Summit</b> (2025). Franklin et al., “Using GIS and Metagenomics to Enhance Wastewater Surveillance.”</li>
+      <li><b>First Place</b>, School of Applied Computational Sciences, <b>69th Annual Research Day</b>, Meharry Medical College (2025), for Franklin et al., “Using GIS and Metagenomics to Enhance Wastewater Surveillance.”</li>
       <li>Featured, Wiley’s Index of Inspiring Black Scientists (2026)</li>
     </ul></article>
   </div>
   <article class="panel c12 origin"><h2>Where this came from</h2>
-    <p>NWGS Grid™ began as a poster. In 2025 Victoria proposed a conceptual framework for combining GIS and metagenomics to enhance wastewater surveillance — presented at the <b>Wastewater Disease Surveillance Summit</b>, and awarded <b>First Place</b> for the School of Applied Computational Sciences at the <b>69th Annual Research Day</b> at Meharry Medical College.</p>
+    <p>NWGS Grid™ began as a poster. In 2025 Victoria proposed a conceptual framework for combining GIS and metagenomics to enhance wastewater surveillance, presented at the <b>Wastewater Disease Surveillance Summit</b>, and awarded <b>First Place</b> for the School of Applied Computational Sciences at the <b>69th Annual Research Day</b> at Meharry Medical College.</p>
     <figure class="posterfig">
       <img src="img/poster-gis-metagenomics.webp" alt="Research poster: Using GIS and Metagenomics to Enhance Wastewater Surveillance, by Victoria Love Franklin, Todd Gary, Bishnu Sarker and Reginald Archer." loading="lazy">
       <figcaption class="small muted">Franklin VL, Gary T, Sarker B, Archer R. “Using GIS and Metagenomics to Enhance Wastewater Surveillance.” School of Applied Computational Sciences, Meharry Medical College; Department of Environmental Sciences, Tennessee State University (2025).</figcaption>
@@ -1895,10 +1910,10 @@ about(){
       <tr><td class="lead" data-l="In the poster">“Identify distinct spatial patterns in the distribution of targeted pathogens, correlating patterns with secondary data.”</td>
           <td data-l="Today" class="small">Local spatial clustering is computed each week and correlated against clinical emergency-department data and social vulnerability. <a href="#equity" data-go="equity">Coverage &amp; equity</a></td></tr>
     </table></div>
-    <p class="small muted">The poster’s stated limitation — missing sewer-access location data for the study site — is the same problem that the representativeness measure now addresses at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is.</p>
+    <p class="small muted">The poster’s stated limitation, missing sewer-access location data for the study site, is the same problem that the representativeness measure now addresses at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is.</p>
     <p class="note">The poster was collaborative work with the co-authors named above. <b>NWGS Grid™ is independent work</b> that followed it: Victoria created and built every part of the platform herself, outside any employer, fellowship or sponsored program, using only public data.</p></article>
   <article class="panel domains"><h2>Domains</h2>
-    <p class="small">Victoria’s work runs along one thread: the critical systems communities depend on — health, energy, environment — and the geospatial and AI methods that reveal where those systems are strong, where they fail and whom they reach. NWGS Grid™ is the public-health expression of that thread.</p>
+    <p class="small">Victoria’s work runs along one thread: the critical systems communities depend on, namely health, energy and environment, and the geospatial and AI methods that reveal where those systems are strong, where they fail and whom they reach. NWGS Grid™ is the public-health expression of that thread.</p>
     <div class="tbl"><table class="stack dtable"><tr><th>Domain</th><th>Focus</th><th>Areas</th></tr><tr><td class="lead dname" data-l="Domain">Biosurveillance &amp; public health</td><td data-l="Focus" class="small">Turning environmental and clinical signals into early warning, and asking who the system reaches.</td><td data-l="Areas"><ul class="tags"><li>Wastewater biosurveillance</li><li>Genomic epidemiology</li><li>Spatial epidemiology</li><li>Metagenomics &amp; NGS</li><li>Structural biology</li><li>Health equity &amp; social vulnerability</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Critical infrastructure &amp; cybersecurity</td><td data-l="Focus" class="small">Protecting operational systems and modelling how they behave under stress.</td><td data-l="Areas"><ul class="tags"><li>Nuclear cybersecurity</li><li>ICS/OT security</li><li>Power grids &amp; smart grids</li><li>Grid resilience</li><li>Digital twins</li><li>Anomaly detection</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Environment &amp; remote sensing</td><td data-l="Focus" class="small">Measuring land, air and climate pressure from satellite and sensor data.</td><td data-l="Areas"><ul class="tags"><li>GIS &amp; geospatial intelligence</li><li>Remote sensing</li><li>Forestry &amp; biomass</li><li>Carbon sequestration</li><li>Air quality</li><li>Climate hazards &amp; wildfire risk</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">AI &amp; application development</td><td data-l="Focus" class="small">Building the models, pipelines and interfaces that put the analysis in people’s hands.</td><td data-l="Areas"><ul class="tags"><li>App development, front end &amp; back end</li><li>Machine learning &amp; explainable AI</li><li>Retrieval-augmented generation (RAG)</li><li>Automated data pipelines</li><li>Dashboards &amp; public data portals</li></ul></td></tr></table></div>
     <p class="small muted">Full project history on her <a href="https://victorialovefranklin.github.io/victoria-franklin-site/" target="_blank" rel="noopener">personal website</a>.</p></article>
   <div class="grid">
@@ -1959,13 +1974,13 @@ alerts(){
   <p class="note">Same rule as the weekly email alerts: a county is High when its median site z-score over the latest four weeks is above 1.0. Each chip gives the county and that z-score, and values of <span class="zkey z2">2.0 and above</span> or <span class="zkey z3">3.0 and above</span> are emphasised so the strongest signals stand out. A z-score compares a site only against its own history, so a high value means unusual for that place, not more cases than somewhere else.</p>
   <div class="head" style="margin-top:12px"><span class="eyebrow">Emerging pathogens</span><h2 style="font-size:1.5rem">Where H5 bird flu, measles and mpox were detected</h2><p class="muted">CDC tests these as detected / not detected. A site counts as positive if any sample tested positive in the latest four weeks.</p></div>
   <div class="controls"><div class="seg" id="em-p">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p==='Influenza A(H5)'?'H5 bird flu':p}</button>`).join('')}</div></div>
-  <div class="grid"><article class="panel c12"><div class="mapbox" id="em-map"></div><div id="em-legend"></div></article><article class="panel c12" id="em-list"></article></div>`;
+  <div class="grid"><article class="panel c8"><div class="mapbox" id="em-map"></div><div id="em-legend"></div></article><article class="panel c4" id="em-list"></article></div>`;
   const sel=document.getElementById('al-st');
   function draw(){
     const H=highBy(), max=Math.max(1,d3.max(Object.values(H),d=>d.total)||1);
     const col=d3.scaleLinear().domain([1,max]).range([css('--hi-soft'),css('--hi')]).interpolate(d3.interpolateRgb);
     const states=Object.keys(H).sort((a,b)=>H[b].total-H[a].total||STATE_NAMES[a].localeCompare(STATE_NAMES[b]));
-    sel.innerHTML=`<option value="">All states (${states.length} with High counties)</option>`+Object.keys(STATE_NAMES).sort((a,b)=>STATE_NAMES[a].localeCompare(STATE_NAMES[b])).map(s=>`<option value="${s}"${s===ST?' selected':''}>${esc(STATE_NAMES[s])}${H[s]?` — ${H[s].total} High`:''}</option>`).join('');
+    sel.innerHTML=`<option value="">All states (${states.length} with High counties)</option>`+Object.keys(STATE_NAMES).sort((a,b)=>STATE_NAMES[a].localeCompare(STATE_NAMES[b])).map(s=>`<option value="${s}"${s===ST?' selected':''}>${esc(STATE_NAMES[s])}${H[s]?` (${H[s].total} High)`:''}</option>`).join('');
     // map
     const box=document.getElementById('al-map');box.innerHTML='';
     const svg=d3.select(box).append('svg').attr('viewBox','0 0 975 610').attr('role','img').attr('aria-label','States by number of counties at High');
@@ -2044,18 +2059,18 @@ glossary(){
    ['Global coverage',[
     ['global-coverage','Global coverage','How much of a country’s population wastewater surveillance could observe at all, which depends on how many people are connected to a sewer. It is a ceiling on the method, measured before asking whether a program exists.'],
     ['sewer-connected','Sewer-connected population','The share of people whose household waste reaches a sewer system rather than a septic tank, pit latrine, or no sanitation. Only this share can ever be seen by testing wastewater, however good the laboratory is.'],
-    ['observable-population','Observable population','Population multiplied by the sewer-connected share — the number of people a perfectly run wastewater program in that country could detect. The remainder is invisible to the method regardless of funding.'],
+    ['observable-population','Observable population','Population multiplied by the sewer-connected share, giving the number of people a perfectly run wastewater program in that country could detect. The remainder is invisible to the method regardless of funding.'],
     ['income-group','Income group','The World Bank classification of countries as low, lower-middle, upper-middle or high income. Shown here because sewer connection and surveillance capacity both track it closely, which is the central finding of this page.'],
-    ['jmp','WHO/UNICEF JMP','The Joint Monitoring Program for Water Supply, Sanitation and Hygiene — the standard international source for how many people in each country have sewer connections. It supplies the denominator for this page.'],
+    ['jmp','WHO/UNICEF JMP','The Joint Monitoring Program for Water Supply, Sanitation and Hygiene, the standard international source for how many people in each country have sewer connections. It supplies the denominator for this page.'],
     ['open-feed','Open machine-readable feed','A national program that publishes its wastewater data in a form software can read directly, under a license permitting reuse. Very few do. A dashboard a human can look at is not a feed; being listed here means the data can be downloaded and recomputed.'],
     ['insdc','INSDC / NCBI Virus / GenBank','The International Nucleotide Sequence Database Collaboration and its public archives. Sequences here are in the public domain and may be redistributed, which is why every sequence and phylogenetic tree shown on this site comes from them.'],
-    ['gisaid','GISAID','A widely used virus sequence database, including wastewater-relevant collections and phylogenetic trees. Its Database Access Agreement does not permit redistributing data — or anything derived from it — through another portal, so GISAID data is not shown anywhere on this site. It may be used in published research with acknowledgement, and is cited there instead.'],
+    ['gisaid','GISAID','A widely used virus sequence database, including wastewater-relevant collections and phylogenetic trees. Its Database Access Agreement does not permit redistributing data, or anything derived from it, through another portal, so GISAID data is not shown anywhere on this site. It may be used in published research with acknowledgement, and is cited there instead.'],
     ['phylogenetic-tree','Phylogenetic tree','A branching diagram showing how versions of a virus are related by descent, used to tell whether cases share a common origin or arrived separately.'],
    ]],
    ['Lead time & forecasting',[
     ['shedding-lead','Shedding lead','How many weeks wastewater activity rises before emergency-department visits do. This is the figure most often quoted as “wastewater gives one to three weeks of warning.” On its own it describes biology, not usable warning time, because it ignores how long the measurement takes to become public.'],
     ['reporting-lag','Reporting lag','How many weeks pass between a sample being collected and its value appearing in the public CDC dataset. Measured from the dataset’s own update timestamp against the latest sample week it contains. This is a property of the data pipeline, not of the virus.'],
-    ['operational-lead','Operational lead','Shedding lead minus reporting lag — the only one of the three that answers whether a health department could actually have acted on the signal before the clinical rise. It can be zero or negative. When it is, the signal existed but became public too late to use, which is why this site reports all three terms separately instead of one headline number.'],
+    ['operational-lead','Operational lead','Shedding lead minus reporting lag. It is the only one of the three that answers whether a health department could actually have acted on the signal before the clinical rise. It can be zero or negative. When it is, the signal existed but became public too late to use, which is why this site reports all three terms separately instead of one headline number.'],
     ['forecast-skill','Forecast skill','One minus the error of a model divided by the error of simple persistence (assuming next week looks like this week). Above zero, the model beat persistence; below zero, it did worse. Skill below zero is reported here as readily as skill above it.'],
     ['forecast-ledger','Forecast ledger','Every run writes its predictions, tagged with that run’s ID, before the outcome exists. Later runs score them against what actually happened. Because a prediction already on the ledger is never rewritten, the scoreboard cannot be adjusted after the fact to look better than it was.'],
    ]],
@@ -2173,12 +2188,12 @@ methods(){
   </ol>
   <p class="small muted">All CDC, Census, NCBI and RCSB data are public and remain subject to their providers’ terms. NWGS Grid™ is not affiliated with or endorsed by CDC.</p></article>
   <div class="grid"><article class="panel c12"><h2>Measures</h2><ul class="small" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
-    <li><b>Activity level</b> — within-site z-score of log concentration, median across a county’s sites for the latest 4 weeks. Very Low ≤ −1, Low ≤ −0.25, Typical ≤ 0.25, Elevated ≤ 1, High &gt; 1.</li>
-    <li><b>Analysis-ready</b> — at least 52 qualifying weeks and at least 70% completeness across the active span.</li>
-    <li><b>Timing</b> — Spearman correlation between state wastewater and ED activity at lags of 0–6 weeks, FDR-corrected; best lag reported.</li>
-    <li><b>Seasonal peaks</b> — complete July–June seasons only; leads near season boundaries are flagged.</li>
-    <li><b>Clusters</b> — global and local Moran’s I, k=6 nearest neighbours, EPSG:5070, permutation inference.</li>
-    <li><b>Models</b> — random forest and gradient boosting vs. clinical persistence on a chronological holdout; ablation, wastewater-only benchmark and SHAP.</li></ul></article></div>
+    <li><b>Activity level</b>: within-site z-score of log concentration, median across a county’s sites for the latest 4 weeks. Very Low ≤ −1, Low ≤ −0.25, Typical ≤ 0.25, Elevated ≤ 1, High &gt; 1.</li>
+    <li><b>Analysis-ready</b>: at least 52 qualifying weeks and at least 70% completeness across the active span.</li>
+    <li><b>Timing</b>: Spearman correlation between state wastewater and ED activity at lags of 0–6 weeks, FDR-corrected; best lag reported.</li>
+    <li><b>Seasonal peaks</b>: complete July–June seasons only; leads near season boundaries are flagged.</li>
+    <li><b>Clusters</b>: global and local Moran’s I, k=6 nearest neighbours, EPSG:5070, permutation inference.</li>
+    <li><b>Models</b>: random forest and gradient boosting vs. clinical persistence on a chronological holdout; ablation, wastewater-only benchmark and SHAP.</li></ul></article></div>
   <p class="note">The site is one static page generated from the weekly pipeline export. It is rebuilt every Saturday after CDC’s weekly NWSS refresh, and only when no validation check fails.</p>`;
 }
 };

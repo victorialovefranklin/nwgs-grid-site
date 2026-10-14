@@ -1,7 +1,7 @@
 /*
- * Render docs/DASHBOARD_AUDIT.md as a Word document.
+ * Render any of the project's Markdown documents as a Word document.
  *
- *   node scripts/audit_to_docx.js <input.md> <output.docx>
+ *   node scripts/md_to_docx.js <input.md> <output.docx>
  *
  * The audit is regenerated from each run's export, so the Word version is
  * generated too rather than converted by hand. Nothing here adds content: it
@@ -40,11 +40,13 @@ function inline(text, base = {}) {
         children: [new TextRun({ text: m[2], ...base, style: "Hyperlink", color: "1D4F91", underline: {} })],
       }));
     } else if (m[4]) {
-      push(m[5], { bold: true });
+      // Recurse, so `code` and [links] inside **bold** keep their own styling
+      // instead of being emitted with their markers intact.
+      out.push(...inline(m[5], { ...base, bold: true }));
     } else if (m[6]) {
       push(m[7], { font: "Consolas", size: 18, color: WINE });
     } else if (m[8]) {
-      push(m[9], { italics: true });
+      out.push(...inline(m[9], { ...base, italics: true }));
     }
     last = re.lastIndex;
   }
@@ -71,6 +73,28 @@ function rule() {
     spacing: { before: 80, after: 160 },
     border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: RULE } },
   });
+}
+
+// A fenced block. One paragraph per source line so line breaks survive, with a
+// tinted panel behind the whole run and no inline parsing of the contents.
+function codeBlock(lines) {
+  const edge = { style: BorderStyle.SINGLE, size: 4, color: RULE };
+  return lines.map((text, idx) => new Paragraph({
+    children: [new TextRun({ text: text || " ", font: "Consolas", size: 17, color: NAVY })],
+    spacing: {
+      before: idx === 0 ? 120 : 0,
+      after: idx === lines.length - 1 ? 180 : 0,
+      line: 240,
+    },
+    indent: { left: 180, right: 180 },
+    shading: { type: ShadingType.CLEAR, fill: BAND },
+    border: {
+      left: edge,
+      right: edge,
+      ...(idx === 0 ? { top: edge } : {}),
+      ...(idx === lines.length - 1 ? { bottom: edge } : {}),
+    },
+  }));
 }
 
 function quote(lines) {
@@ -170,6 +194,23 @@ function convert(md) {
     const line = lines[i];
     const t = line.trim();
 
+    // Fenced code block. Taken verbatim, before anything else can claim the
+    // lines: a fence may hold pipes, hashes and hyphens that otherwise read as
+    // tables, headings or rules.
+    if (t.startsWith("```")) {
+      flushAll();
+      const buf = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith("```")) {
+        buf.push(lines[i].replace(/\s+$/, ""));
+        i++;
+      }
+      i++;  // closing fence
+      while (buf.length && buf[buf.length - 1] === "") buf.pop();
+      if (buf.length) body.push(...codeBlock(buf));
+      continue;
+    }
+
     if (t === "") { flushAll(); i++; continue; }
 
     if (/^---+$/.test(t)) { flushAll(); body.push(rule()); i++; continue; }
@@ -246,14 +287,21 @@ function convert(md) {
 
 /* ---------- document ---------- */
 
+const AUTHOR = "Victoria Love Franklin";
+
 function main(inPath, outPath) {
   const md = fs.readFileSync(inPath, "utf8");
+  // The running head and the file's own metadata come from the document's H1,
+  // so this converter renders any of the project's documents unchanged.
+  const h1 = md.match(/^#\s+(.+)$/m);
+  const docTitle = (h1 ? h1[1] : "NWGS Grid").replace(/\s*[—–]\s*/g, " - ").trim();
   const children = convert(md);
 
   const doc = new Document({
-    creator: "Victoria Love Franklin",
-    title: "NWGS Grid - Dashboard Audit",
-    description: "Generated audit of the NWGS Grid dashboard",
+    creator: AUTHOR,
+    lastModifiedBy: AUTHOR,
+    title: docTitle,
+    description: `${docTitle}. Generated from the repository and from a weekly run's export.`,
     styles: {
       default: { document: { run: { font: "Calibri", size: 21, color: INK } } },
     },
@@ -289,7 +337,7 @@ function main(inPath, outPath) {
           children: [new Paragraph({
             alignment: AlignmentType.CENTER,
             children: [new TextRun({
-              children: ["NWGS Grid - Dashboard Audit    |    ", PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES],
+              children: [`${docTitle}    |    `, PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES],
               size: 16, color: MUTED,
             })],
           })],
