@@ -5,6 +5,45 @@
 Weekly, validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties,
 rebuilt every Saturday by GitHub Actions. Sign in on the site to save alerts.
 
+## The website
+
+One static HTML page. No framework, no bundler, no build step for the browser, and nothing
+queried at page load: every figure is precomputed, so any page can be reproduced exactly from
+the archived release for its run. `scripts/build_site.py` substitutes one JSON payload into
+`site_src/template.html` and writes `site/index.html`.
+
+**Seventeen views, grouped into six sections in the header:**
+
+| Section | Views |
+|---|---|
+| Overview | Start here · Dashboard |
+| Surveillance | Surveillance map · Trends & timing · Lead time · Predictive models · Alerts · My alerts |
+| Coverage & equity | Coverage & equity · Global coverage · Tennessee |
+| Research & genomics | Genomics & AMR · Protein structures |
+| Data & methods | Audit log · Methods & sources · Glossary |
+| About | About the developer |
+
+The grouping is presentation only. Every view key and `#hash` route is unchanged, so existing
+links keep working. Below roughly 760px the header collapses to a menu button and the groups
+become one stacked list, so no view is more than one tap away.
+
+**Design rules the page keeps to:**
+
+- Navy carries the text, rose marks selected state and accents, teal pairs with rose on charts.
+  No text on the site is grey.
+- Three type sizes and no more: 32px page titles, 20px section headings, 16px for anything
+  written to be read, plus 15px captions and 12px field labels. A component that sets its own
+  size is a bug.
+- Each pathogen has one colour, defined once and used on its card, sparkline, trend line, map
+  and chips. A colour identifies the pathogen; it never signals severity.
+- Panels size to their own content rather than stretching to the tallest card in the row.
+- An empty panel always says which source did not load and why, so a missing source can never
+  be mistaken for a measurement of zero.
+- Monospace is reserved for run identifiers, dataset codes and audit output.
+
+The front end reference documents the data object, the view functions, the chart helpers and
+the theme tokens in full.
+
 **Author:** Victoria Love Franklin · Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
 
 **Contact, license requests and beta feedback:** victorialovefranklin@gmail.com
@@ -90,9 +129,10 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
 | `site_src/` | Page template, images and U.S. county map (us-atlas, ISC license) |
 | `static_inputs/` | Files the pipeline doesn't download (SVI, AMR, forecast ledger seed); TIGER is downloaded each run |
 | `supabase/` | Database tables and security rules for accounts and alerts |
-| `docs/` | Generated documentation (see above) |
+| `docs/` | Generated documentation (see above), in Markdown and Word |
 | `sample_export/` | A saved export, used as a fixture for running the scripts offline |
 | `LICENSE`, `CITATION.cff` | Copyright terms and citation details |
+| `.gitattributes` | Pins LF line endings, so a Windows round-trip cannot rewrite every line of a data file |
 
 ## Structural annotation layer
 `pull_uniprot_functional_regions()` in the pipeline imports UniProtKB's curated feature table
