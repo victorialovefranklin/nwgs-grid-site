@@ -356,7 +356,7 @@ function main(inPath, outPath) {
 if (require.main === module) {
   const [, , inPath, outPath] = process.argv;
   if (!inPath || !outPath) {
-    console.error("usage: node scripts/audit_to_docx.js <input.md> <output.docx>");
+    console.error("usage: node scripts/md_to_docx.js <input.md> <output.docx>");
     process.exit(1);
   }
   main(inPath, outPath).catch((e) => { console.error(e); process.exit(1); });

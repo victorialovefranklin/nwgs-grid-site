@@ -113,11 +113,20 @@ hex values, which is why they stay legible when the theme changes.
 
 | Tokens | Used for |
 |---|---|
-| `--navy`, `--wine`, `--gold` | Brand palette. |
-| `--ink`, `--muted`, `--line`, `--surface`, `--bg` | Text, rules and backgrounds. |
-| `--vl`, `--lo`, `--typ`, `--el`, `--hi` | Activity levels, Very Low through High. |
+| `--navy`, `--rose`, `--rose-deep`, `--teal` | Brand palette: navy carries text, rose marks the selected state and accents, teal pairs with rose on charts. |
+| `--ink`, `--muted`, `--line`, `--surface`, `--bg` | Text, rules and backgrounds. `--muted` matches `--ink`: no text on the site is grey. |
+| `--vl`, `--lo`, `--typ`, `--el`, `--hi` | Activity levels, Very Low through High, running teal to rose. |
 | `--ok`, `--warn`, `--nodata` | Status colours. |
-| `--display`, `--body`, `--mono` | Fraunces, Inter and IBM Plex Mono. |
+| `--display`, `--body`, `--mono` | Inter for the interface, IBM Plex Mono for technical strings. |
+| `--sp-1` to `--sp-5`, `--card-pad` | The spacing scale cards and sections share. |
+
+Type is three sizes and no more: 32px page titles, 20px section headings and
+16px for anything written to be read, with 15px for captions and 12px for
+field labels. A component that sets its own size is a bug, not a style.
+
+Each pathogen has one colour, defined once in `PCOL` and used on its card, its
+sparkline, its line on the national trend chart, its map and its chips. A
+colour identifies the pathogen; it never signals severity.
 
 A chart that hardcodes a hex value will be invisible on one of the two themes.
 This has happened and been fixed; prefer `css('--token')`.
@@ -126,13 +135,27 @@ This has happened and been fixed; prefer `css('--token')`.
 
 ## 6. Layout
 
-A twelve-column grid (`.grid` with `.c3` to `.c12`) with `align-items:start`,
-so a short panel does not stretch to its neighbour's height. Where that leaves
-a visible gap, the fix is to rebalance the row rather than to stretch the
-panels: a tall panel is usually better given its own full-width row.
+A white header holds the wordmark and six navigation groups covering all the
+views above. The groups are presentation only: every view key, hash and route
+is unchanged by the grouping, and a view missing from every group is appended
+to a `More` group with a console warning rather than becoming unreachable.
+Below roughly 760px the header collapses to a menu button and the groups
+become one stacked list, so no view is more than one tap away.
+
+Content sits in a twelve-column grid (`.grid` with `.c3` to `.c12`) with
+`align-items:start`, so a short panel does not stretch to its neighbour's
+height. Where that leaves a visible gap, the fix is to rebalance the row
+rather than to stretch the panels: a tall panel is usually better given its
+own full-width row.
 
 Wide tables carry `class="stack"`, which collapses them into labelled blocks
 below roughly 760px using each cell's `data-l` attribute as its label.
+
+Two traps worth knowing. `all:unset` resets `box-sizing` to `content-box`,
+which defeats the global `border-box` rule and makes `width:100%` plus padding
+overflow its container, so anything using it restores `box-sizing` explicitly.
+And a grid item spanning rows stretches those rows to its own height, so a
+side-by-side block that must not do that uses flex with its own wrapper.
 
 ---
 

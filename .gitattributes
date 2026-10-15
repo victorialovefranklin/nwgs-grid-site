@@ -1,0 +1,19 @@
+# Line endings are normalised to LF in the repository, whatever the checkout
+# platform does locally. Without this, a Windows round-trip rewrites every
+# line of the static input CSVs and the diff buries the real change.
+* text=auto eol=lf
+
+# Data and documents are byte-exact; never let a filter touch them.
+*.csv   text eol=lf
+*.json  text eol=lf
+*.docx  binary
+*.xlsx  binary
+*.png   binary
+*.jpg   binary
+*.webp  binary
+*.zip   binary
+*.pdf   binary
+
+# Generated documentation, so a diff of it is noise in a pull request.
+docs/*.md      linguist-generated=true
+docs/*.docx    linguist-generated=true
