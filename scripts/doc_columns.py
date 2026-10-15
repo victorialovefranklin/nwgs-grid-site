@@ -5,7 +5,7 @@ upstream dataset are described here. A column absent from this file is printed
 with its type, nullability and an example value, and its description is left
 blank: an undocumented column is better than an invented one.
 
-Author: Victoria Love Franklin - Developer, PhD Student, Data Science, Research Scholar
+Author: Victoria Love Franklin - Ph.D. Data Science Student, GIS, AI & ML, Developer, Published Researcher
 Copyright (c) 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 """
 
@@ -194,9 +194,11 @@ SPECIFIC = {
     "DataSource.rows": "Rows retrieved from the dataset in this run.",
     "DataSource.updated_utc": "Provider's own last-updated timestamp for the dataset.",
     "DataSource.source_url": "Address the dataset was retrieved from.",
-    "PipelineRun.n_pass": "Validation checks that passed.",
+    "PipelineRun.n_pass": "Validation checks that passed. Counted across every row of AuditLog, so pass, warning, info and fail sum to n_checks.",
     "PipelineRun.n_warning": "Checks that raised a warning but did not block publication.",
+    "PipelineRun.n_info": "Checks that recorded an outcome without passing or failing, such as an optional source that returned nothing.",
     "PipelineRun.n_fail": "Checks that failed. A failure blocks publication and the previous week stays live.",
+    "PipelineRun.n_checks": "Total rows in AuditLog for this run: the number of checks a reader can see on the Audit log page.",
     "SourceStatus.url": "Address the source was retrieved from.",
 }
 

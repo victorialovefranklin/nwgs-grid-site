@@ -2,7 +2,7 @@
 """
 NWGS Grid(TM) - app export step
 ================================
-Author: Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+Author: Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
 Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 
 Turns one pipeline run's output tables into the site's data files.
@@ -146,10 +146,53 @@ def main(table_dir, out_dir, allow_mixed=False):
     stamp = {"run_id": run_id, "data_as_of": data_as_of}
 
     # ---- 3. entities --------------------------------------------------------
-    # PipelineRun
+    # AuditLog (Table13 + consistency checks + summary audits). Built before
+    # PipelineRun because the headline counts are taken from it: the published
+    # tally and the published table must describe the same set of checks.
+    al = t13.copy()
+    al["source"] = "Table13"
+    extra = [{"component": c["check"], "status": "PASS" if c["ok"] else "WARNING_MIXED_RUN",
+              "detail": f"expected {c['expected']}, found {c['found']}", "source": "export"} for c in checks]
+    t09b = find(table_dir, "Table09b_AMR_Classification_Audit", required=False)
+    if t09b is not None:
+        extra.append({"component": "AMR classification (Table09b)", "status": t09b["status"].iloc[0],
+                      "detail": t09b["detail"].iloc[0], "source": "Table09b"})
+    t11c = find(table_dir, "Table11c_RCSB_Structural_Figure_Audit", required=False)
+    if t11c is not None:
+        last11 = t11c.iloc[-1]
+        extra.append({"component": "RCSB structural QC (Table11c)", "status": last11["figure_component_qc"],
+                      "detail": f"{last11['metadata_status']} structures, {last11['render_status']}",
+                      "source": "Table11c"})
+    # External source outcomes become audit rows, so a layer that is empty on
+    # the site can always be explained from the published tables alone.
+    t26d = find(table_dir, "Table26d_Source_Fetch_Status", required=False)
+    if t26d is not None and len(t26d):
+        STATUS_MAP = {"OK": "PASS", "EMPTY": "INFO", "FAILED": "WARNING"}
+        for _, r in t26d.iterrows():
+            extra.append({
+                "component": f"Source: {r['source']}",
+                "status": STATUS_MAP.get(str(r.get("status")), "INFO"),
+                "detail": (str(r.get("detail") or "")
+                           + (f" [{r['url']}]" if str(r.get("url") or "") else "")).strip() or "no detail recorded",
+                "source": "Table26d",
+            })
+        ents["SourceStatus"] = t26d
+
+    audit = pd.concat([al, pd.DataFrame(extra)], ignore_index=True)
+    ents["AuditLog"] = audit
+
+    # PipelineRun. Counted across every row of the audit log above, so that
+    # pass, warning, info and fail add up to the number of rows a reader can
+    # see on the Audit log page. Counting passes from one source while
+    # counting warnings from all of them understated the passes.
+    st = audit["status"].astype(str).str.upper()
     ents["PipelineRun"] = pd.DataFrame([{
         **stamp, "data_pulled_utc": pulled.isoformat(), "gate_status": gate,
-        "n_pass": int((t13["status"] == "PASS").sum()), "n_warning": len(warns), "n_fail": len(fails),
+        "n_pass": int((st == "PASS").sum()),
+        "n_warning": int(st.str.startswith("WARN").sum()),
+        "n_info": int(st.str.startswith("INFO").sum()),
+        "n_fail": int(st.str.startswith("FAIL").sum()),
+        "n_checks": int(len(audit)),
         "consistency_ok": not mixed,
     }])
 
@@ -416,38 +459,6 @@ def main(table_dir, out_dir, allow_mixed=False):
                                      "eligible_for_tennessee_seasonal_inference", "ww_peak_week",
                                      "clinical_peak_week", "ww_lead_to_clinical_peak_weeks", "implausible_lead_flag"]]
 
-    # AuditLog (Table13 + consistency checks + summary audits)
-    al = t13.copy()
-    al["source"] = "Table13"
-    extra = [{"component": c["check"], "status": "PASS" if c["ok"] else "WARNING_MIXED_RUN",
-              "detail": f"expected {c['expected']}, found {c['found']}", "source": "export"} for c in checks]
-    t09b = find(table_dir, "Table09b_AMR_Classification_Audit", required=False)
-    if t09b is not None:
-        extra.append({"component": "AMR classification (Table09b)", "status": t09b["status"].iloc[0],
-                      "detail": t09b["detail"].iloc[0], "source": "Table09b"})
-    t11c = find(table_dir, "Table11c_RCSB_Structural_Figure_Audit", required=False)
-    if t11c is not None:
-        last11 = t11c.iloc[-1]
-        extra.append({"component": "RCSB structural QC (Table11c)", "status": last11["figure_component_qc"],
-                      "detail": f"{last11['metadata_status']} structures, {last11['render_status']}",
-                      "source": "Table11c"})
-    # External source outcomes become audit rows, so a layer that is empty on
-    # the site can always be explained from the published tables alone.
-    t26d = find(table_dir, "Table26d_Source_Fetch_Status", required=False)
-    if t26d is not None and len(t26d):
-        STATUS_MAP = {"OK": "PASS", "EMPTY": "INFO", "FAILED": "WARNING"}
-        for _, r in t26d.iterrows():
-            extra.append({
-                "component": f"Source: {r['source']}",
-                "status": STATUS_MAP.get(str(r.get("status")), "INFO"),
-                "detail": (str(r.get("detail") or "")
-                           + (f" [{r['url']}]" if str(r.get("url") or "") else "")).strip() or "no detail recorded",
-                "source": "Table26d",
-            })
-        ents["SourceStatus"] = t26d
-
-    ents["AuditLog"] = pd.concat([al, pd.DataFrame(extra)], ignore_index=True)
-
     # ---- 4. derived alerts --------------------------------------------------
     alerts = []
     # a. counties at High activity, grouped by pathogen + state
@@ -486,7 +497,7 @@ def main(table_dir, out_dir, allow_mixed=False):
     # ---- 5. write -----------------------------------------------------------
     manifest = {"run_id": run_id, "data_as_of": data_as_of, "data_pulled_utc": pulled.isoformat(),
                 "gate_status": gate, "consistency_checks": checks, "entities": {},
-                "author": "Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar",
+                "author": "Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher",
                 "copyright": "Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE."}
     payload = {}
     for name, df in ents.items():

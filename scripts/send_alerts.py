@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 NWGS Grid(TM) - weekly alert emails
-Author: Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+Author: Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
 Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 
     python3 scripts/send_alerts.py <EXPORT_DIR> [--dry-run]

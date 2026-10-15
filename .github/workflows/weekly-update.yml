@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 150
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Fail here, loudly, rather than later and quietly. Without this the run
       # could fall back to a saved export and report success while publishing
@@ -47,7 +47,7 @@ jobs:
           fi
           echo "All required build inputs present."
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -125,7 +125,7 @@ jobs:
 
       - name: Keep this run's export (90 days)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: app-export-${{ github.run_number }}
           path: |
@@ -140,7 +140,7 @@ jobs:
         if: success()
         env:
           GH_TOKEN: ${{ github.token }}
-          CREDIT_LINE: "Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar"
+          CREDIT_LINE: "Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher"
         shell: bash
         run: |
           RUN_ID=$(python -c "import json;print(json.load(open('app_export/manifest.json'))['run_id'])")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Build the static NWGS Grid site from one app export.
-Author: Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+Author: Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
 Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 
 
@@ -217,7 +217,7 @@ def main(export_dir, site_dir):
             '<meta name="copyright" content="© 2026 Victoria Love Franklin. All rights reserved.">'
             '<meta name="description" content="NWGS Grid™: weekly validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties. By Victoria Love Franklin.">'
             '<meta property="og:title" content="NWGS Grid™ — National Wastewater Genomic Surveillance">'
-            '<meta property="og:description" content="Weekly wastewater surveillance dashboard by Victoria Love Franklin, Developer · PhD Student, Data Science · Research Scholar.">'
+            '<meta property="og:description" content="Weekly wastewater surveillance dashboard by Victoria Love Franklin, Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher.">'
             '<style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + html + "</body></html>")
     (out / "index.html").write_text(page)
     copy_assets(out)

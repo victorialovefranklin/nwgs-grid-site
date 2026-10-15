@@ -5,7 +5,7 @@
 Weekly, validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties,
 rebuilt every Saturday by GitHub Actions. Sign in on the site to save alerts.
 
-**Author:** Victoria Love Franklin · Developer · PhD Student, Data Science · Research Scholar
+**Author:** Victoria Love Franklin · Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
 
 **Contact, license requests and beta feedback:** victorialovefranklin@gmail.com
 

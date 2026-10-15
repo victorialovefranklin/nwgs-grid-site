@@ -18,7 +18,7 @@ judgement are written here. A column whose meaning is not established is listed
 with its type and an example and left without a description, because an
 undocumented column is better than an invented one.
 
-Author: Victoria Love Franklin - Developer, PhD Student, Data Science, Research Scholar
+Author: Victoria Love Franklin - Ph.D. Data Science Student, GIS, AI & ML, Developer, Published Researcher
 Copyright (c) 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 """
 import re
@@ -80,7 +80,7 @@ def user_guide(E, run_id, as_of):
         ("audit", "Audit log", "Every automated check from this run, and whether each source loaded."),
         ("methods", "Methods & sources", "How the numbers were produced, with the full dataset and reference list."),
         ("glossary", "Glossary", "Plain-language definitions of every term used."),
-        ("about", "About & contact", "Authorship, citation and licensing."),
+        ("about", "About the developer", "Authorship, citation and licensing."),
     ]
     rows = [[label, note] for key, label, note in PAGES if key in known]
     missing = [k for k, _, _ in PAGES if k not in known]

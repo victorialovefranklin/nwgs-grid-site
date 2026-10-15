@@ -7,7 +7,7 @@
  * generated too rather than converted by hand. Nothing here adds content: it
  * is a renderer for the Markdown the Python generator produces.
  *
- * Author: Victoria Love Franklin - Developer, PhD Student, Data Science, Research Scholar
+ * Author: Victoria Love Franklin - Ph.D. Data Science Student, GIS, AI & ML, Developer, Published Researcher
  * Copyright (c) 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
  */
 const fs = require("fs");

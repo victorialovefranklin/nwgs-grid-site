@@ -2,7 +2,7 @@
 
 """
 NWGS Grid™ MASTER REPRODUCIBLE PIPELINE v5.20
-Author: Victoria Love Franklin — Developer · PhD Student, Data Science · Research Scholar
+Author: Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
 Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 Generated: 2026-09-14 (v5.20 revision)
 Validated locally: Python syntax; full live-data rerun required for regenerated results
@@ -6467,19 +6467,37 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
     # as this pipeline having ingested it: only Germany is fetched today, and
     # the feed_status column states that plainly rather than implying coverage
     # the run does not have.
-    open_feeds = {"Germany": "RKI AMELAG (CC BY 4.0)", "Netherlands": "RIVM open data"}
-    ingested = {"Germany"}
-    g["open_machine_readable_feed"] = g["country"].map(open_feeds)
+    # Keyed by ISO3, not by country name: JMP writes the Netherlands as
+    # "Netherlands (Kingdom of the)", so a name lookup silently missed it and
+    # the page labelled it "No open feed known" while its own text said RIVM
+    # publishes one. ISO3 does not get renamed between collections.
+    open_feeds = {"DEU": "RKI AMELAG (CC BY 4.0)", "NLD": "RIVM open data"}
+    ingested = {"DEU"}
+    # Fall back to country names only if the workbook carried no usable ISO3,
+    # so a missing identifier degrades to the old behaviour instead of wiping
+    # every feed off the page.
+    if g["iso3"].notna().any():
+        key = g["iso3"]
+    else:
+        print("[WARN] no ISO3 in the sanitation table; matching open feeds by name")
+        key = g["country"].map({"Germany": "DEU", "Netherlands": "NLD",
+                                "Netherlands (Kingdom of the)": "NLD"})
+    g["open_machine_readable_feed"] = key.map(open_feeds)
     g["has_open_feed"] = g["open_machine_readable_feed"].notna()
     g["feed_rows_ingested"] = np.nan
     g["feed_status"] = np.where(~g["has_open_feed"], "No open feed known",
-                                np.where(g["country"].isin(ingested),
+                                np.where(key.isin(ingested),
                                          "Fetch attempted this run", "Known feed, not yet ingested"))
     if amelag is not None and not amelag.empty:
-        g.loc[g["country"].eq("Germany"), "feed_rows_ingested"] = len(amelag)
-        g.loc[g["country"].eq("Germany"), "feed_status"] = "Ingested this run"
+        g.loc[key.eq("DEU"), "feed_rows_ingested"] = len(amelag)
+        g.loc[key.eq("DEU"), "feed_status"] = "Ingested this run"
     else:
-        g.loc[g["country"].eq("Germany"), "feed_status"] = "Fetch failed this run"
+        g.loc[key.eq("DEU"), "feed_status"] = "Fetch failed this run"
+
+    missing_feed = sorted(set(open_feeds) - set(key.dropna()))
+    if missing_feed:
+        print(f"[WARN] open-feed registry entries absent from the sanitation "
+              f"table, so they will not appear on the page: {missing_feed}")
 
     for c, default in (("denominator_basis", "sewer_connected (WHO/UNICEF JMP)"),
                        ("denominator_caveat", "")):

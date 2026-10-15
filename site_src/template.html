@@ -1,74 +1,116 @@
 <title>NWGS Grid™ · Victoria Love Franklin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: lab console — fixed left rail of views, a run-status strip across the top, data panels in a 12-col grid */
+/* Layout: a public dashboard — white header with grouped navigation, a light
+   workspace, and content cards in a 12-column grid. Navy carries the text,
+   rose pink marks what is selected, and monospace is reserved for genuine
+   technical output such as run identifiers and audit details. */
 :root{
-  /* NWGS Grid™ brand (Victoria Love Franklin signature palette): navy, wine, gold on paper */
-  --navy:#14213a; --navy-2:#1c2c4c; --wine:#6e1f2b; --gold:#c49a4a; --gold-soft:#f0cf8f; --paper:#fbf8f3; --cream:#f7f1e8;
-  --bg:#ffffff; --surface:#ffffff; --ink:#14213a; --muted:#262b36; --line:#e7e4de;
-  --accent:#1c2c4c; --accent-ink:#ffffff; --accent-soft:#e7ebf3; --link:#1c2c4c;
-  --rail-bg:#ffffff; --rail-ink:#14213a; --rail-muted:#262b36; --rail-hover:#f5f3ef; --rail-active:rgba(196,154,74,.16); --rail-line:#e7e4de; --count-ink:#6e1f2b; --count-bg:rgba(196,154,74,.18); --brand-accent:#1d4f91;
-  --nodata:#e8e6e1; --typ:#f4f3ef; --typ-line:#bdb8ad; --hi-soft:#f5cdc6;
-  --vl:#2166ac; --lo:#67a9cf; --el:#ef8a62; --hi:#b2182b; --warn:#b4630f; --ok:#2e7d4f;
-  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  /* NWGS Grid™ palette: navy text on white and soft gray, rose-pink accent */
+  --navy:#203047; --navy-2:#2c405e; --wine:#702d43; --gold:#b58a3a; --gold-soft:#e3c98f;
+  --rose:#ef91b3; --rose-deep:#ad4570; --rose-bright:#b94d78; --rose-soft:#fdeef4; --teal:#91d5d3; --teal-deep:#3f8d8b;
+  --paper:#f5f7f9; --cream:#f5f7f9;
+  --bg:#ffffff; --surface:#ffffff; --ink:#203047; --muted:#203047; --line:#dde2e9;
+  --accent:#ad4570; --accent-ink:#ffffff; --accent-soft:#fdeef4; --link:#ad4570;
+  --rail-bg:#ffffff; --rail-ink:#203047; --rail-muted:#203047; --rail-hover:#f5f7f9;
+  --rail-active:#fdeef4; --rail-line:#e1e5eb; --count-ink:#ad4570; --count-bg:#fdeef4;
+  --brand-accent:#ad4570;
+  --nodata:#e7ebf0; --typ:#f1f4f7; --typ-line:#c3cbd6; --hi-soft:#f7d4de;
+  --vl:#3f8d8b; --lo:#91d5d3; --el:#ef91b3; --hi:#b94d78; --warn:#b4630f; --ok:#2e7d4f;
+  --display:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --r:8px;
+  --r:10px;
+  /* Spacing scale, so cards and sections share one rhythm */
+  --sp-1:8px; --sp-2:16px; --sp-3:24px; --sp-4:32px; --sp-5:48px;
+  --card-pad:22px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0c1424; --surface:#131d33; --ink:#f2ece2; --muted:#a9b0c0; --line:#27324b;
-  --accent:#e0bd74; --accent-ink:#14213a; --accent-soft:#25304a; --link:#f0cf8f;
-  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18); --rail-line:#27324b; --count-ink:#f0cf8f; --count-bg:rgba(196,154,74,.16); --brand-accent:#e0bd74;
-  --nodata:#283247; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2630;
-  --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}}
+  --bg:#0e1626; --surface:#17213a; --ink:#eef2f7; --muted:#eef2f7; --line:#2a3650;
+  --accent:#ef91b3; --accent-ink:#1a2335; --accent-soft:#332130; --link:#f3a9c3;
+  --rail-bg:#111a2c; --rail-ink:#eef2f7; --rail-muted:#eef2f7; --rail-hover:rgba(238,242,247,.07);
+  --rail-active:rgba(239,145,179,.18); --rail-line:#2a3650; --count-ink:#f3a9c3; --count-bg:rgba(239,145,179,.18);
+  --brand-accent:#f3a9c3;
+  --nodata:#2a3650; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2a38;
+  --vl:#5fb6b3; --lo:#91d5d3; --el:#ef91b3; --hi:#e36b96; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}}
 :root[data-theme="dark"] .fulllogo{background:#fff;padding:8px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fulllogo{background:#fff;padding:8px}}
 :root[data-theme="dark"]{
-  --bg:#0c1424; --surface:#131d33; --ink:#f2ece2; --muted:#a9b0c0; --line:#27324b;
-  --accent:#e0bd74; --accent-ink:#14213a; --accent-soft:#25304a; --link:#f0cf8f;
-  --rail-bg:#09101f; --rail-ink:#f2ece2; --rail-muted:#9aa3b5; --rail-hover:rgba(242,236,226,.07); --rail-active:rgba(224,189,116,.18); --rail-line:#27324b; --count-ink:#f0cf8f; --count-bg:rgba(196,154,74,.16); --brand-accent:#e0bd74;
-  --nodata:#283247; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2630;
-  --vl:#4f8fd0; --lo:#8cc3e0; --el:#f09a76; --hi:#e2525a; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}
+  --bg:#0e1626; --surface:#17213a; --ink:#eef2f7; --muted:#eef2f7; --line:#2a3650;
+  --accent:#ef91b3; --accent-ink:#1a2335; --accent-soft:#332130; --link:#f3a9c3;
+  --rail-bg:#111a2c; --rail-ink:#eef2f7; --rail-muted:#eef2f7; --rail-hover:rgba(238,242,247,.07);
+  --rail-active:rgba(239,145,179,.18); --rail-line:#2a3650; --count-ink:#f3a9c3; --count-bg:rgba(239,145,179,.18);
+  --brand-accent:#f3a9c3;
+  --nodata:#2a3650; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2a38;
+  --vl:#5fb6b3; --lo:#91d5d3; --el:#ef91b3; --hi:#e36b96; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased}
-a{color:var(--link);text-decoration-color:color-mix(in srgb,var(--gold) 70%,transparent);text-underline-offset:2px}
-h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.005em;text-wrap:pretty;margin:0;font-optical-sizing:auto;text-align:left}
-h1{font-size:2rem;line-height:1.12}
-h2{font-size:1.25rem}
-h3{font-size:1rem;font-weight:600;font-family:var(--body)}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-decoration-color:color-mix(in srgb,var(--rose-deep) 45%,transparent);text-underline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.015em;text-wrap:pretty;margin:0;text-align:left}
+h1{font-size:2rem;line-height:1.18}            /* 32px page title */
+h2{font-size:1.25rem;line-height:1.35}         /* 20px section heading, everywhere */
+h3{font-size:1.0625rem;font-weight:600}        /* 17px card heading */
+.small{font-size:.9375rem}                      /* 14px */
+.meta{font-size:.8125rem;color:var(--muted)}   /* 13px metadata */
 p{margin:0;text-wrap:pretty}
 li{text-wrap:pretty}
-.num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+/* Figures read as part of the interface, so they stay in the body face with
+   tabular figures for alignment. Monospace is kept for genuine technical
+   strings: run identifiers, dataset codes, audit output, code. */
+.num{font-family:var(--body);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
-.small{font-size:.82rem}
+
 .label{font:600 .7rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 
-.app{display:grid;grid-template-columns:228px minmax(0,1fr);min-height:100%}
-.rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--rail-bg);color:var(--rail-ink);padding:20px 14px;display:flex;flex-direction:column;gap:18px;border-top:3px solid var(--gold);border-right:1px solid var(--rail-line)}
-.brand{display:flex;align-items:center;gap:10px;padding:0 8px;text-decoration:none;color:inherit}
+.app{display:flex;flex-direction:column;min-height:100%}
+.skiplink{position:absolute;left:-9999px;top:0;z-index:60;background:var(--surface);color:var(--ink);
+  padding:10px 16px;border:1px solid var(--line);border-radius:var(--r);font-weight:600}
+.skiplink:focus{left:12px;top:12px}
+
+/* White header, navy type, grouped navigation. The header stays white in both
+   themes' light mode; pink appears only on the selected group and the badge. */
+.topbar{position:sticky;top:0;z-index:40;background:var(--rail-bg);border-bottom:1px solid var(--rail-line)}
+.topbar-in{max-width:1360px;margin:0 auto;padding:10px 28px;display:flex;align-items:center;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;flex:none}
 .brand svg{flex:none}
 .fulllogo{display:block;width:100%;max-width:184px;height:auto;margin:0 auto;border-radius:10px}
-.rail .brand{justify-content:center}
-.rail .brand .markbadge,.rail .brand .wm{display:none}
-.markbadge{flex:none;width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 2px var(--gold)}
-.markbadge img{width:34px;height:auto;display:block}
+.markbadge{flex:none;width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 1.5px var(--rail-line)}
+.markbadge img{width:30px;height:auto;display:block}
 .wlogo{width:min(220px,60%);height:auto;display:block;margin:0 0 4px}
-.brand .wm{display:flex;flex-direction:column;gap:3px}
-.brand b{font:700 1.4rem/1 var(--display);letter-spacing:.005em;color:var(--rail-ink)}
-.brand b span{color:var(--brand-accent,#1d4f91)}
-.brand b sup{font:500 .55rem var(--body);color:var(--rail-muted);margin-left:1px}
-.brand small{color:var(--rail-muted);font-size:.72rem;line-height:1.3}
+.brand .wm{display:flex;flex-direction:column;gap:1px}
+.brand b{font:700 1.25rem/1.1 var(--display);letter-spacing:-.02em;color:var(--rail-ink)}
+.brand b span{color:var(--rail-ink)}
+.brand b sup{font:500 .5rem var(--body);color:var(--rail-muted);margin-left:1px}
+.brand small{color:var(--rail-muted);font-size:.75rem;line-height:1.3}
 .menubtn{display:none}
-.nav{display:flex;flex-direction:column;gap:2px}
-.nav button{all:unset;cursor:pointer;padding:8px 10px 8px 12px;border-radius:6px;font-size:.9rem;color:var(--rail-muted);display:flex;justify-content:space-between;align-items:center;border-left:3px solid transparent}
-.nav button:hover{color:var(--rail-ink);background:var(--rail-hover)}
-.nav button[aria-current="page"]{background:var(--rail-active);color:var(--rail-ink);font-weight:600;border-left-color:var(--gold)}
-.nav button:focus-visible,button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.nav .count{font:500 .72rem var(--mono);color:var(--count-ink);background:var(--count-bg);padding:1px 7px;border-radius:999px}
-.rail .foot{margin-top:auto;font-size:.72rem;color:var(--rail-muted);padding:0 8px;line-height:1.5}
+
+.nav{display:flex;align-items:center;gap:1px;margin-left:auto;flex-wrap:nowrap}
+.navgrp{position:relative}
+
+.navtop{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:9px 11px;
+  border-radius:8px;font-size:.9rem;font-weight:500;color:var(--rail-muted);white-space:nowrap}
+.navtop:hover{color:var(--rail-ink);background:var(--rail-hover)}
+.navtop.here,.navtop[aria-current="page"]{color:var(--rose-deep);background:var(--rail-active);font-weight:600}
+.caret{width:0;height:0;border:4px solid transparent;border-top-color:currentColor;margin-top:3px;opacity:.65}
+.navtop[aria-expanded="true"] .caret{transform:rotate(180deg);margin-top:-3px}
+/* Open state is a class, not the hidden attribute, so the phone layout can
+   simply show every menu without fighting the user agent's [hidden] rule. */
+.navmenu{position:absolute;top:calc(100% + 6px);right:0;min-width:232px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);padding:6px;display:none;flex-direction:column;gap:1px;
+  box-shadow:0 10px 28px rgba(32,48,71,.12);z-index:50}
+.navmenu.open{display:flex}
+.navmenu button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 11px;border-radius:7px;font-size:.9375rem;color:var(--ink);white-space:nowrap}
+.navmenu button:hover{background:var(--rail-hover)}
+.navmenu button[aria-current="page"]{background:var(--rail-active);color:var(--rose-deep);font-weight:600}
+.nav button:focus-visible,button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--rose-deep);outline-offset:2px}
+.nav .count{font:600 .75rem var(--body);color:var(--count-ink);background:var(--count-bg);padding:1px 8px;border-radius:999px}
+.navscrim{position:fixed;inset:0;background:rgba(32,48,71,.3);z-index:30}
 .sitefoot{margin-top:12px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:center;text-align:center;gap:4px 18px;font-size:.78rem;color:var(--muted)}
 .acct{margin-left:0}
 .acct button{all:unset;cursor:pointer;font-size:.82rem;color:var(--accent);font-weight:600}
@@ -133,12 +175,28 @@ details>summary.btn::-webkit-details-marker{display:none}
 .portrait{padding:0;overflow:hidden;margin:0}
 .portrait img{display:block;width:100%;height:100%;aspect-ratio:3/4;object-fit:cover;object-position:center 20%}
 .role{font-weight:600;color:var(--wine)}
-.why .lede{font:500 1.2rem/1.45 var(--display);color:var(--ink)}
-.why .sig{font:italic 500 1.05rem var(--display);color:var(--muted)}
-.creds{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:.88rem}
+/* The mark sits beside the writing rather than as a block above it, so the
+   section reads as one piece instead of a logo and then some text. A spanned
+   grid item would stretch the rows to its own height, so the writing is
+   wrapped in its own element and the two sit side by side.
+   .panel sets display:flex later in the sheet, hence both classes. */
+.panel.why{display:flex;flex-direction:row;align-items:flex-start;gap:var(--sp-3)}
+.panel.why .wlogo{flex:none;width:190px;max-width:38%;margin:2px 0 0}
+.why-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:14px}
+/* All three paragraphs read at one size; the opening is not a pull quote. */
+.why .lede{font:400 1rem/1.6 var(--body);color:var(--ink)}
+@media (max-width:760px){
+  .panel.why{flex-direction:column;gap:var(--sp-2)}
+  .panel.why .wlogo{width:170px;max-width:60%}
+}
+/* The signature runs on from the closing sentence rather than standing as a
+   block of its own, and is bound to the preceding word so it never falls to
+   a line by itself. */
+.why .sig{font-style:italic;font-weight:500;color:var(--muted);white-space:nowrap}
+.creds{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px;font-size:1rem}
 .creds li::marker{color:var(--gold)}
 .creds+h3{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-.refs{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:.86rem}
+.refs{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-size:1rem}
 .refs li{overflow-wrap:anywhere}
 .refs li::marker{color:var(--gold);font-weight:600}
 /* Structure cards: a fixed-ratio figure so every card has the same silhouette
@@ -151,7 +209,7 @@ details>summary.btn::-webkit-details-marker{display:none}
 .sfig-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--navy-2,#1c2c4c);opacity:.17;font-size:1.6rem;letter-spacing:.14em;font-weight:600}
 .sfig-tag{position:absolute;right:8px;bottom:8px;z-index:2;background:rgba(20,33,58,.86);color:#f7f1e8;font-size:.68rem;letter-spacing:.03em;padding:3px 7px;border-radius:4px}
 .shead{display:flex;flex-direction:column;gap:2px}
-.shead h2{font-size:1.12rem}
+.shead h2{font-size:1.25rem}
 .sprot{margin:0;font-weight:600;font-size:.92rem;color:var(--ink)}
 .stitle{margin:0}
 .sspec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:2px 0;padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -181,16 +239,22 @@ details>summary.btn::-webkit-details-marker{display:none}
 .emlist li{border-top:1px solid var(--line);padding-top:8px}
 /* Column flow, not a grid: a grid forces every row to the height of its
    tallest panel, which leaves large empty gaps under the short sections. */
-.glist{column-count:2;column-gap:12px}
-.glist>.gsec{break-inside:avoid;page-break-inside:avoid;margin:0 0 12px;display:block}
+.glist{column-count:2;column-gap:16px}
+.glist>.gsec{break-inside:avoid;page-break-inside:avoid;margin:0 0 16px;display:block}
 .gsec dl{margin:0;display:flex;flex-direction:column}
-.gitem{padding:7px 0;border-top:1px solid var(--line);scroll-margin:90px;transition:background .3s}
+
+.gitem{padding:11px 0;border-top:1px solid var(--line);scroll-margin:90px;transition:background .3s}
 .gitem:first-child{border-top:none;padding-top:0}
-.gsec{gap:8px;padding:14px 16px}
-.gsec h2{margin:0;font-size:1.1rem}
+.gsec{gap:0;padding:18px 20px 16px}
+/* The section heading is the thing a reader scans for, so it is coloured,
+   set apart from the first term by a rule, and given room to breathe. */
+.gsec h2{margin:0 0 14px;padding-bottom:10px;font-size:1.25rem;font-weight:600;
+  letter-spacing:.01em;color:var(--rose-deep);border-bottom:2px solid var(--rose-soft)}
+.gsec dt{font-weight:600;color:var(--ink);margin-bottom:3px}
+.gsec dd{margin:0;color:var(--muted)}
 .gitem.hl{padding-left:8px;padding-right:8px}
-.gitem dt{font-weight:600;font-size:.92rem;line-height:1.3}
-.gitem dd{margin:1px 0 0;font-size:.88rem;line-height:1.45;color:var(--muted)}
+.gitem dt{font-weight:600;font-size:1rem;line-height:1.4}
+.gitem dd{margin:3px 0 0;font-size:1rem;line-height:1.6}
 .gitem.hl{background:var(--count-bg);border-radius:6px}
 .gsearch input{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;width:min(420px,90vw)}
 .gsearch input:focus{outline:2px solid var(--gold);outline-offset:0}
@@ -230,10 +294,16 @@ details>summary.btn::-webkit-details-marker{display:none}
   grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0 20px}
 .tags li{font-size:.82rem;color:var(--ink);padding:4px 0;border-bottom:1px solid var(--hair)}
 .molhead #mol-r{display:block;font-weight:400;margin-top:2px}
-.cite{font-size:.84rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;overflow-wrap:anywhere}
+.cite{font-size:.9375rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;overflow-wrap:anywhere}
 
-.main{min-width:0;padding-block:20px 48px;padding-inline:28px;display:flex;flex-direction:column;gap:22px}
-.status{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px 16px;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
+.main{min-width:0;width:100%;max-width:1360px;margin:0 auto;padding-block:var(--sp-3) var(--sp-5);
+  padding-inline:28px;display:flex;flex-direction:column;gap:var(--sp-3)}
+.status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 24px;
+  font-size:.8125rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:14px}
+.status .sinfo{display:flex;align-items:center;flex-wrap:wrap;gap:10px 28px}
+.status .sitem{display:inline-flex;align-items:center;gap:7px}
+.status .slab{font-weight:600;color:var(--muted)}
+.status .sitem b{color:var(--ink);font-weight:600}
 .status .sinfo{grid-column:2;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;text-align:center}
 .status .acct{grid-column:3;justify-self:end;margin:0}
 /* The visible mark stays small, but an invisible overlay gives it a 28px
@@ -253,9 +323,16 @@ details>summary.btn::-webkit-details-marker{display:none}
 .head{display:flex;flex-direction:column;gap:8px;max-width:none;text-align:left}
 .head p{text-wrap:pretty;font-size:1rem;max-width:none}
 .head .eyebrow{font:600 .72rem/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--sp-2);align-items:start}
 .c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}.c3{grid-column:span 3}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;min-width:0;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 3px rgba(20,33,58,.05),0 1px 1px rgba(20,33,58,.03)}
+/* White cards, one restrained border, modest rounding, no shadow. */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--card-pad);min-width:0;display:flex;flex-direction:column;gap:14px;box-shadow:none}
+/* Card headings carry the accent so a reader can find the start of a section
+   at a glance. The pathogen cards override this with their own series colour,
+   and page titles stay in ink so the accent does not compete with them. */
+.panel>h2,.panel>header>h2,.panel>.sh-h>h2,.panel>.ov-h>h2,
+.panel>.why-body>h2,.panel>header>.h2{color:var(--rose-deep)}
+.panel h2.pname{color:inherit}
 /* Left-aligned body text everywhere, and no single word stranded alone
    on a final line. text-wrap:pretty asks the browser to avoid orphans. */
 .panel p,.panel li,.note,.small,.muted{text-align:left}
@@ -265,6 +342,11 @@ p,li,dd,dt,td,th,figcaption,.detail,.arow,.amsg,.statecard,.stat{text-wrap:prett
 
 .card-p{display:flex;flex-direction:column;gap:10px}
 .card-p .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+/* The pathogen name is coloured with that pathogen's own series colour, the
+   same one used on its sparkline, map and chips, and is given room to sit
+   apart from the metric below it. */
+.card-p .top{margin-bottom:6px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.pname{font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
 .chip{display:inline-flex;align-items:center;gap:6px;font:600 .72rem var(--body);letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;border:1px solid transparent}
 .chip.sw{width:12px;height:12px;padding:0;border-radius:3px}
 .big{font:600 clamp(1.4rem,5.2vw,2rem)/1.05 var(--display);font-variant-numeric:lining-nums tabular-nums;overflow-wrap:anywhere;min-width:0}
@@ -312,14 +394,27 @@ tr.unsup td{opacity:.62}
 .notloaded p{margin:0;text-align:left}
 .nl-head{font-weight:700;font-size:.98rem;color:var(--ink)}
 .plain{background:var(--surface)}
-.plain p{max-width:none;font-size:1.02rem;text-align:left}
+.plain p{max-width:none;font-size:1rem;text-align:left}
 .plainlist{max-width:none;margin:10px 0 12px;padding-left:20px;text-align:left}
 .plainlist li{margin:6px 0}
-/* Start here: orientation content, so the type is a touch larger and the
-   blocks are visually distinct from the data pages. */
+/* Opening screen: a short hero, one primary action, then four indicators. */
+.hero{padding:var(--sp-3) 0 var(--sp-2);max-width:74ch;text-align:left}
+.hero h1{font-size:2rem;line-height:1.18;margin-bottom:12px}
+.hero-sub{font-size:1rem;line-height:1.6;max-width:70ch;margin-bottom:var(--sp-4)}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--rose-deep);color:#fff;
+  font-weight:600;font-size:1rem;padding:12px 22px;border-radius:999px;text-decoration:none;
+  border:1px solid var(--rose-deep)}
+.btn-primary:hover{background:#94365d;border-color:#94365d}
+.btn-primary:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+.glance{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--sp-2);
+  margin:var(--sp-1) 0 var(--sp-2)}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.gval{font-size:1.6rem;font-weight:600;line-height:1.1;color:var(--ink)}
 .sh{font-size:1.15rem;margin:0 0 2px}
-.guidetbl td,.guidetbl th{vertical-align:top;padding:10px 12px}
-.guidetbl td.lead{font-weight:600;width:16rem}
+.guidetbl td,.guidetbl th{vertical-align:top;padding:12px 14px;font-size:1rem}
+.tbl table td,.tbl table th{font-size:1rem}
+.guidetbl td.lead{font-weight:600;width:24rem;overflow-wrap:normal;word-break:keep-all;hyphens:none}
 
 /* Start here: tinted section cards with an icon badge per heading. Tints are
    defined for both themes so nothing relies on a light background. */
@@ -353,7 +448,7 @@ tr.unsup td{opacity:.62}
 .sh-hero p{max-width:46rem;margin:0}
 .sh-goal{display:flex;gap:12px;align-items:flex-start;background:var(--surface);
   border:1px solid var(--t-info-line);border-radius:var(--r);padding:16px 18px;background:var(--surface)}
-.sh-goal h2{font-size:1.02rem;margin:0 0 4px;color:var(--ink)}
+.sh-goal h2{font-size:1.25rem;margin:0 0 6px}
 .sh-goal p{margin:0;font-size:.93rem;color:var(--muted);max-width:none}
 
 .sh-ico{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
@@ -370,9 +465,18 @@ tr.unsup td{opacity:.62}
 .sh-top{align-items:stretch}
 .sh-hero{display:flex;flex-direction:column;justify-content:center}
 .sh-card .sh-h{display:flex;align-items:center;justify-content:flex-start;gap:11px;border:0;padding:0;margin:0 0 10px}
-.sh-card .sh-h h2{font-size:1.14rem;margin:0}
+.sh-card .sh-h h2{font-size:1.25rem;margin:0}
 .sh-card p{max-width:none;text-align:left}
-.sh-sub{color:var(--muted);font-size:.95rem;margin:0 0 10px}
+/* Reading copy is ink, not grey. Grey is kept for what is genuinely
+   secondary: field labels, timestamps, counts under a figure, captions.
+   A paragraph someone is meant to read is never grey. */
+.sh-card p,.sh-card li,.sh-steps li,.sh-list li,.guidetbl td,.note,
+.panel>p,.panel>ul>li,.panel>ol>li,.why-body p,.gsec dd{color:var(--ink)}
+.sh-card p.muted,.sh-card p.small.muted,.panel>p.muted,.note.muted,
+.why-body p.muted,.lede.muted{color:var(--ink)}
+/* Still secondary, and still grey. */
+.label,.meta,.status,.sitefoot,.brand small,.navtop,.gcard .meta{color:var(--muted)}
+.sh-sub{font-size:1rem;margin:0 0 12px}
 .t-info-card{background:var(--surface);border-color:var(--t-info-line)}
 .t-ok-card{background:var(--surface);border-color:var(--t-ok-line)}
 .t-no-card{background:var(--surface);border-color:var(--t-no-line)}
@@ -383,13 +487,13 @@ tr.unsup td{opacity:.62}
 
 /* numbered steps */
 .sh-steps{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:12px;max-width:none}
-.sh-steps li{display:flex;gap:11px;align-items:flex-start;font-size:.96rem;line-height:1.52}
+.sh-steps li{display:flex;gap:11px;align-items:flex-start;font-size:1rem;line-height:1.6}
 .sh-num{flex:0 0 auto;display:grid;place-items:center;width:23px;height:23px;border-radius:50%;
   background:var(--t-info-ico);color:var(--t-num-ink,#fff);font:700 .76rem/1 var(--body);margin-top:1px}
 
 /* check / cross lists */
 .sh-list{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:9px;max-width:none}
-.sh-list li{position:relative;padding-left:26px;font-size:.96rem;line-height:1.52}
+.sh-list li{position:relative;padding-left:26px;font-size:1rem;line-height:1.6}
 .sh-list li::before{position:absolute;left:0;top:0;font-weight:700}
 .sh-list.ok li::before{content:"\2713";color:var(--t-ok-ico)}
 .sh-list.no li::before{content:"\2715";color:var(--t-no-ico)}
@@ -404,9 +508,13 @@ tr.unsup td{opacity:.62}
 .num{font-variant-numeric:tabular-nums}
 .ov .ov-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
   border:0;padding:0;margin:0 0 10px}
-.ov .ov-h h2{font-size:1.1rem;margin:0;min-width:0;overflow-wrap:anywhere}
+.ov .ov-h h2{font-size:1.25rem;margin:0;min-width:0;overflow-wrap:break-word}
 .ov .ov-h>*{min-width:0}
-.ov .label,.ov-kpi .label{line-height:1.25;overflow-wrap:anywhere}
+.ov .label,.ov-kpi .label{line-height:1.25;overflow-wrap:break-word}
+/* Three narrow columns were splitting single words across lines ("COUNTIE/S").
+   Shrink the tracking and let a label wrap only between words. */
+.ov .kv .label{letter-spacing:.045em;font-size:.66rem;overflow-wrap:normal;word-break:keep-all;hyphens:none}
+.ov .kv{gap:10px;align-items:end}
 .ov-kpi>div{flex:1 1 auto}
 .ov .ov-h h3{margin:0}
 .ov-band{font:600 .9rem/1 var(--body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
@@ -428,7 +536,10 @@ tr.unsup td{opacity:.62}
 .ov-em-v{font:700 1.55rem/1.1 var(--body);letter-spacing:-.015em}
 .seg.sm button{font-size:.8rem;padding:5px 9px}
 .ov .mapbox{margin-top:8px}
-.grid>.ov{height:100%}
+/* Panels size to their own content. Stretching a short card to match a tall
+   neighbour buys a straight bottom edge and pays for it with dead space
+   inside the short card; where a row looks unbalanced, rebalance the row. */
+.grid>.ov{height:auto}
 .cov-wrap{display:grid;grid-template-columns:minmax(190px,auto) minmax(150px,auto) 1fr;gap:18px 28px;align-items:start}
 @media (max-width:900px){.cov-wrap{grid-template-columns:1fr}}
 .cov-wrap .ov-kpi{flex-direction:column;gap:12px;margin:0}
@@ -490,16 +601,18 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 .stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);min-width:0}
 .stat .label,.stat .small{overflow-wrap:anywhere}
 .stat .mono{overflow-wrap:anywhere}
-.note{font-size:.82rem;color:var(--muted);max-width:none;text-align:left}
-.callout{border-left:3px solid var(--warn);padding:8px 12px;background:var(--surface);font-size:.86rem;border-radius:0 var(--r) var(--r) 0}
+.note{font-size:1rem;line-height:1.6;max-width:none;text-align:left}
+.callout{border-left:3px solid var(--warn);padding:10px 14px;background:var(--surface);font-size:1rem;border-radius:0 var(--r) var(--r) 0}
 .detail{font-size:.88rem}
 .flag{color:var(--warn);font-weight:600}
 
 #tip{position:fixed;pointer-events:none;z-index:20;background:var(--ink);color:var(--bg);font-size:.78rem;line-height:1.35;padding:7px 9px;border-radius:5px;max-width:240px;opacity:0;transition:opacity .08s}
 #tip b{font-weight:600}
 
-@media (max-width:1100px){
-  .app{grid-template-columns:200px minmax(0,1fr)}
+@media (max-width:1240px){
+  .topbar-in{padding-inline:22px;gap:12px}
+  .navtop{padding:8px 8px;font-size:.86rem;gap:4px}
+  .brand small{display:none}
   .main{padding-inline:22px}
   .c8,.c7,.c6,.c5{grid-column:span 12}.c4,.c3{grid-column:span 6}
   .c4.solo{grid-column:span 12}
@@ -510,22 +623,36 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 @media (max-width:760px){
   .portrait img{aspect-ratio:4/5;max-height:440px}
   .aboutgrid .portrait,.aboutgrid .bio{grid-column:span 12}
-  .app{grid-template-columns:minmax(0,1fr)}
-  .rail{position:sticky;top:0;height:auto;max-height:100vh;z-index:30;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-top-width:3px}
-  .brand b{font-size:1.2rem}
+  .topbar-in{flex-wrap:wrap;padding:10px 16px;gap:10px}
+  .brand b{font-size:1.15rem}
   .fulllogo{display:none}
-  .rail .brand{justify-content:flex-start}
-  .rail .brand .markbadge{display:grid}.rail .brand .wm{display:flex}
-  .rail{border-right:none;border-bottom:1px solid var(--rail-line)}
   .markbadge{width:36px;height:36px}.markbadge img{width:28px}
   .brand small{display:none}
-  .menubtn{display:inline-flex;align-items:center;gap:8px;all:unset;cursor:pointer;color:var(--rail-ink);font:600 .86rem var(--body);padding:7px 12px;border:1px solid var(--rail-line);border-radius:var(--r)}
-  .menubtn{display:inline-flex}
-  .menubtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-  .nav{display:none;flex-basis:100%;padding:6px 0 10px;max-height:calc(100vh - 70px);overflow-y:auto}
-  .rail.open .nav{display:flex}
-  .nav button{font-size:1rem;padding:11px 12px}
-  .rail .foot{display:none}
+  .menubtn{display:inline-flex;align-items:center;gap:8px;all:unset;cursor:pointer;margin-left:auto;
+    color:var(--rail-ink);font:600 .9375rem var(--body);padding:9px 14px;
+    border:1px solid var(--rail-line);border-radius:var(--r)}
+  .menubtn:focus-visible{outline:2px solid var(--rose-deep);outline-offset:2px}
+  /* On a phone the groups become a single stacked list, open by default when
+     the menu is shown, so nothing is two taps away. */
+  .nav{display:none;flex-basis:100%;flex-direction:column;align-items:stretch;gap:2px;
+    padding:6px 0 10px;max-height:calc(100vh - 86px);overflow-y:auto;margin-left:0}
+  .topbar.open .nav{display:flex}
+  /* A nowrap label in a column flex can push the item past the container, so
+     items are allowed to shrink and wrap on a phone. */
+  .navgrp{position:static;min-width:0;width:100%}
+  .navtop{width:100%;min-width:0;justify-content:space-between;font-size:.8125rem;font-weight:600;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 12px 6px;
+    white-space:normal}
+  .navtop:hover{background:none}
+  /* Group rows are section labels here, not destinations, so they carry no
+     selected state; the selected view below is what gets marked. */
+  .navtop[data-grp],.navtop[data-grp].here{background:none;color:var(--muted)}
+  .navtop[data-grp] .caret{display:none}
+  /* The Alerts row carries the count here, so the group label needn't repeat it. */
+  .navtop[data-grp] .count{display:none}
+  .navmenu,.navmenu.open{position:static;border:0;box-shadow:none;padding:0;min-width:0;
+    background:none;display:flex}
+  .navmenu button,.navtop[data-v]{font-size:1rem;padding:11px 14px;min-width:0;white-space:normal}
   .main{padding-inline:16px;padding-top:14px;gap:18px}
   .c8,.c7,.c6,.c5,.c4,.c3{grid-column:span 12}
   h1{font-size:1.6rem}
@@ -539,15 +666,16 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 </style>
 
 <div class="app">
-  <aside class="rail">
-    <a class="brand" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid home">
-      <img class="fulllogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ · National Wastewater Genomic Surveillance" width="520" height="496">
-      <span class="markbadge"><img src="img/nwgs-mark.webp" alt="" width="149" height="160"></span>
-      <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomic Surveillance</small></span></a>
-    <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="nav"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
-    <nav class="nav" id="nav" aria-label="Views"></nav>
-    <div class="foot">© <span class="cy">2026</span> Victoria Love Franklin<br>NWGS Grid™ · All rights reserved</div>
-  </aside>
+  <a class="skiplink" href="#v-dashboard">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid home">
+        <span class="markbadge"><img src="img/nwgs-mark.webp" alt="" width="149" height="160"></span>
+        <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomic Surveillance</small></span></a>
+      <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="nav"><svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
+      <nav class="nav" id="nav" aria-label="Sections"></nav>
+    </div>
+  </header>
   <main class="main">
     <div class="status" id="status"></div>
     <section class="view" id="v-start" hidden></section>
@@ -569,12 +697,13 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
       <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
-      <span>Developer · PhD Student, Data Science · Research Scholar</span>
+      <span>Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher</span>
       <span class="footmail"></span>
       <span>NWGS Grid™ · <a href="#about" data-go="about">About, contact &amp; how to cite</a></span>
     </footer>
   </main>
 </div>
+<div class="navscrim" id="navscrim" hidden></div>
 <div id="tip" role="tooltip"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
@@ -741,28 +870,80 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['start','Start here'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About & contact']];
+const VIEWS=[['start','Start here'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
 const built={};
 let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
 const highAlerts=D.alerts.filter(a=>a.severity==='high').length;
-nav.innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}">${l}${k==='alerts'?`<span class="count">${D.alerts.length}</span>`:''}</button>`).join('');
-nav.addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)});
-const rail=document.querySelector('.rail'),menubtn=document.getElementById('menubtn');
-menubtn.addEventListener('click',()=>{const o=rail.classList.toggle('open');menubtn.setAttribute('aria-expanded',o)});
+
+/* Six groups over the same seventeen views. Every key below is a view key from
+   VIEWS, so each route and hash the site has always used keeps working; the
+   grouping only changes how they are presented. */
+const GROUPS=[
+  ['Overview',           ['start','dashboard']],
+  ['Surveillance',       ['map','analytics','leadtime','predictive','alerts','myalerts']],
+  ['Coverage & equity',  ['equity','global','tennessee']],
+  ['Research & genomics',['genomics','structures']],
+  ['Data & methods',     ['audit','methods','glossary']],
+  ['About',              ['about']],
+];
+const LABEL=Object.fromEntries(VIEWS);
+// A view missing from every group would become unreachable from the menu.
+(()=>{const inGroups=new Set(GROUPS.flatMap(([,ks])=>ks));
+      const orphan=VIEWS.map(v=>v[0]).filter(k=>!inGroups.has(k));
+      if(orphan.length){GROUPS.push(['More',orphan]);
+        console.warn('views not in any navigation group, added under More:',orphan);}})();
+
+nav.innerHTML=GROUPS.map(([g,keys],i)=>{
+  const badge=keys.includes('alerts')&&D.alerts.length?`<span class="count">${D.alerts.length}</span>`:'';
+  const single=keys.length===1;
+  return single
+    ? `<div class="navgrp"><button class="navtop" data-v="${keys[0]}">${g}</button></div>`
+    : `<div class="navgrp"><button class="navtop" data-grp="${i}" aria-expanded="false" aria-controls="grp-${i}">${g}${badge}<span class="caret" aria-hidden="true"></span></button>
+       <div class="navmenu" id="grp-${i}">${keys.map(k=>
+         `<button data-v="${k}">${LABEL[k]||k}${k==='alerts'&&D.alerts.length?`<span class="count">${D.alerts.length}</span>`:''}</button>`).join('')}</div></div>`;
+}).join('');
+
+const navscrim=document.getElementById('navscrim');
+const closeMenus=()=>{nav.querySelectorAll('.navmenu').forEach(m=>m.classList.remove('open'));
+  nav.querySelectorAll('.navtop[data-grp]').forEach(b=>b.setAttribute('aria-expanded','false'));};
+nav.addEventListener('click',e=>{
+  const top=e.target.closest('.navtop[data-grp]');
+  if(top){const m=document.getElementById('grp-'+top.dataset.grp);const willOpen=!m.classList.contains('open');
+    closeMenus();m.classList.toggle('open',willOpen);top.setAttribute('aria-expanded',String(willOpen));return;}
+  const b=e.target.closest('button[data-v]');
+  if(b){closeMenus();go(b.dataset.v);}
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.nav')&&!e.target.closest('#menubtn'))closeMenus();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();closeNav();}});
+
+const topbar=document.querySelector('.topbar'),menubtn=document.getElementById('menubtn');
+function closeNav(){topbar.classList.remove('open');menubtn.setAttribute('aria-expanded','false');navscrim.hidden=true;}
+menubtn.addEventListener('click',()=>{const o=topbar.classList.toggle('open');
+  menubtn.setAttribute('aria-expanded',String(o));navscrim.hidden=!o;if(!o)closeMenus();});
+navscrim.addEventListener('click',()=>{closeMenus();closeNav();});
 let lastW=innerWidth,rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(Math.abs(innerWidth-lastW)<40)return;lastW=innerWidth;Object.keys(built).forEach(k=>delete built[k]);const v=location.hash.slice(1)||'dashboard';if(VIEWS.some(x=>x[0]===v)){RENDER[v]();built[v]=true}},200)});
 function go(v,push=true){
   if(!VIEWS.some(x=>x[0]===v))v='dashboard';
   VIEWS.forEach(([k])=>{document.getElementById('v-'+k).hidden=k!==v});
-  nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'page':'false'));
+  nav.querySelectorAll('button[data-v]').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'page':'false'));
+  // Mark the group that owns the current view, so the header always shows
+  // where the reader is even when the view sits inside a closed menu.
+  GROUPS.forEach(([,keys],i)=>{
+    const t=nav.querySelector(`.navtop[data-grp="${i}"]`)||nav.querySelector(`.navgrp:nth-child(${i+1}) .navtop`);
+    if(t)t.classList.toggle('here',keys.includes(v));
+  });
   if(!built[v]){RENDER[v]();built[v]=true}
   try{noWidows(document.getElementById('v-'+v))}catch(e){}
   if(push&&location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(e){}}
   try{localStorage.setItem('nwgs_view',v);if(v!=='about')localStorage.setItem('nwgs_last',v)}catch(e){}
-  rail.classList.remove('open');menubtn.setAttribute('aria-expanded','false');
+  closeNav();
   window.scrollTo(0,0);
 }
-document.addEventListener('click',e=>{const g=e.target.closest('[data-gloss]');if(g){e.preventDefault();go('glossary');const el=document.getElementById('g-'+g.dataset.gloss);if(el){el.scrollIntoView({block:'center'});el.classList.add('hl');setTimeout(()=>el.classList.remove('hl'),2200)}return}
+document.addEventListener('click',e=>{const g=e.target.closest('[data-gloss]');if(g){e.preventDefault();go('glossary');const el=document.getElementById('g-'+g.dataset.gloss);
+  if(el){el.scrollIntoView({block:'center'});el.classList.add('hl');setTimeout(()=>el.classList.remove('hl'),2200)}
+  else{console.warn('glossary: no entry for data-gloss="'+g.dataset.gloss+'"; the question mark opened the glossary but highlighted nothing');}
+  return}
   const a=e.target.closest('[data-go]');if(a){e.preventDefault();go(a.dataset.go)}});
 
 /* ---------- status strip ---------- */
@@ -772,12 +953,24 @@ const copyYears=pulledYear>2026?`2026–${pulledYear}`:'2026';
 document.querySelectorAll('.cy').forEach(e=>e.textContent=copyYears);
 document.querySelectorAll('.footmail').forEach(e=>e.innerHTML=`<a href="mailto:${EMAIL}">${EMAIL}</a>`);
 const gateCls=R.gate_status==='PASS'?'ok':R.gate_status==='BLOCKED'?'bad':'warn';
+/* Three plain items: the period the data covers, when it was published, and
+   what the checks actually said. A run that carried warnings is never
+   described as fully validated. */
+const checkWord = R.n_fail ? `${R.n_fail} failed`
+  : R.n_warning ? `${R.n_pass} passed, ${R.n_warning} with warnings`
+  : `All ${R.n_pass} passed`;
 document.getElementById('status').innerHTML=
-  `<div class="sinfo"><span>Latest sample <b style="color:var(--ink)">${dateFmt(D.latest_sample||R.data_as_of)}</b> <button class="qmark" data-gloss="latest-sample" aria-label="What is the latest sample?">?</button></span>
-   <span class="opt-s">CDC data updated ${new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · refreshed every Saturday</span>
-   <button class="pill ${gateCls}" data-go="audit" title="${R.n_pass} pass · ${R.n_warning} warnings · ${R.n_fail} fail"><i></i>Validated: ${R.n_pass} checks passed${R.n_fail?` · ${R.n_fail} failed`:''}</button>
-   <button class="qmark" data-gloss="validated" aria-label="What does validated mean?">?</button>
-   ${R.consistency_ok?'':'<button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button>'}</div>
+  `<div class="sinfo">
+     <span class="sitem"><span class="slab">Data through</span>
+       <b>${dateFmt(D.latest_sample||R.data_as_of)}</b>
+       <button class="qmark" data-gloss="latest-sample" aria-label="What is the latest sample?">?</button></span>
+     <span class="sitem opt-s"><span class="slab">Last updated</span>
+       <b>${new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</b></span>
+     <span class="sitem"><span class="slab">Data checks</span>
+       <button class="pill ${gateCls}" data-go="audit" title="${R.n_pass} pass · ${R.n_warning} warnings · ${R.n_fail} fail"><i></i>${checkWord}</button>
+       <button class="qmark" data-gloss="validated" aria-label="What do the data checks mean?">?</button></span>
+     ${R.consistency_ok?'':'<span class="sitem"><button class="pill warn" data-go="audit"><i></i>Tables from mixed runs (test build)</button></span>'}
+   </div>
    <span id="acct" class="acct"></span>`;
 
 const S = Object.fromEntries(D.summary.map(s=>[s.pathogen,s]));
@@ -788,8 +981,12 @@ const highCount = p => Object.values(D.activity[p]).filter(([z])=>z>1).length;
 /* Alert county chips: a readable pathogen color and a severity band, so a
    county 4 standard deviations above its own normal is visibly different
    from one just over the threshold rather than lost in a run of text. */
-const PCOL={'SARS-CoV-2':'#1d4f91','Influenza A':'#b4630f','RSV':'#6e1f2b',
-            'Influenza A(H5)':'#5b3b8c','Measles':'#0f766e','Mpox':'#a3123a'};
+/* One colour per pathogen, used identically on every chart, map and chip.
+   Chosen to stay distinguishable from each other and from the activity ramp,
+   and to remain legible for the common forms of colour blindness. A pathogen
+   colour identifies the pathogen; it never signals severity. */
+const PCOL={'SARS-CoV-2':'#2c405e','Influenza A':'#b58a3a','RSV':'#b94d78',
+            'Influenza A(H5)':'#3f8d8b','Measles':'#6b4ea8','Mpox':'#702d43'};
 const pcol = p => PCOL[p]||'var(--hi)';
 const zband = z => z>=3?'z3':z>=2?'z2':'z1';
 
@@ -800,17 +997,29 @@ const zband = z => z>=3?'z3':z>=2?'z2':'z1';
    node itself so markup, links and entities inside the block are untouched. */
 function noWidows(root){
   if(!root) return;
-  root.querySelectorAll('p,li,dd,figcaption,.note').forEach(el=>{
+  /* Headings strand a word as readily as paragraphs do, and a short final
+     word is the one most likely to be left alone on its own line, so the
+     last two words are tied together when that word is short. */
+  root.querySelectorAll('p,li,dd,figcaption,.note,h1,h2,h3,.lede,.sig,blockquote').forEach(el=>{
     if(el.dataset.nw) return;
     const walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
     let last=null,n;
     while((n=walk.nextNode())) if(n.nodeValue.trim()) last=n;
-    if(!last) return;
+    if(!last) { el.dataset.nw='1'; return; }
     const t=last.nodeValue.replace(/\s+$/,'');
     const words=t.split(' ');
-    if(words.length>1 && t.length>40){
-      words[words.length-1]='\u00A0'+words[words.length-1];
-      last.nodeValue=words.slice(0,-1).join(' ')+words[words.length-1];
+    const isHeading=/^H[1-3]$/.test(el.tagName);
+    if(words.length>1 && (isHeading ? t.length>12 : t.length>40)){
+      // Keep the last two words together. Pull in a third only when the last
+      // word is short and the bound run stays narrow, so a phone never has to
+      // break mid-run and overflow.
+      let n2=2;
+      const lastLen=words[words.length-1].replace(/[^\w]/g,'').length;
+      const run3=words.slice(-3).join(' ');
+      if(words.length>3 && lastLen<=4 && run3.length<=20) n2=3;
+      const tail=words.slice(-n2).join('\u00A0');
+      const head=words.slice(0,-n2);
+      last.nodeValue=head.length?head.join(' ')+' '+tail:tail;
     }
     el.dataset.nw='1';
   });
@@ -835,7 +1044,7 @@ function notLoaded(what, source, detail){
 function assayPanel(){
   const why=`<p>A validated diagnostic assay binds a specific stretch of the pathogen genome. When that stretch accumulates sequence variation, the assay can quietly lose sensitivity. The pathogen is present, and the test stops reporting it. A documented example: Beck et al. reported measles variants carrying mismatches at a priming site of a widely used diagnostic real-time RT-PCR assay, which reduced sensitivity for templates at low copy number; the authors developed an alternate priming strategy that restored it (<a href="https://doi.org/10.2807/1560-7917.ES.2024.29.28.2400410" target="_blank" rel="noopener">Beck et al., <i>Eurosurveillance</i> 2024;29(28):2400410</a>).</p>
   <p>This failure mode is invisible in every public wastewater aggregate, CDC's included, because aggregates report <i>detections</i> and never report what the assay could no longer see. A detection rate that falls because an assay drifted looks identical to one that falls because transmission fell.</p>
-  <p class="note"><b>What this panel is, and is not.</b> It reproduces published assay target coordinates alongside the public sequence record, each row carrying its own citation and the reference accession its coordinates are expressed against. Rows without a citation, accession or valid coordinate range are dropped rather than displayed. It is a quality-control reference for laboratories deciding whether to re-verify their own panels. It does not design, recommend, optimise or score any assay, and it is not a substitute for a laboratory's own verification.</p>`;
+  <p class="note"><b>What this site does not publish.</b> It does not carry a table of primer and probe coordinates. Those coordinates are published one paper and one protocol document at a time, each against its own reference sequence, and they would have to be transcribed from the source rather than inferred. A wrong coordinate would send a laboratory to re-verify the wrong stretch of genome, which is worse than publishing none. Laboratories checking whether a target region has drifted should work from the primary literature for their own assay.</p>`;
 
   // Defense in depth: refuse to render any row that looks like a placeholder,
   // even if one reaches the export. A citation is what makes a coordinate
@@ -848,12 +1057,15 @@ function assayPanel(){
     return c && !PLACEHOLDER.test(c) && !PLACEHOLDER.test(String(r.assay_name||''));
   });
   const dropped=all.length-a.length;
+  /* With no curated panel supplied, this is a limitation the section states
+     plainly, not a source that failed to load, so it carries no empty-state
+     warning. If a citation-bearing panel is ever added the table below
+     appears on its own. A run that supplied rows but had them all refused is
+     a different matter and is still reported. */
   if(!a.length)
     return `<article class="panel c12"><header><h2>Assay-target vulnerability</h2><span class="small muted">why the structural layer is here</span></header>
       ${why}
-      ${notLoaded('Assay-target panel','a curated table of published primer and probe coordinates, each row carrying its own citation and reference accession',
-        (dropped?`<b>${dropped} row${dropped===1?'':'s'} in this run named no real citation and ${dropped===1?'was':'were'} refused.</b> `:'')+
-        'This table is a <b>curated input</b>, not a computed one. Primer and probe coordinates are published in specific papers and protocol documents; inferring or generating them would be worse than showing none. Entries appear only once a citation-bearing panel is supplied and verified.')}</article>`;
+      ${dropped?`<p class="note"><b>${dropped} row${dropped===1?'':'s'} supplied to this run named no real citation and ${dropped===1?'was':'were'} refused.</b> A coordinate is only as trustworthy as the citation behind it.</p>`:''}</article>`;
   const ov=a[0]&&a[0].overlay_note;
   return `<article class="panel c12"><header><h2>Assay-target vulnerability</h2><span class="small muted">published target regions, with citations</span></header>
   ${why}
@@ -969,26 +1181,49 @@ start(){
   const lvl=(l,m,p)=>`<tr><td data-l="Level"><span class="sh-dot" style="background:${lvColor(l)}"></span><b>${l}</b></td>
     <td class="mono small" data-l="Means">${m}</td><td class="small" data-l="Plain reading">${p}</td></tr>`;
 
-  el.innerHTML=`<div class="grid sh-top">
-    <div class="c8 sh-hero"><h1>Start here</h1>
-      <p class="muted">What wastewater surveillance is, what it can and cannot tell you, and how to find what you need on this site.</p></div>
-    <aside class="c4 sh-goal">${ico(I.shield,'t-info')}<div><h2>Our goal</h2>
-      <p>Turn publicly available CDC data into clear, reliable information so you can understand what is happening in your community and make informed decisions.</p></div></aside>
+  /* Opening screen: what the site is, one way in, and four indicators read
+     from the run that is actually published. Nothing here is hardcoded. */
+  const glance=(()=>{
+    const sites=D.attrition_sites||[];
+    const cards=[];
+    /* Count distinct pathogens. The emerging set is a subset of the summary,
+       so adding the two lengths counted three of them twice. */
+    const pathogens=new Set([...(D.summary||[]).map(s=>s.pathogen),
+                             ...Object.keys(D.emerging||{}),
+                             ...Object.keys(D.trend||{})]).size;
+    if(pathogens) cards.push(['Pathogens tracked',String(pathogens),'in this week’s release']);
+    cards.push(['Latest sample',dateFmt(D.latest_sample||D.activity_end),'the period this release covers']);
+    /* The national coverage table is the one authoritative county figure.
+       Per-pathogen counts are cumulative and larger; counting distinct
+       counties off the site roster answers a narrower question. Using the
+       national table keeps this card and Coverage & equity in agreement. */
+    const rn=D.rep_national||{};
+    if(rn.counties_monitored!=null){
+      cards.push(['Counties monitored',Number(rn.counties_monitored).toLocaleString(),
+                  `of ${Number(rn.counties_total||0).toLocaleString()} with a sewershed`]);
+    }else if(sites.length){
+      const act=sites.filter(x=>x.status==='active');
+      cards.push(['Sites reporting',act.length.toLocaleString(),`of ${sites.length.toLocaleString()} in the roster`]);
+    }
+    cards.push(['Data checks',
+      R.n_fail?`${R.n_fail} failed`:R.n_warning?`${R.n_pass} passed`:`All ${R.n_pass} passed`,
+      R.n_fail?'publication blocked':R.n_warning?`${R.n_warning} raised a warning`:'no warnings']);
+    return `<section class="glance" aria-label="At a glance">${cards.map(([l,v,n])=>
+      `<div class="gcard"><span class="label">${l}</span><b class="gval num">${v}</b><span class="meta">${n}</span></div>`).join('')}</section>`;
+  })();
+
+  el.innerHTML=`<div class="hero">
+    <h1>National Wastewater Genomic Surveillance</h1>
+    <p class="hero-sub">Explore wastewater pathogen activity, geographic coverage and public-health trends across the United States.</p>
+    <p><a class="btn-primary" href="#dashboard" data-go="dashboard">Explore the dashboard</a></p>
   </div>
+  ${glance}
 
   <div class="grid">
-  <article class="panel c5 sh-card t-info-card"><header class="sh-h">${ico(I.info,'t-info')}<h2>At a glance</h2></header>
+  <article class="panel c5 sh-card t-info-card"><header class="sh-h">${ico(I.info,'t-info')}<h2>What this measures</h2></header>
     <p>People shed viruses in their stool, often before they feel ill and whether or not they ever get tested. Everything that goes down a drain in a sewered neighborhood arrives at the same treatment plant. Testing that water tells you something about the whole community at once, without testing a single person.</p>
     <p>This site collects what the U.S. Centers for Disease Control and Prevention publishes from that testing, standardizes it so places can be compared fairly, and rebuilds itself every week.</p>
-    ${(()=>{const sites=D.attrition_sites||[];
-      if(!sites.length) return '';
-      const act=sites.filter(x=>x.status==='active').length;
-      const cty=new Set(sites.map(x=>String(x.county_fips).padStart(5,'0'))).size;
-      return `<h3 class="ov-sub" style="margin-top:4px">This week's run</h3>
-      <div class="ov-kpi"><div><span class="label">Sites reporting</span><b class="num">${act.toLocaleString()}</b><span class="small muted">of ${sites.length.toLocaleString()} in the roster</span></div>
-        <div><span class="label">Counties</span><b class="num">${cty.toLocaleString()}</b></div>
-        <div><span class="label">Latest sample</span><b class="num">${dateFmt(D.latest_sample||D.activity_end)}</b></div></div>
-      <p class="small muted">Figures change every week as CDC revises its data. <a href="#dashboard" data-go="dashboard">See this week in full</a>.</p>`})()}
+    <p class="small muted">Figures change every week as CDC revises its data. <a href="#dashboard" data-go="dashboard">See this week in full</a>.</p>
   </article>
 
   <article class="panel c7 sh-card"><header class="sh-h">${ico(I.gear,'t-slate')}<h2>How a sample becomes a number</h2></header>
@@ -1078,7 +1313,9 @@ dashboard(){
   const LVRANGE={'Very Low':'z ≤ −1','Low':'−1 &lt; z ≤ −0.25','Typical':'−0.25 &lt; z ≤ 0.25','Elevated':'0.25 &lt; z ≤ 1','High':'z &gt; 1'};
   // Trend-line colors come from the theme tokens so the chart stays legible in
   // dark mode; hardcoded hexes went invisible on the dark surface.
-  const TCOL=[css('--vl'),css('--ok'),css('--hi')];
+  // One colour per pathogen, shared with the cards, maps and chips, so a
+  // virus looks the same everywhere on the site.
+  const TCOL=ROUTINE.map(pcol);
 
   /* ---- Surveillance coverage, computed from the site roster in this run ----
      Every figure below is a count of rows in D.attrition_sites. Nothing here is
@@ -1100,7 +1337,7 @@ dashboard(){
     sites.forEach(s=>{const k=s.state_code||'—';(byState[k]=byState[k]||{n:0,a:0}).n++;if(s.status==='active')byState[k].a++});
     const top=Object.entries(byState).sort((a,b)=>b[1].n-a[1].n).slice(0,10);
     covPanel=`<article class="panel c12 ov"><header class="ov-h"><h2>Surveillance coverage</h2>
-        <button class="qmark" data-gloss="sewershed" aria-label="What is a monitored site?">?</button></header>
+        <button class="qmark" data-gloss="site" aria-label="What is a monitored site?">?</button></header>
       <div class="cov-wrap">
         <div class="ov-kpi"><div><span class="label">Sites in roster</span><b class="num">${total.toLocaleString()}</b></div>
           <div><span class="label">Reporting now</span><b class="num">${active.toLocaleString()}</b><span class="small muted">${pct(shareActive)} of the roster</span></div>
@@ -1215,7 +1452,7 @@ dashboard(){
   // Validation
   const pAudit=panel('c4','Validation for this run','audit','Audit log',
     `<p class="small">Every automated check the pipeline ran before anything was published. Nothing on the site updates while a check is failing.</p>
-     ${kpi([['Passed',Number(R.n_pass).toLocaleString(),''],
+     ${kpi([['Passed',Number(R.n_pass).toLocaleString(),`of ${Number(R.n_checks||(R.n_pass+R.n_warning+R.n_fail)).toLocaleString()} checks`],
             ['Warnings',Number(R.n_warning).toLocaleString(),'explained in the log'],
             ['Failed',Number(R.n_fail).toLocaleString(),Number(R.n_fail)?'publication blocked':'none']])}
      <p class="small muted">Run <span class="mono">${esc(R.run_id)}</span> · data through ${dateFmt(R.data_as_of)}. Each run is archived as a release so these numbers stay recoverable.</p>`);
@@ -1225,7 +1462,7 @@ dashboard(){
   <p class="muted">Site-standardized wastewater activity for the four weeks ending ${dateFmt(D.activity_end)}, with clinical alignment, spatial clustering and coverage equity from the same weekly run.</p></div>
 
   <div class="grid">${ROUTINE.map(p=>{const s=S[p];const l=level(s.recent_median_site_z);return `
-    <article class="panel card-p c3 ov"><div class="top"><h2>${p}</h2>${chip(l)}</div>
+    <article class="panel card-p c3 ov"><div class="top"><h2 class="pname" style="color:${pcol(p)}">${p}</h2>${chip(l)}</div>
       <span class="label">Median site z-score</span>
       <div class="ov-metric"><span class="metric-value num">${fmt(s.recent_median_site_z)}</span>
         <span class="small">${arrow(s.trend)}<br><span class="muted num">${s.change_vs_previous_window_z>0?'+':''}${fmt(s.change_vs_previous_window_z)} vs previous window</span></span></div>
@@ -1261,7 +1498,7 @@ dashboard(){
   <div class="grid">
     <article class="panel c4 ov"><header class="ov-h"><h2>Emerging pathogen detections</h2></header>
       <p class="small muted">Share of <b>site-weeks</b> testing positive in the latest four weeks. This is not the share of people infected, and a detection does not establish local spread.</p>
-      <div class="ov-em">${EMERGING.map(p=>{const s=S[p];return `<div><span class="label">${p}</span><span class="ov-em-v num">${pct(s.recent_detection_rate)}</span><div class="chart" id="se-${id(p)}"></div><span class="small muted">${s.sites.toLocaleString()} sites have reported since ${dateFmt(s.first_observation)}</span></div>`}).join('')}</div>
+      <div class="ov-em">${EMERGING.map(p=>{const s=S[p];return `<div><span class="label" style="color:${pcol(p)}">${p}</span><span class="ov-em-v num">${pct(s.recent_detection_rate)}</span><div class="chart" id="se-${id(p)}"></div><span class="small muted">${s.sites.toLocaleString()} sites have reported since ${dateFmt(s.first_observation)}</span></div>`}).join('')}</div>
     </article>
 
     ${clinical}
@@ -1276,14 +1513,14 @@ dashboard(){
     </article>
   </div>
 
-  <h2 class="ov-band">Analysis from the same weekly run</h2>
+  <p class="ov-band">Analysis from the same weekly run</p>
   <div class="grid">${pClusterMap}${pSpatial}</div>
   <div class="grid">${pLead}${pModels}${pEquity}</div>
   <div class="grid">${pAmr}${pStruct}${pAudit}</div>
 
   <p class="note srcline"><b>Sources.</b> CDC National Wastewater Surveillance System (NWSS), six public pathogen datasets on data.cdc.gov, pulled for this run and listed with their dataset identifiers on <a href="#methods" data-go="methods">Methods &amp; sources</a>. Clinical comparison uses CDC's National Syndromic Surveillance Program emergency-department data. Activity is standardized within each site against its own history before any county or national figure is taken.</p>`;
 
-  ROUTINE.forEach(p=>spark(document.getElementById('sp-'+id(p)),D.trend[p].slice(-52).map(d=>d[1]),css('--accent')));
+  ROUTINE.forEach(p=>spark(document.getElementById('sp-'+id(p)),D.trend[p].slice(-52).map(d=>d[1]),pcol(p)));
   EMERGING.forEach(p=>spark(document.getElementById('se-'+id(p)),D.emerging[p].slice(-52).map(d=>d[1]*100),css('--warn'),{zero:false,base:0,dom:[0,Math.max(3,d3.max(D.emerging[p].slice(-52),d=>d[1]*100))]}));
 
   /* national trends, with a range toggle */
@@ -1424,11 +1661,11 @@ analytics(){
   </div>
   <p class="note srcline"><b>Sources.</b> Wastewater from CDC NWSS; clinical comparison from CDC's National Syndromic Surveillance Program (NSSP) emergency-department visit percentages. Lag is a Spearman cross-correlation with Benjamini&ndash;Hochberg correction across all state&ndash;pathogen pairs. Full dataset list on <a href="#methods" data-go="methods">Methods &amp; sources</a>.</p>`;
   let P='SARS-CoV-2';
-  const drawT=()=>lineChart(document.getElementById('a-trend'),[{name:P,values:ser(P),color:css('--accent'),area:false}],{bands:true,zero:true,w:900,h:260});
+  const drawT=()=>lineChart(document.getElementById('a-trend'),[{name:P,values:ser(P),color:pcol(P),area:false}],{bands:true,zero:true,w:900,h:260});
   const drawLag=p=>{const by=Object.fromEntries(D.statelag.filter(x=>x.pathogen===p).map(x=>[x.state_code,x]));
     stateMap(document.getElementById('a-lagmap'),st=>{const r=by[st];return !r||!r.significant_fdr?css('--nodata'):r.lag_weeks>0?css('--el'):css('--accent')},
       (st,name)=>{const r=by[st];return r?`<b>${esc(name)}</b><div>${r.relationship}${r.lag_weeks?` by ${r.lag_weeks} wk`:''}</div><div>ρ = ${fmt(r.spearman_r)} · ${r.paired_weeks} weeks</div>${r.significant_fdr?'':'<div>Not significant after FDR</div>'}`:`<b>${esc(name)}</b><div>No qualifying data</div>`})};
-  const drawEm=p=>lineChart(document.getElementById('a-emc'),[{name:p,values:D.emerging[p].filter(d=>d[2]>=20).map(d=>[new Date(d[0]),d[1]]),color:css('--warn'),area:true}],{ymin:0,ymax:Math.max(.01,d3.max(D.emerging[p].filter(d=>d[2]>=20),d=>d[1])*1.15),yfmt:d3.format('.0%'),tipfmt:v=>pct(v),w:440,h:260,left:40,xticks:4});
+  const drawEm=p=>lineChart(document.getElementById('a-emc'),[{name:p,values:D.emerging[p].filter(d=>d[2]>=20).map(d=>[new Date(d[0]),d[1]]),color:pcol(p),area:true}],{ymin:0,ymax:Math.max(.01,d3.max(D.emerging[p].filter(d=>d[2]>=20),d=>d[1])*1.15),yfmt:d3.format('.0%'),tipfmt:v=>pct(v),w:440,h:260,left:40,xticks:4});
   const seg=(id,fn)=>el.querySelector(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll(id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.p)});
   seg('#a-path',p=>{P=p;drawT()});seg('#a-lagp',drawLag);seg('#a-em',drawEm);
   drawT();drawLag('SARS-CoV-2');drawEm('Influenza A(H5)');
@@ -1535,7 +1772,7 @@ equity(){
   <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
     <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
   <article class="panel c12"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
-    <p style="font-size:1.05rem;font-weight:600">${line}</p>
+    <p style="font-weight:600">${line}</p>
     <div class="statgrid"><div class="stat"><span class="label">Odds ratio per 0.10 SVI</span><span class="big">${fmt(g.glm_odds_ratio,3)}</span></div><div class="stat"><span class="label">95% CI</span><span class="big" style="font-size:1.4rem">${fmt(g.glm_or_95ci_low,3)}–${fmt(g.glm_or_95ci_high,3)}</span></div><div class="stat"><span class="label">p value</span><span class="big" style="font-size:1.4rem">${pFmt(g.glm_p_value)}</span></div></div>
     <div class="mapbox" id="e-map"></div>${legend([['var(--accent)','Analysis-ready'],['var(--lo)','Observed, not ready'],['var(--nodata)','No surveillance']])}
     <p class="note">Analysis-ready = at least 52 qualifying weeks and at least 70% completeness across the active span. Association, not cause.</p>
@@ -1592,14 +1829,20 @@ global(){
   const withSM=g.filter(c=>c.safely_managed_pct!=null&&c.sanitation_not_observable_pct!=null);
   const hasSM=withSM.length>0, smN=withSM.length;
   const smPop=d3.sum(withSM,c=>c.sanitation_not_observable_population||0);
-  const topGap=withSM.slice().sort((a,b)=>b.sanitation_not_observable_pct-a.sanitation_not_observable_pct).slice(0,3);
+  // Countries where safely managed came in below sewer-connected carry a gap
+  // forced to zero. Including those zeros in the median halves it and answers
+  // a question nobody asked, so the median is taken over the countries where
+  // a gap is actually interpretable, which is also where the population is.
+  const gapSet=withSM.filter(c=>!c.gap_uninterpretable), gapN=gapSet.length;
+  const nonInterp=smN-gapN;
+  const topGap=gapSet.slice().sort((a,b)=>b.sanitation_not_observable_pct-a.sanitation_not_observable_pct).slice(0,3);
   const feeds=g.filter(c=>c.has_open_feed);
   const totPop=d3.sum(g,c=>c.population||0), obs=d3.sum(g,c=>c.observable_population||0);
   el.innerHTML=head+`
   ${basisNote}
   <div class="statgrid">
     <div class="stat"><span class="label">Countries with sanitation data</span><span class="big">${g.length}</span></div>
-    <div class="stat"><span class="label">With an open machine-readable feed</span><span class="big">${feeds.length}</span><span class="small muted">${feeds.map(c=>esc(c.country)).join(', ')||'none'}</span></div>
+    <div class="stat"><span class="label">With an open machine-readable feed</span><span class="big">${feeds.length}</span><span class="small muted">${feeds.length?feeds.map(c=>`${esc(c.country)} (${esc(String(c.feed_status||'').toLowerCase()||'status unknown')})`).join(', '):'none'}</span></div>
     <div class="stat"><span class="label">Population ${isBound?'observable at most':'observable by this method'}</span><span class="big">${totPop?fmt(100*obs/totPop,0)+'%':'—'}</span><span class="small muted">${isBound?'upper bound, weighted':'sewer-connected share, weighted'}</span></div>
   </div>
   ${inc.length?`<article class="panel c6"><header><h2>Observable population by income group <button class="qmark" data-gloss="observable-population" aria-label="What does observable population mean?">?</button></h2></header>
@@ -1610,11 +1853,11 @@ global(){
   ${hasSM?`<article class="panel c12"><header><h2>Sanitation is not the same as visibility</h2></header>
     <p>“Safely managed sanitation” (World Bank <span class="mono">SH.STA.SMSS.ZS</span>) counts septic tanks and improved latrines as success, and rightly so as public health. But neither reaches a treatment plant, so neither can be observed by testing wastewater. The difference between the two columns below is, approximately, <b>the population with working sanitation that this method still cannot see.</b></p>
     <div class="statgrid">
-      <div class="stat"><span class="label">Population with sanitation but not sewered</span><span class="big">${smPop?Math.round(smPop).toLocaleString():'—'}</span><span class="small muted">across ${smN} countries reporting both</span></div>
-      <div class="stat"><span class="label">Median gap</span><span class="big">${fmt(d3.median(withSM,c=>c.sanitation_not_observable_pct),1)}%</span><span class="small muted">safely managed minus sewer-connected</span></div>
+      <div class="stat"><span class="label">Population with sanitation but not sewered</span><span class="big">${smPop?Math.round(smPop).toLocaleString():'—'}</span><span class="small muted">across ${gapN} countries with a measurable gap</span></div>
+      <div class="stat"><span class="label">Median gap</span><span class="big">${fmt(d3.median(gapSet,c=>c.sanitation_not_observable_pct),1)}%</span><span class="small muted">safely managed minus sewer-connected, across those ${gapN}</span></div>
       <div class="stat"><span class="label">Largest gaps</span><span class="big" style="font-size:1.2rem">${topGap.map(c=>esc(c.country)).join(', ')||'—'}</span></div>
     </div>
-    <p class="note">The two series come from different collections and can cross in either direction for a given country-year. Where safely managed is reported below sewer-connected the gap is not interpretable and is shown as zero rather than a negative number.</p></article>`:''}
+    <p class="note">${smN} countries report both series. The two come from different collections and can cross in either direction for a given country-year: in ${nonInterp} of them safely managed is reported below sewer-connected, so the gap is not interpretable and is shown as zero rather than as a negative number. The population and median above are taken across the ${gapN} countries where a gap can be measured, since the ${nonInterp} contribute nothing to the population and would only drag the median down.</p></article>`:''}
   <article class="panel c6"><header><h2>${isBound?'Sanitation coverage by country':'Sewer-connected population by country'} <button class="qmark" data-gloss="sewer-connected" aria-label="What does sewer-connected mean?">?</button></h2><span class="small muted">lowest first</span></header>
     <div class="tbl scroll"><table><tr><th>Country</th><th class="n">${isBound?'Upper bound %':'Sewer %'}</th>${hasSM?'<th class="n">Safely managed %</th><th class="n">Gap</th>':''}<th>Income group</th><th>Open feed</th><th>Status in this run</th></tr>
       ${g.slice(0,60).map(c=>`<tr><td>${esc(c.country)}</td><td class="n">${fmt(c.sewer_connected_pct,1)}</td>${hasSM?`<td class="n">${c.safely_managed_pct!=null?fmt(c.safely_managed_pct,1):'—'}</td><td class="n">${c.sanitation_not_observable_pct!=null?fmt(c.sanitation_not_observable_pct,1):'—'}</td>`:''}<td class="small">${esc(c.income_group??'—')}</td><td class="small">${c.open_machine_readable_feed?esc(c.open_machine_readable_feed):'—'}</td><td class="small muted">${esc(c.feed_status??'—')}</td></tr>`).join('')}</table></div>
@@ -1845,13 +2088,14 @@ about(){
   const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
   const site=location.protocol.startsWith('http')?location.origin+location.pathname:'https://victorialovefranklin.github.io/nwgs-grid-site/';
   const tnNow=(D.tn_county||[]).filter(c=>c.reporting_now).length;
-  el.innerHTML=`<div class="head"><h1>About &amp; contact</h1><p class="muted">Who built NWGS Grid™, why, and how to reach her, cite the work or request a license.</p></div>
+  el.innerHTML=`<div class="head"><h1>About The Developer</h1><p class="muted">Who built NWGS Grid™, why, and how to reach her, cite the work or request a license.</p></div>
   <div class="grid aboutgrid">
   <figure class="panel c4 portrait"><img src="img/vlf-portrait.jpg" alt="Portrait of Victoria Love Franklin" width="1080" height="1439" loading="lazy"></figure>
   <article class="panel c8 bio"><h2>Victoria Love Franklin, PSM, CPT</h2>
-    <p class="role">Developer · PhD Student, Data Science · Research Scholar</p>
-    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened into Data Science with a cybersecurity concentration, while continuing to research <b>structural biology</b>, the protein-level side of the pathogens this system tracks. Her work spans five federal laboratories (Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine), as well as local government and industry.</p>
-    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance. She has since trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and AI. That biomedical and structural grounding is why NWGS Grid™ carries reference protein structures and their curated functional regions alongside the surveillance data.</p>
+    <p class="role">Ph.D. Data Science Student · GIS · AI &amp; ML · Developer · Published Researcher · Public Administration · Executive Leadership &amp; Policy</p>
+    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened her studies into Data Science with a cybersecurity concentration. Her multidisciplinary research spans data science, geospatial intelligence, genomics, <b>structural biology</b>, cybersecurity and public-sector technology.</p>
+    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance. Her professional and research experience includes work involving Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine. She has also trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and artificial intelligence.</p>
+    <p>Her work focuses on developing data-driven approaches and AI-enabled systems to address complex challenges in public health, critical infrastructure resilience and government operations. Through NWGS Grid™, she brings together wastewater surveillance data, geospatial analytics, genomic information and reference protein structures with curated functional regions to support a broader understanding of infectious-disease surveillance.</p>
     <div class="controls">
       <a class="btn primary" href="${mail('NWGS Grid inquiry')}">Email Victoria</a>
       <a class="btn" href="https://victorialovefranklin.github.io/victoria-franklin-site/" target="_blank" rel="noopener">Personal website ↗</a>
@@ -1860,12 +2104,10 @@ about(){
     </article>
   </div>
   <div class="grid">
-  <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><h2>Why I built NWGS Grid™</h2>
-    <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor.</p>
-    <p>But that signal is spread across separate CDC datasets, clinical feeds and vulnerability indices. It changes every week, and it reaches some communities far better than others. I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses.</p>
-    <p><b>NWGS Grid™ is independent work.</b> Victoria created and built every part of it: the pipeline, the validation checks, the weekly automation and this site, outside any employer, fellowship or sponsored program, using only public data.</p>
-    <p>That last question is personal. In my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.</p>
-    <p class="sig">— Victoria</p></article>
+  <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><div class="why-body"><h2>Why I built NWGS Grid™</h2>
+    <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor. But that signal is scattered across separate CDC datasets, clinical feeds and vulnerability indices, it changes every week, and it reaches some communities far better than others.</p>
+    <p>I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses. <b>It is independent work.</b> I built every part of it, the pipeline, the validation checks, the weekly automation and this site, outside any employer, fellowship or sponsored program, using only public data.</p>
+    <p>That last one is personal: in my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.&nbsp;<span class="sig">— Victoria</span></p></div></article>
   <article class="panel c12"><h2>Credentials &amp; affiliations</h2>
     <h3>Education &amp; training</h3>
     <ul class="creds">
@@ -1910,8 +2152,7 @@ about(){
       <tr><td class="lead" data-l="In the poster">“Identify distinct spatial patterns in the distribution of targeted pathogens, correlating patterns with secondary data.”</td>
           <td data-l="Today" class="small">Local spatial clustering is computed each week and correlated against clinical emergency-department data and social vulnerability. <a href="#equity" data-go="equity">Coverage &amp; equity</a></td></tr>
     </table></div>
-    <p class="small muted">The poster’s stated limitation, missing sewer-access location data for the study site, is the same problem that the representativeness measure now addresses at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is.</p>
-    <p class="note">The poster was collaborative work with the co-authors named above. <b>NWGS Grid™ is independent work</b> that followed it: Victoria created and built every part of the platform herself, outside any employer, fellowship or sponsored program, using only public data.</p></article>
+    <p class="note">The poster’s stated limitation, missing sewer-access location data for the study site, is the same problem the representativeness measure now addresses at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is. The poster itself was collaborative work with the co-authors named above, while <b>NWGS Grid™ is independent work</b> that followed it, built entirely by Victoria outside any employer, fellowship or sponsored program, using only public data.</p></article>
   <article class="panel domains"><h2>Domains</h2>
     <p class="small">Victoria’s work runs along one thread: the critical systems communities depend on, namely health, energy and environment, and the geospatial and AI methods that reveal where those systems are strong, where they fail and whom they reach. NWGS Grid™ is the public-health expression of that thread.</p>
     <div class="tbl"><table class="stack dtable"><tr><th>Domain</th><th>Focus</th><th>Areas</th></tr><tr><td class="lead dname" data-l="Domain">Biosurveillance &amp; public health</td><td data-l="Focus" class="small">Turning environmental and clinical signals into early warning, and asking who the system reaches.</td><td data-l="Areas"><ul class="tags"><li>Wastewater biosurveillance</li><li>Genomic epidemiology</li><li>Spatial epidemiology</li><li>Metagenomics &amp; NGS</li><li>Structural biology</li><li>Health equity &amp; social vulnerability</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Critical infrastructure &amp; cybersecurity</td><td data-l="Focus" class="small">Protecting operational systems and modelling how they behave under stress.</td><td data-l="Areas"><ul class="tags"><li>Nuclear cybersecurity</li><li>ICS/OT security</li><li>Power grids &amp; smart grids</li><li>Grid resilience</li><li>Digital twins</li><li>Anomaly detection</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Environment &amp; remote sensing</td><td data-l="Focus" class="small">Measuring land, air and climate pressure from satellite and sensor data.</td><td data-l="Areas"><ul class="tags"><li>GIS &amp; geospatial intelligence</li><li>Remote sensing</li><li>Forestry &amp; biomass</li><li>Carbon sequestration</li><li>Air quality</li><li>Climate hazards &amp; wildfire risk</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">AI &amp; application development</td><td data-l="Focus" class="small">Building the models, pipelines and interfaces that put the analysis in people’s hands.</td><td data-l="Areas"><ul class="tags"><li>App development, front end &amp; back end</li><li>Machine learning &amp; explainable AI</li><li>Retrieval-augmented generation (RAG)</li><li>Automated data pipelines</li><li>Dashboards &amp; public data portals</li></ul></td></tr></table></div>
@@ -1972,7 +2213,7 @@ alerts(){
   </div>
   <div id="al-list" class="statecards"></div>
   <p class="note">Same rule as the weekly email alerts: a county is High when its median site z-score over the latest four weeks is above 1.0. Each chip gives the county and that z-score, and values of <span class="zkey z2">2.0 and above</span> or <span class="zkey z3">3.0 and above</span> are emphasised so the strongest signals stand out. A z-score compares a site only against its own history, so a high value means unusual for that place, not more cases than somewhere else.</p>
-  <div class="head" style="margin-top:12px"><span class="eyebrow">Emerging pathogens</span><h2 style="font-size:1.5rem">Where H5 bird flu, measles and mpox were detected</h2><p class="muted">CDC tests these as detected / not detected. A site counts as positive if any sample tested positive in the latest four weeks.</p></div>
+  <div class="head" style="margin-top:12px"><span class="eyebrow">Emerging pathogens</span><h2>Where H5 bird flu, measles and mpox were detected</h2><p class="muted">CDC tests these as detected / not detected. A site counts as positive if any sample tested positive in the latest four weeks.</p></div>
   <div class="controls"><div class="seg" id="em-p">${EMERGING.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p==='Influenza A(H5)'?'H5 bird flu':p}</button>`).join('')}</div></div>
   <div class="grid"><article class="panel c8"><div class="mapbox" id="em-map"></div><div id="em-legend"></div></article><article class="panel c4" id="em-list"></article></div>`;
   const sel=document.getElementById('al-st');
@@ -2046,7 +2287,7 @@ audit(){
   const el=document.getElementById('v-audit');
   const cls=s=>s.startsWith('PASS')?'PASS':s.startsWith('FAIL')?'FAIL':'WARN';
   el.innerHTML=`<div class="head"><h1>Audit log</h1><p class="muted">Every validation check from this run. The app only updates when no check fails.</p></div>
-  <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono">${R.n_pass} pass · ${R.n_warning} warn · ${R.n_fail} fail</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
+  <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono" style="font-size:.86rem;line-height:1.5">${[[R.n_pass,'pass'],[R.n_warning,'warn'],...(R.n_info?[[R.n_info,'info']]:[]),[R.n_fail,'fail']].map(([n,w])=>`<span style="white-space:nowrap">${n}&nbsp;${w}</span>`).join(' · ')}</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
   ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
   <article class="panel"><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
   ${D.audit.map(a=>{const phil=/PHIL/.test(a.component)&&/PARTIAL_IMAGES/.test(a.status);return `<tr><td class="lead">${esc(a.component)}</td><td class="status-${phil?'INFO':cls(a.status)}" style="white-space:nowrap;font-weight:600">${phil?'INFO · OPTIONAL':esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}${phil?'. Optional photos from CDC’s image library (PHIL), which blocks automated downloads; no analysis uses them.':''}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`}).join('')}</table></div></article>
@@ -2061,10 +2302,10 @@ glossary(){
     ['sewer-connected','Sewer-connected population','The share of people whose household waste reaches a sewer system rather than a septic tank, pit latrine, or no sanitation. Only this share can ever be seen by testing wastewater, however good the laboratory is.'],
     ['observable-population','Observable population','Population multiplied by the sewer-connected share, giving the number of people a perfectly run wastewater program in that country could detect. The remainder is invisible to the method regardless of funding.'],
     ['income-group','Income group','The World Bank classification of countries as low, lower-middle, upper-middle or high income. Shown here because sewer connection and surveillance capacity both track it closely, which is the central finding of this page.'],
+    ['safely-managed','Safely managed sanitation','The WHO/UNICEF measure of households whose waste is safely contained and treated. It counts septic tanks and improved latrines alongside sewers, and rightly so as public health. It is not a measure of visibility: a septic tank protects health but never reaches a treatment plant, so nothing in it can be observed by testing wastewater.'],
     ['jmp','WHO/UNICEF JMP','The Joint Monitoring Program for Water Supply, Sanitation and Hygiene, the standard international source for how many people in each country have sewer connections. It supplies the denominator for this page.'],
     ['open-feed','Open machine-readable feed','A national program that publishes its wastewater data in a form software can read directly, under a license permitting reuse. Very few do. A dashboard a human can look at is not a feed; being listed here means the data can be downloaded and recomputed.'],
     ['insdc','INSDC / NCBI Virus / GenBank','The International Nucleotide Sequence Database Collaboration and its public archives. Sequences here are in the public domain and may be redistributed, which is why every sequence and phylogenetic tree shown on this site comes from them.'],
-    ['gisaid','GISAID','A widely used virus sequence database, including wastewater-relevant collections and phylogenetic trees. Its Database Access Agreement does not permit redistributing data, or anything derived from it, through another portal, so GISAID data is not shown anywhere on this site. It may be used in published research with acknowledgement, and is cited there instead.'],
     ['phylogenetic-tree','Phylogenetic tree','A branching diagram showing how versions of a virus are related by descent, used to tell whether cases share a common origin or arrived separately.'],
    ]],
    ['Lead time & forecasting',[
@@ -2084,13 +2325,15 @@ glossary(){
    ['Data & updates',[
     ['latest-sample','Latest sample','The most recent date a wastewater sample was collected in this week’s CDC data. Samples take several days to be tested and reported, so it is usually a few days before the update date.'],
     ['cdc-updated','CDC data updated','When CDC last refreshed its public wastewater datasets. NWGS Grid™ pulls them every Saturday morning (Central time) and rebuilds the site.'],
-    ['validated','Validated (checks passed)',`Every weekly run passes through ${R.n_pass+R.n_warning+R.n_fail} automated quality checks before anything is published: data parsing, county counts, pathogen independence, spatial and model audits, and cross-table consistency. “${R.n_pass} checks passed” means those checks found no problem. Warnings are listed on the Audit log with an explanation. If any check fails, the site keeps last week’s data instead of publishing.`],
+    ['validated','Validated (checks passed)',`Every weekly run passes through ${R.n_checks||(R.n_pass+R.n_warning+R.n_fail)} automated quality checks before anything is published: data parsing, county counts, pathogen independence, spatial and model audits, and cross-table consistency. “${R.n_pass} checks passed” means those checks found no problem. Warnings are listed on the Audit log with an explanation. If any check fails, the site keeps last week’s data instead of publishing.`],
     ['run-id','Run ID','A label for one weekly snapshot of the data (for example run_20261009T1509Z). Every number on the site comes from the same run, so tables and charts always agree. Cite it with the data-through date.'],
+    ['tiger','TIGER/Line · Socrata · SRA','Three sources named in the run log. TIGER/Line is the Census Bureau county boundary file, downloaded fresh each run rather than stored. Socrata is the platform CDC publishes its datasets on. The SRA is NCBI’s Sequence Read Archive, the public store of raw sequencing reads.'],
     ['window','Four-week window','Levels and alerts summarize the latest four weeks of samples, which smooths out single noisy samples.'],
     ['release','Release (weekly archive)','A permanent, downloadable copy of a week’s tables, figures and log on GitHub, used to cite exact numbers later.']]],
    ['Wastewater basics',[
     ['nwss','NWSS','CDC’s National Wastewater Surveillance System, which collects test results from wastewater treatment plants across the U.S.'],
     ['site','Site (sewershed)','A wastewater treatment plant or sampling point. Its sewershed is the area whose sewage flows to it; one site can serve several counties.'],
+    ['catchment','Catchment','The area whose sewage flows to one sampling point, used interchangeably with sewershed on this site. Its size decides how many people a single sample speaks for, and how little can be inferred about any one household.'],
     ['county-rep','Counties represented','Counties served by at least one reporting site.'],
     ['concentration','Concentration (log)','The amount of a virus’s genetic material per volume of wastewater, put on a log scale because values vary over a huge range.'],
     ['ed','ED visits (NSSP)','The share of emergency-department visits for COVID-19, flu or RSV, from CDC’s National Syndromic Surveillance Program. Used as the clinical comparison.']]],
@@ -2121,6 +2364,7 @@ glossary(){
    ['Predictive models',[
     ['r2','R² (held-out)','The share of week-to-week variation in ED visits a model explains on later weeks it never saw. 1 is perfect; below 0 is worse than guessing the average.'],
     ['persistence','Clinical only (persistence)','A baseline that predicts next week’s ED visits from recent ED visits alone.'],
+    ['collinearity','Collinearity','When two predictors carry much the same information, so a model cannot separate their contributions. The audit reports it for the wastewater and clinical lag terms because when those move together, apparent wastewater skill may be the clinical series in disguise.'],
     ['ww-only','Wastewater only · full model · gain','Wastewater only uses just wastewater features; the full (multimodal) model uses both. Gain is how much the full model improves on persistence.'],
     ['shap','SHAP (top predictors)','A method that shows how much each input contributed to the model’s predictions.']]],
    ['Protein structures & annotations',[
@@ -2134,6 +2378,9 @@ glossary(){
     ['mapped','Mapped · not in structure','Mapped means UniProt’s region lines up with residues this structure actually resolves. Regions the structure does not cover are left out rather than approximated.']]],
    ['Genomics & structures',[
     ['amr','AMR · ARG','Antimicrobial resistance and the antibiotic-resistance genes measured in wastewater.'],
+    ['assay','Diagnostic assay','A validated laboratory test for one specific target. In wastewater it is almost always a PCR test counting copies of a chosen stretch of the pathogen genome. The test binds that stretch and nothing else, which is why sequence change at the target can make a working test go quiet while the pathogen is still present.'],
+    ['pcr','PCR · RT-PCR','Polymerase chain reaction: a method that copies a chosen stretch of genetic material over and over until there is enough to count. RT-PCR adds a first step converting RNA into DNA, which RNA viruses such as SARS-CoV-2, influenza and RSV require.'],
+    ['primer-probe','Primer · probe','The short synthetic sequences that make a PCR test specific. Primers mark where copying starts and stops; the probe reports when the intended target has been copied. Their coordinates are published per assay, measured against a named reference sequence.'],
     ['ncbi','NCBI records · complete genomes','Public virus sequence records from NCBI Virus, and how many are full genomes. They are not sequences from these wastewater samples.'],
     ['pdb','PDB entry · DOI','A reference 3D protein structure in the RCSB Protein Data Bank, with its permanent citation link.'],
     ['resolution','Resolution (Å) · Cryo-EM · X-ray','How fine the structure’s detail is, in ångströms (smaller is sharper), and the lab method used to determine it.']]],
