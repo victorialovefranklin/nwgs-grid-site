@@ -558,6 +558,13 @@ header .dlrow{align-self:center}
 .dlgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:var(--sp-2);margin:var(--sp-2) 0}
 .dlgrid>div{border:1px solid var(--line);border-radius:8px;padding:var(--sp-2)}
 .dlgrid p{margin:4px 0 10px}
+.rdim{opacity:.72}
+.report{margin-top:var(--sp-3)}
+.report .rhead{border-bottom:2px solid var(--navy);padding-bottom:var(--sp-2);margin-bottom:var(--sp-3)}
+.report h3{margin-top:var(--sp-4)}
+.rfig{margin:var(--sp-3) 0}
+.rfig figcaption{font-size:.9375rem;margin-top:var(--sp-1);padding-top:var(--sp-1);border-top:1px solid var(--line)}
+@media print{.report{border:none;padding:0}.rfig{break-inside:avoid;page-break-inside:avoid}}
 /* Printing. The browser's "Save as PDF" is the PDF export: no library, no
    server, and what you see is what you get. Navigation and controls are
    dropped, the citation block is revealed, and panels are kept off page
@@ -727,6 +734,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
       <p>Franklin, V. L. NWGS Grid™: National Wastewater Genomic Surveillance Grid [Software and web dashboard]. https://nwgsgrid.com</p>
       <p>© Victoria Love Franklin. All rights reserved. Citation required; see LICENSE. Cite the run identifier above with any figure.</p>
     </div>
+    <section class="view" id="v-reports" hidden></section>
     <section class="view" id="v-monitoring" hidden></section>
     <section class="view" id="v-equity" hidden></section>
     <section class="view" id="v-global" hidden></section>
@@ -1017,7 +1025,7 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['start','Start here'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
+const VIEWS=[['start','Start here'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['reports','Data & reports'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
 const built={};
 let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
@@ -1031,7 +1039,7 @@ const GROUPS=[
   ['Surveillance',       ['map','analytics','leadtime','predictive','alerts','myalerts']],
   ['Coverage & equity',  ['monitoring','equity','global','tennessee']],
   ['Research & genomics',['genomics','structures']],
-  ['Data & methods',     ['audit','methods','glossary']],
+  ['Data & methods',     ['reports','audit','methods','glossary']],
   ['About',              ['about']],
 ];
 const LABEL=Object.fromEntries(VIEWS);
@@ -1356,6 +1364,221 @@ function attritionPanel(){
     <p class="note">Descriptive comparison only. A site going dormant and a county's vulnerability score are both observed; nothing here identifies why any particular site stopped reporting.</p></article>`:''}
   </div>
   ${defn}</article>`;
+}
+
+/* ---------- Data & reports ----------
+   One place to take the data away, at the scope a reader actually works in.
+   The scope decides what can be offered: lead time is computed per state and
+   resistance per treatment plant, so neither exists for a single county, and
+   the tab says so rather than quietly showing less. */
+const RSCOPE = {kind:'us', code:'', label:'United States'};
+const STATES_WITH_DATA = () => {
+  const s=new Set();
+  Object.values(D.monitoring_names||{}).forEach(n=>{if(n&&n[1])s.add(n[1])});
+  return [...s].sort((a,b)=>(STATE_NAMES[a]||a).localeCompare(STATE_NAMES[b]||b));
+};
+const inScope = f => RSCOPE.kind==='us' ? true
+  : RSCOPE.kind==='county' ? f===RSCOPE.code
+  : ((D.monitoring_names||{})[f]||[])[1]===RSCOPE.code;
+
+/* What each dataset is, and the scopes it can honestly answer. */
+const RDATA = [
+  {id:'monitoring', name:'Monitoring status by county',
+   note:'Whether a site is reporting, residents on sewers, vulnerability of the sewered area.',
+   scopes:['us','state','county']},
+  {id:'activity', name:'Current activity by county and pathogen',
+   note:'The four-week level for each pathogen, with the standardised value behind it.',
+   scopes:['us','state','county']},
+  {id:'coverage', name:'Surveillance record by county',
+   note:'Weeks of data, whether the county is analysis-ready, social vulnerability.',
+   scopes:['us','state','county']},
+  {id:'statelag', name:'Lead time by state',
+   note:'Shedding lead, reporting lag and operational lead.',
+   scopes:['us','state'], why:'computed per state, so it has no single-county value'},
+  {id:'amr_state', name:'Resistance genes by state',
+   note:'Detections summarised from treatment-plant measurements.',
+   scopes:['us','state'], why:'measured per treatment plant, not per county'},
+  {id:'urbanicity', name:'Coverage by rural-urban class',
+   note:'How much of each class the network reaches, against all U.S. counties.',
+   scopes:['us'], why:'classes are counted against every county in the country'},
+  {id:'equity', name:'Coverage by vulnerability quartile',
+   note:'Analysis-ready coverage across social vulnerability quartiles.',
+   scopes:['us'], why:'quartiles are ranked across all counties at once'},
+  {id:'audit', name:'Validation checks for this run',
+   note:'Every check the pipeline ran, and what it found.',
+   scopes:['us'], why:'checks describe the whole run, not one place'},
+];
+
+/* Rows for a dataset at the current scope. One place, so a filtered download
+   and the report it accompanies can never disagree. */
+function rRows(id){
+  const N=D.monitoring_names||{}, nm=f=>(N[f]||['',''])[0], st=f=>(N[f]||['',''])[1];
+  switch(id){
+    case 'monitoring':{
+      if(!D.monitoring) return [];
+      const L=['Wastewater here is being tested','Sewer service here, no site reporting','Few homes here are on sewers'];
+      return Object.entries(D.monitoring).filter(([f])=>inScope(f)).map(([f,v])=>({
+        county_fips:f, county_name:nm(f), state:st(f), status:L[v[0]],
+        sites_reporting:v[1], residents_on_sewers:v[2], share_on_sewers:v[3],
+        vulnerability_of_sewered_area:v[4]}));
+    }
+    case 'activity':{
+      const out=[];
+      Object.entries(D.activity||{}).forEach(([p,byF])=>
+        Object.entries(byF).filter(([f])=>inScope(f)).forEach(([f,v])=>out.push({
+          county_fips:f, county_name:nm(f)||((D.names||{})[f]||[''])[0], state:st(f),
+          pathogen:p, level:category(v[0]), activity_z:v[0], n_sites:v[1]})));
+      return out;
+    }
+    case 'coverage':
+      return Object.entries(D.coverage||{}).filter(([f])=>inScope(f)).map(([f,v])=>({
+        county_fips:f, county_name:nm(f)||((D.names||{})[f]||[''])[0], state:st(f),
+        weeks_of_data:v[0], analysis_ready:v[1], social_vulnerability:v[2]}));
+    case 'statelag':
+      return (D.statelag||[]).filter(r=>RSCOPE.kind==='us'||r.state_code===RSCOPE.code);
+    case 'amr_state':
+      return (D.amr_state||[]).filter(r=>RSCOPE.kind==='us'||r.state_code===RSCOPE.code);
+    case 'urbanicity': return D.urbanicity||[];
+    case 'equity':     return D.equity||[];
+    case 'audit':      return D.audit||[];
+    default:           return [];
+  }
+}
+const category = z => z==null?'Unknown': z<=-1?'Very Low': z<=-0.25?'Low': z<=0.25?'Typical': z<=1?'Elevated':'High';
+const rSlug = () => RSCOPE.kind==='us' ? 'united_states'
+  : (RSCOPE.label||RSCOPE.code).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+
+
+
+/* The written report. Prose, then a map and figures, each with a caption that
+   says what it shows and where it came from, because a figure separated from
+   its page has to explain itself. Rendered into the page and printed by the
+   browser: no library, and what is printed is what was checked on screen. */
+function buildReport(){
+  const out=document.getElementById('r-out'); if(!out) return;
+  const N=D.monitoring_names||{}, S=RSCOPE, mono=D.monitoring||{};
+  const nm=f=>(N[f]||['',''])[0], stOf=f=>(N[f]||['',''])[1];
+  const fips=Object.keys(mono).filter(inScope);
+  const pct=v=>v==null?'—':Math.round(v*100)+'%';
+  const nfmt=v=>v==null?'—':Number(v).toLocaleString();
+  let figN=0;
+  const fig=(id,caption)=>{figN++;return `<figure class="rfig"><div class="mapbox" id="${id}"></div>
+    <figcaption><b>Figure ${figN}.</b> ${caption}</figcaption></figure>`};
+  const figc=(id,caption)=>{figN++;return `<figure class="rfig"><div class="chart" id="${id}"></div>
+    <figcaption><b>Figure ${figN}.</b> ${caption}</figcaption></figure>`};
+
+  // --- the numbers this report rests on -------------------------------
+  const rep=fips.filter(f=>mono[f][0]===0).length,
+        svc=fips.filter(f=>mono[f][0]===1).length,
+        lim=fips.filter(f=>mono[f][0]===2).length;
+  const sewered=fips.reduce((a,f)=>a+(mono[f][2]||0),0);
+  const acts=[];
+  Object.entries(D.activity||{}).forEach(([pth,byF])=>{
+    const vals=Object.entries(byF).filter(([f])=>inScope(f)).map(([f,v])=>v[0]).filter(v=>v!=null);
+    if(vals.length) acts.push({pathogen:pth, n:vals.length,
+      mean:vals.reduce((a,b)=>a+b,0)/vals.length,
+      high:vals.filter(v=>v>1).length});
+  });
+  // Two different tables can answer "how early". LeadTime carries the three-term
+  // decomposition and is the one worth quoting; StateLag carries the best lag and
+  // its correlation. Use whichever this run produced, and say which it is, rather
+  // than printing a sentence about terms the table does not contain.
+  const lead3=(D.leadtime||[]).filter(r=>S.kind==='us'||r.state_code===S.code);
+  const lagC =(D.statelag||[]).filter(r=>S.kind==='us'||r.state_code===S.code);
+
+  // --- narrative -------------------------------------------------------
+  let lead;
+  if(S.kind==='county'){
+    const v=mono[S.code];
+    lead = !v ? `<p>No information for this county in this run.</p>`
+      : v[0]===0 ? `<p><b>Wastewater from this county is being tested.</b> ${v[1]} site${v[1]===1?'':'s'} reported results in this update. About ${pct(v[3])} of residents are served by sewers, so that is roughly the share of the county this testing can observe.</p>`
+      : v[0]===1 ? `<p><b>No site reported results from this county in this update.</b> About ${nfmt(v[2])} residents here are on sewer systems, so testing would reach a substantial part of the county.</p>`
+      : `<p><b>No site reported results from this county in this update.</b> Only about ${pct(v[3])} of residents are on sewer systems, so wastewater testing would observe a small share of this county whatever resources were applied.</p>`;
+  } else {
+    lead = `<p>Of the ${nfmt(fips.length)} counties in this area, <b>${nfmt(rep)}</b> had a site reporting wastewater results in this update. <b>${nfmt(svc)}</b> have sewer service but no site reporting, and <b>${nfmt(lim)}</b> are places where few homes are on sewers, so wastewater testing would observe a small share of residents there. About ${nfmt(Math.round(sewered))} residents in this area live in sewered areas.</p>`;
+  }
+
+  const actPara = acts.length
+    ? `<p>${acts.map(a=>`<b>${esc(a.pathogen)}</b> averaged ${a.mean.toFixed(2)} across ${a.n} count${a.n===1?'y':'ies'} with data${a.high?`, with ${a.high} at a high level`:''}`).join('; ')}.</p>
+       <p class="small">Levels compare each site with its own history, so they describe relative change rather than case counts. A value near zero is typical for that place.</p>`
+    : `<p>No county in this area reported enough recent data for an activity level in this run.</p>`;
+
+  let lagPara;
+  if(lead3.length){
+    lagPara = `<p>${lead3.slice(0,3).map(r=>`For <b>${esc(r.pathogen||'this pathogen')}</b>, wastewater rose about ${fmt(r.shedding_lead_weeks,1)} weeks before emergency-department visits, but the measurement took about ${fmt(r.reporting_lag_weeks,1)} weeks to become public, leaving an operational lead of <b>${fmt(r.operational_lead_weeks,1)} weeks</b>`).join('. ')}.</p>
+      <p class="small">Only the third figure answers whether a health department could have acted on the signal before the clinical rise. It can be zero or negative, and where it is, the signal existed but became public too late to use.</p>`;
+  } else if(lagC.length){
+    const sig=lagC.filter(r=>r.significant_fdr);
+    const show=(sig.length?sig:lagC).slice(0,3);
+    lagPara = `<p>${show.map(r=>{const w=Number(r.lag_weeks);
+        const dir = w>0?`about ${w} week${w===1?'':'s'} ahead of`: w<0?`about ${Math.abs(w)} week${Math.abs(w)===1?'':'s'} behind`:'in step with';
+        return `<b>${esc(r.pathogen)}</b> moved ${dir} emergency-department visits${r.spearman_r!=null?` (correlation ${fmt(r.spearman_r,2)}${r.significant_fdr?'':', not statistically distinguishable from no relationship'})`:''}`}).join('; ')}.</p>
+      <p class="small">This is the lag at which wastewater and clinical visits line up most closely. It describes the biology and the reporting together, and is not the same as usable warning time: a signal can lead the clinical rise and still reach the public too late to act on. The full decomposition into shedding lead, reporting lag and operational lead is on the Lead time page when this run produces it.</p>`;
+  } else {
+    lagPara = `<p class="small">No lead-time result is available for this area in this run. Nothing is estimated in its place.</p>`;
+  }
+
+  out.innerHTML=`<article class="panel c12 report" id="r-report">
+    <div class="rhead">
+      <h2>Wastewater surveillance report — ${esc(S.label)}</h2>
+      <p class="small">Run <span class="mono">${esc(R.run_id)}</span> · Data through ${esc(R.data_as_of)} · Prepared ${new Date().toISOString().slice(0,10)}</p>
+      <div class="dlrow">${dlPDF()}</div>
+    </div>
+
+    <h3>What this report covers</h3>
+    <p>This report describes what wastewater surveillance currently observes in ${esc(S.label)}, how much of the population it can observe at all, and what the figures do and do not support. Every number comes from the single weekly run named above and can be reproduced from the archive for that run.</p>
+
+    <h3>Is wastewater being tested here?</h3>
+    ${lead}
+    ${fig('rp-map', S.kind==='county'
+      ? `${esc(S.label)} shown within its state. Colour marks whether wastewater is being tested in each county, and where it is not, whether sewer service would make testing possible. Source: CDC NWSS site reports and the EPA National Sewershed Dataset.`
+      : `Counties of ${esc(S.label)} by monitoring status. Full tone marks counties where a site reported in this update; the paler tones distinguish counties with sewer service from those where few homes are on sewers. Source: CDC NWSS site reports and the EPA National Sewershed Dataset.`)}
+    ${S.kind!=='county' ? figc('rp-status', `Counties in ${esc(S.label)} by monitoring status. Read with the map above: the middle bar is the group where this method could be applied today. Source: as Figure ${figN}.`) : ''}
+
+    <h3>What the signal is showing now</h3>
+    ${actPara}
+    ${acts.length ? figc('rp-act', `Mean standardised wastewater activity by pathogen across counties with data in ${esc(S.label)}. Zero is typical for a site against its own history; positive values are above it. Source: CDC National Wastewater Surveillance System, four weeks ending ${esc(R.data_as_of)}.`) : ''}
+
+    <h3>How early the signal arrives</h3>
+    ${lagPara}
+
+    <h3>What this report does not tell you</h3>
+    <ul>
+      <li>Levels are relative to each site's own history. They are not case counts and cannot be compared between places as if they were.</li>
+      <li>Only people whose homes drain to a monitored sewer can be observed. Residents on septic systems are absent from these figures regardless of how well the system is funded.</li>
+      <li>Samples take days to be collected, tested and published, so the data-through date above is not today.</li>
+      <li>A county with no site reporting may still have a site that is operating and not reporting to the national system. Participation is voluntary.</li>
+      <li>Sewer figures come from EPA boundaries that are largely modelled, so a single county's sewer share is an estimate. Methods &amp; sources states the range.</li>
+    </ul>
+
+    <h3>Sources and citation</h3>
+    <p class="small">Wastewater and clinical data: U.S. Centers for Disease Control and Prevention. Sewer service: U.S. Environmental Protection Agency National Sewershed Dataset. Social vulnerability: CDC/ATSDR Social Vulnerability Index 2022. Rural-urban classification: USDA Economic Research Service.</p>
+    <p class="small">${CITE_LINES()[1]} ${CITE_LINES()[2]}</p>
+    <p class="note">Cite the run identifier with any figure taken from this report. The live site is rebuilt every week; the archived release for this run does not change.</p>
+  </article>`;
+
+  // --- draw the figures ------------------------------------------------
+  const SCOL=['#1d4f91','#c49a4a','#dfe4ea'];
+  const mapEl=document.getElementById('rp-map');
+  if(mapEl){
+    const pre = S.kind==='county' ? S.code.slice(0,2)
+              : S.kind==='state' ? Object.keys(mono).find(f=>stOf(f)===S.code)?.slice(0,2) : null;
+    countyMap(mapEl,
+      f=>{const v=mono[f]; if(!v) return css('--nodata');
+          if(S.kind==='county'&&f!==S.code) return '#eef1f5';
+          return SCOL[v[0]]},
+      f=>{const v=mono[f]; return `<b>${nm(f)||cname(f)}</b>${v?`<div>${['Being tested','Sewer service, no site reporting','Few homes on sewers'][v[0]]}</div>`:''}`},
+      pre?{filter:d=>String(d.id).startsWith(pre), fit:true, label:'Monitoring status map'}
+         :{label:'Monitoring status map'});
+  }
+  const se=document.getElementById('rp-status');
+  if(se) hbars(se,[{label:'Being tested',v:rep,color:SCOL[0]},
+                   {label:'Sewer service, no site',v:svc,color:SCOL[1]},
+                   {label:'Few homes on sewers',v:lim,color:'#b9c0c9'}],
+            {min:0,left:150,bh:30,fmt:v=>v.toLocaleString()});
+  const ae=document.getElementById('rp-act');
+  if(ae) hbars(ae, acts.map(a=>({label:a.pathogen,v:+a.mean.toFixed(2),color:pcol(a.pathogen)})),
+            {left:140,bh:30,fmt:v=>v.toFixed(2)});
 }
 
 const RENDER={
@@ -1962,6 +2185,78 @@ predictive(){
   <p class="note srcline"><b>Sources.</b> Features from CDC NWSS wastewater and CDC NSSP emergency-department data for the same state-weeks. Models are evaluated on later weeks they never saw. Attribution uses SHAP (Lundberg &amp; Lee, 2017). Full dataset list on <a href="#methods" data-go="methods">Methods &amp; sources</a>.</p>`;
   groupedBars(document.getElementById('p-bars'),ROUTINE.map(p=>({name:p,a:M[p].clinical_persistence_r2,b:M[p].wastewater_only_r2,c:M[p].full_model_r2})),['a','b','c'],[css('--muted'),css('--el'),css('--accent')],{labels:['Clinical only','Wastewater only','Full model'],valueLabels:true,max:1,w:1000,h:300});
   ROUTINE.forEach(p=>hbars(document.getElementById('p-shap-'+p.replace(/\W/g,'')),D.shap.filter(s=>s.pathogen===p).slice(0,8).map(s=>({label:FEAT(s.feature),v:s.mean_abs_shap,color:/^(ww_|wastewater)/.test(s.feature)?css('--el'):css('--muted')})),{left:150,w:360,bh:18,fmt:v=>v<.01?v.toFixed(3):v.toFixed(2)}));
+},
+
+reports(){
+  const el=document.getElementById('v-reports');
+  const render=()=>{
+    const states=STATES_WITH_DATA();
+    const counties=Object.keys(D.monitoring_names||{}).sort((a,b)=>{
+      const x=D.monitoring_names[a],y=D.monitoring_names[b];
+      return (x[1]||'').localeCompare(y[1]||'')||(x[0]||'').localeCompare(y[0]||'')});
+    el.innerHTML=`<div class="head"><h1>Data &amp; reports</h1><p>Take any of this away: the tables as spreadsheets, or a written report with its maps and figures. Everything carries the run it came from, so a figure can still be checked after it has been pasted into something else.</p></div>
+    <div class="grid">
+      <article class="panel c12"><header><h2>Choose an area</h2></header>
+        <form class="form" id="r-form" autocomplete="off">
+          <div class="row2">
+            <label>Area type<select id="r-kind">
+              <option value="us"${RSCOPE.kind==='us'?' selected':''}>The whole United States</option>
+              <option value="state"${RSCOPE.kind==='state'?' selected':''}>One state</option>
+              <option value="county"${RSCOPE.kind==='county'?' selected':''}>One county</option>
+            </select></label>
+            <label id="r-pick-l"${RSCOPE.kind==='us'?' hidden':''}>${RSCOPE.kind==='county'?'County':'State'}
+              <select id="r-pick">${RSCOPE.kind==='county'
+                ? counties.map(f=>{const n=D.monitoring_names[f];
+                    return `<option value="${f}"${f===RSCOPE.code?' selected':''}>${esc(n[0])}${n[1]?', '+esc(n[1]):''}</option>`}).join('')
+                : states.map(s=>`<option value="${s}"${s===RSCOPE.code?' selected':''}>${esc(STATE_NAMES[s]||s)}</option>`).join('')}</select></label>
+          </div>
+        </form>
+        <p class="small">Showing: <b id="r-label">${esc(RSCOPE.label)}</b></p>
+      </article>
+
+      <article class="panel c12"><header><h2>Written report</h2><span class="small">narrative, maps and figures, with a caption on every figure</span></header>
+        <p class="small">Opens the report below. Use <b>Save as PDF</b> on it, or your browser&rsquo;s print command, to keep a copy.</p>
+        <div><button class="btn primary" id="r-build">Build report for ${esc(RSCOPE.label)}</button></div>
+      </article>
+
+      <article class="panel c12"><header><h2>Tables</h2><span class="small">as CSV, filtered to the area above</span></header>
+        <div class="dlgrid">${RDATA.map(d=>{
+          const ok=d.scopes.includes(RSCOPE.kind);
+          const rows=ok?rRows(d.id).length:0;
+          return `<div${ok?'':' class="rdim"'}><b>${esc(d.name)}</b>
+            <p class="small">${esc(d.note)}</p>
+            ${ok ? (rows?`<button class="btn small" data-rdl="${d.id}">Download CSV · ${rows.toLocaleString()} row${rows===1?'':'s'}</button>`
+                        : `<p class="small"><b>No rows for this area in this run.</b></p>`)
+                 : `<p class="small"><b>Not available for ${RSCOPE.kind==='county'?'a single county':'one state'}</b> &mdash; ${esc(d.why||'')}.</p>`}
+          </div>`}).join('')}</div>
+        <p class="note">Each file opens with the citation, the run identifier and the data-through date on lines beginning with <span class="mono">#</span>, which pandas, R and Excel all skip. The complete archive for every run, including the pipeline tables and figures, is published at <a href="https://github.com/victorialovefranklin/nwgs-grid-site/releases" target="_blank" rel="noopener">the releases page</a>.</p>
+      </article>
+    </div>
+    <div id="r-out"></div>`;
+
+    const kind=document.getElementById('r-kind'), pick=document.getElementById('r-pick');
+    kind.onchange=()=>{
+      RSCOPE.kind=kind.value;
+      if(RSCOPE.kind==='us'){RSCOPE.code='';RSCOPE.label='United States'}
+      else if(RSCOPE.kind==='state'){RSCOPE.code=states[0];RSCOPE.label=STATE_NAMES[states[0]]||states[0]}
+      else {const f=counties[0],n=D.monitoring_names[f];RSCOPE.code=f;RSCOPE.label=`${n[0]}${n[1]?', '+n[1]:''}`}
+      render();
+    };
+    if(pick) pick.onchange=()=>{
+      RSCOPE.code=pick.value;
+      RSCOPE.label = RSCOPE.kind==='state' ? (STATE_NAMES[pick.value]||pick.value)
+        : (()=>{const n=D.monitoring_names[pick.value];return `${n[0]}${n[1]?', '+n[1]:''}`})();
+      render();
+    };
+    el.querySelectorAll('[data-rdl]').forEach(b=>b.onclick=()=>{
+      const rows=rRows(b.dataset.rdl);
+      if(!rows.length){alert('No rows for that area in this run.');return}
+      downloadCSV(rows, `${b.dataset.rdl}_${rSlug()}`);
+    });
+    document.getElementById('r-build').onclick=()=>{buildReport();
+      document.getElementById('r-out').scrollIntoView({behavior:'smooth',block:'start'})};
+  };
+  render();
 },
 
 monitoring(){
