@@ -64,16 +64,24 @@ target. Cited in the assay-target panel as the reason that layer exists.
 
 **Kim S, Zulli A, Chan EMG, Duong D, Linfield RY, McCormack C, White BJ,
 Wolfe MK, Boehm AB, Pickering AJ.** Wastewater surveillance reveals patterns of
-antibiotic resistance across the United States. *medRxiv*. 2025.
-→ https://doi.org/10.1101/2025.04.02.25325128
-**Access: Free** (preprint; also published in *Nature Communications* — cite the
-journal version once its volume and DOI are confirmed)
+antibiotic resistance across the United States. *Nature Communications*.
+2026;17:4680.
+→ https://doi.org/10.1038/s41467-026-71195-4
+**Access: Free** (open access, CC BY 4.0)
 
 Source of every figure on the resistance-gene panels. 163 treatment plants in
 39 states, eleven resistance genes measured by digital droplet PCR and
 normalised to 16S rRNA. The project stores the study's `Averaged` sheet
 unchanged; the detection calls, z-scores and outlier flags are the authors',
-not derived here. Analysis data: https://purl.stanford.edu/vb318cm9509
+not derived here.
+
+The CC BY 4.0 licence permits this reuse provided the work is credited, the
+licence is linked, and any changes are stated. The stored copy is unmodified
+apart from being re-exported at full numeric precision, which is recorded in
+`static_inputs/README.md`.
+
+Underlying data: https://doi.org/10.5281/ZENODO.18749049 (Zenodo), also at
+https://purl.stanford.edu/vb318cm9509
 
 ### Structural and sequence resources
 

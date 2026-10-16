@@ -16,7 +16,7 @@ The large files are gzipped. Every byte of the original is preserved —
 | `EPA_Sewershed_Crosswalk_tracts.csv.gz` | [EPA National Sewershed Dataset v1.2](https://github.com/USEPA/Sewersheds) | 2026-10-16 | 96,932 rows, 5.4 MB | 1.9 MB |
 | `EPA_Sewershed_Crosswalk_block_groups.csv.gz` | [EPA National Sewershed Dataset v1.2](https://github.com/USEPA/Sewersheds) | 2026-10-16 | 228,024 rows, 11.5 MB | 3.5 MB |
 | `EPA_Sewershed_Attributes.csv.gz` | [EPA National Sewershed Dataset v1.2](https://github.com/USEPA/Sewersheds), Sewersheds layer | 2026-10-16 | 17,079 rows | 0.7 MB |
-| `US_Wastewater_AMR_ARG_2024.csv` | [Kim et al. 2025](https://doi.org/10.1101/2025.04.02.25325128), `Averaged` sheet of the published manuscript data | 2026-10-16 | 1,792 rows, 163 plants, 39 states | 0.3 MB |
+| `US_Wastewater_AMR_ARG_2024.csv` | [Kim et al. 2026](https://doi.org/10.1038/s41467-026-71195-4), CC BY 4.0, `Averaged` sheet of the published manuscript data | 2026-10-16 | 1,792 rows, 163 plants, 39 states | 0.3 MB |
 | `Kim_2025_ManuscriptData.xlsx` | The same study's full workbook, archived whole: `README`, `dPCR_Conc`, `Averaged`, `Aggregated`, `Determinants` | 2026-10-16 | 4,811 dPCR rows | 0.9 MB |
 | `NWGS_ASSAY_TARGETS.template.csv` | Template for the optional curated assay-target panel | — | — | <0.1 MB |
 | `NWGS_FORECAST_LEDGER.csv` | Written back by the workflow after each run | — | grows weekly | — |

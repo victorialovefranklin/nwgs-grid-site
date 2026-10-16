@@ -16,7 +16,7 @@ and how to change any of them again.
 | Hosting | GitHub Pages, published by Actions from `site_src/template.html` |
 | `www` host | No DNS record. The apex is the only published name. |
 | Contact address on the site, README, LICENSE and CITATION | `info@nwgsgrid.com` |
-| Sending mailbox for sign-in links and alert emails | `info@nwgsgrid.com` at IONOS |
+| Sending mailbox for sign-in links and alert emails | `alerts@nwgsgrid.com` at IONOS |
 | Accounts, sign-in and alert rules | Supabase |
 
 ---
@@ -152,7 +152,7 @@ that neither looks like a stranger in the inbox.
 
 ### Creating the mailbox
 
-In IONOS, open **Email**, create the mailbox on the domain, and set a password.
+In IONOS, open **Email**, create the mailbox on the domain, and set a password. Two addresses are in use: `alerts@nwgsgrid.com` sends automated mail, and `info@nwgsgrid.com` receives it, because that is the address published on the site, in LICENSE and in CITATION.cff and set as the Reply-To. `info@` must exist as a mailbox or an alias, or replies to every alert bounce.
 The `MX` records already in the zone deliver to it; no DNS change is needed.
 
 ### Pointing Supabase at it
@@ -161,11 +161,11 @@ Authentication, Emails, **SMTP Settings**. Turn on **Enable custom SMTP** and
 fill in:
 
 ```
-Sender email address   info@nwgsgrid.com
+Sender email address   alerts@nwgsgrid.com
 Sender name            NWGS Grid
 Host                   smtp.ionos.com
 Port number            465
-Username               info@nwgsgrid.com
+Username               alerts@nwgsgrid.com
 Password               the mailbox password
 ```
 
@@ -185,7 +185,7 @@ Settings, Secrets and variables, Actions:
 
 | Secret | Value |
 |---|---|
-| `SMTP_USER` | `info@nwgsgrid.com` |
+| `SMTP_USER` | `alerts@nwgsgrid.com` |
 | `SMTP_PASSWORD` | the mailbox password |
 | `SMTP_HOST` | `smtp.ionos.com` |
 

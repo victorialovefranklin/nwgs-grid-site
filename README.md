@@ -115,7 +115,8 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
 - Database tables and security rules: `supabase/schema.sql` (run once in the SQL Editor).
 - Weekly alert emails: `scripts/send_alerts.py`, run by the workflow after each passing run.
   Secrets: `SUPABASE_SECRET_KEY`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_HOST` when the
-  mailbox is not on the default host. The sending mailbox is `info@nwgsgrid.com`.
+  mailbox is not on the default host. Automated mail is sent from `alerts@nwgsgrid.com`;
+  `info@nwgsgrid.com` is the contact address and the Reply-To, so both mailboxes must exist.
 - Sign-in links are sent by Supabase itself, not by this repository, so its own SMTP settings
   and redirect URLs have to be configured too. Both are in
   [docs/DOMAIN_AND_EMAIL.md](docs/DOMAIN_AND_EMAIL.md).
