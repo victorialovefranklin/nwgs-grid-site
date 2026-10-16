@@ -5161,10 +5161,13 @@ def _rcsb_uniprot_entity_alignment(accession):
     RCSB 1D-coordinates alignment: UniProt sequence positions -> PDB entity
     (label_seq_id) positions, per aligned block.
     """
+    # RCSB renamed both fields to plurals; the previous names now fail schema
+    # validation with "Field 'alignment' in type 'Query' is undefined", which
+    # this function used to discard, recording every feature as NO_ALIGNMENT.
     query = """
     query Align($id: String!){
-      alignment(from: UNIPROT, to: PDB_ENTITY, queryId: $id) {
-        target_alignment {
+      alignments(from: UNIPROT, to: PDB_ENTITY, queryId: $id) {
+        target_alignments {
           target_id
           aligned_regions { query_begin query_end target_begin target_end }
         }
@@ -5177,8 +5180,19 @@ def _rcsb_uniprot_entity_alignment(accession):
                               "User-Agent": "NWGS-Grid-Research/5.21"},
                      timeout=90)
     if not r.ok:
+        print(f"[UNIPROT] RCSB alignment HTTP {r.status_code} for {accession}: "
+              f"{r.text[:300]}")
+        record_source("RCSB 1D-coordinates alignment", "FAILED",
+                      f"HTTP {r.status_code} for {accession}", RCSB_SEQUENCE_COORDINATES)
         return {}
-    return parse_rcsb_alignment(r.json())
+    payload = r.json()
+    if payload.get("errors"):
+        msg = "; ".join(str(e.get("message", e))[:200] for e in payload["errors"][:2])
+        print(f"[UNIPROT] RCSB alignment rejected the query for {accession}: {msg}")
+        record_source("RCSB 1D-coordinates alignment", "FAILED",
+                      f"GraphQL error for {accession}: {msg}", RCSB_SEQUENCE_COORDINATES)
+        return {}
+    return parse_rcsb_alignment(payload)
 
 
 def parse_rcsb_alignment(payload):
@@ -5186,7 +5200,8 @@ def parse_rcsb_alignment(payload):
     out = {}
     if payload.get("errors"):
         return out
-    targets = (((payload.get("data") or {}).get("alignment") or {}).get("target_alignment") or [])
+    data = (payload.get("data") or {}).get("alignments") or (payload.get("data") or {}).get("alignment") or {}
+    targets = data.get("target_alignments") or data.get("target_alignment") or []
     for tgt in targets:
         tid = tgt.get("target_id")
         if not tid:
