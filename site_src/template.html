@@ -552,6 +552,35 @@ tr.unsup td{opacity:.62}
 .ansbox .chip{display:inline-block;margin-bottom:var(--sp-2)}
 .ansbox .ans-lead{margin:0 0 var(--sp-2)}
 .ansbox .sspec{margin:0}
+.dlrow{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+header .dlrow{align-self:center}
+.head .dlrow{margin-top:var(--sp-2)}
+.dlgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:var(--sp-2);margin:var(--sp-2) 0}
+.dlgrid>div{border:1px solid var(--line);border-radius:8px;padding:var(--sp-2)}
+.dlgrid p{margin:4px 0 10px}
+/* Printing. The browser's "Save as PDF" is the PDF export: no library, no
+   server, and what you see is what you get. Navigation and controls are
+   dropped, the citation block is revealed, and panels are kept off page
+   boundaries so a table does not split across a break. */
+.printonly{display:none}
+@media print{
+  :root{--bg:#fff;--surface:#fff}
+  header.site, .navbar, .navmenu, .menubtn, .btn, .qmark, .dl,
+  .skip, footer .nav, #tip{display:none !important}
+  body{background:#fff;font-size:11pt}
+  .view[hidden]{display:none !important}
+  .printonly{display:block;margin:0 0 14pt;padding:0 0 8pt;border-bottom:1pt solid #203047}
+  .printonly h1{font-size:14pt;margin:0 0 4pt}
+  .printonly p{font-size:9pt;margin:2pt 0}
+  .panel{break-inside:avoid;page-break-inside:avoid;border:1pt solid #dde2e9;box-shadow:none}
+  .grid{display:block}
+  .grid>*{margin-bottom:10pt}
+  table{font-size:9pt}
+  .mapbox,.chart{break-inside:avoid;page-break-inside:avoid}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;word-break:break-all}
+  a[data-go]::after{content:""}
+}
+
 
 @media (max-width:980px){.metric-value{font-size:2.1rem}}
 
@@ -692,6 +721,12 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-analytics" hidden></section>
     <section class="view" id="v-leadtime" hidden></section>
     <section class="view" id="v-predictive" hidden></section>
+    <div class="printonly" aria-hidden="true">
+      <h1>NWGS Grid™ — National Wastewater Genomic Surveillance Grid</h1>
+      <p id="pr-run"></p>
+      <p>Franklin, V. L. NWGS Grid™: National Wastewater Genomic Surveillance Grid [Software and web dashboard]. https://nwgsgrid.com</p>
+      <p>© Victoria Love Franklin. All rights reserved. Citation required; see LICENSE. Cite the run identifier above with any figure.</p>
+    </div>
     <section class="view" id="v-monitoring" hidden></section>
     <section class="view" id="v-equity" hidden></section>
     <section class="view" id="v-global" hidden></section>
@@ -874,7 +909,110 @@ function groupedBars(el, groups, keys, colors, o={}){
     if(o.valueLabels) svg.append('text').attr('x',x0(g.name)+x1(k)+x1.bandwidth()/2).attr('y',v>=0?yy-4:yy+h+11).attr('text-anchor','middle').text(fmt(v,2)).attr('font-family','var(--mono)').style('font-size','10px');
   }));
 }
+const _prRun=()=>{const e=document.getElementById('pr-run');
+  if(e) e.textContent=`Run ${R.run_id} · Data through ${R.data_as_of} · Printed ${new Date().toISOString().slice(0,10)}`};
 const legend = items => `<div class="legend">${items.map(([c,l])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')}</div>`;
+
+/* ---------- downloads ----------
+   Every file carries the citation and the run it came from. A table that
+   leaves this site without its run identifier cannot be checked later, which
+   is the one thing the whole project is built to make possible. The header
+   lines start with # so pandas, R and Excel can all skip them.          */
+const CITE_LINES = () => [
+  `NWGS Grid™ — National Wastewater Genomic Surveillance Grid`,
+  `Franklin, V. L. (${new Date(R.data_pulled_utc).getUTCFullYear()}). NWGS Grid™: National Wastewater Genomic Surveillance Grid`,
+  `[Software and web dashboard]. Run ${R.run_id}. https://nwgsgrid.com`,
+  `Run: ${R.run_id} · Data through: ${R.data_as_of} · Downloaded: ${new Date().toISOString().slice(0,10)}`,
+  `© ${new Date().getUTCFullYear()} Victoria Love Franklin. All rights reserved. Citation required; see LICENSE.`,
+];
+const csvCell = v => {
+  if(v===null||v===undefined) return '';
+  const s=String(v);
+  return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+};
+function toCSV(rows, cols){
+  if(!rows||!rows.length) return '';
+  const keys = cols || Object.keys(rows[0]);
+  const head = CITE_LINES().map(l=>'# '+l).join('\n')+'\n';
+  return head + keys.join(',') + '\n'
+       + rows.map(r=>keys.map(k=>csvCell(r[k])).join(',')).join('\n') + '\n';
+}
+function downloadCSV(rows, slug, cols){
+  const csv = toCSV(rows, cols);
+  if(!csv){alert('Nothing to download from this table in this run.');return}
+  const name = `nwgs_${slug}_${R.run_id}.csv`;
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()}, 0);
+}
+/* Buttons are wired by delegation so a view can render one without having to
+   remember to attach a handler after each rerender. */
+const dlCSV = (slug, label) => {
+  // Rendered only when the route actually has rows. A button that explains
+  // itself with an alert after being pressed is worse than no button.
+  const r = dlRows(slug);
+  return (r && r.length)
+    ? `<button class="btn small dl" data-dl="${esc(slug)}">${esc(label||'Download CSV')}</button>`
+    : '';
+};
+const dlPDF = () =>
+  `<button class="btn small dl" data-pdf="1" title="Opens your browser's print dialog; choose Save as PDF">Save as PDF</button>`;
+
+/* What each download slug exports. Kept in one place so the citation, the
+   column order and the row source cannot drift apart between views. */
+function dlRows(slug){
+  const N = D.monitoring_names || {};
+  switch(slug){
+    case 'monitoring': {
+      if(!D.monitoring) return null;
+      const L=['Wastewater here is being tested','Sewer service here, no site reporting','Few homes here are on sewers'];
+      return Object.entries(D.monitoring).map(([f,v])=>({
+        county_fips:f, county_name:(N[f]||['',''])[0], state:(N[f]||['',''])[1],
+        status:L[v[0]], sites_reporting:v[1], residents_on_sewers:v[2],
+        share_on_sewers:v[3], vulnerability_of_sewered_area:v[4]}));
+    }
+    case 'urbanicity':  return D.urbanicity||null;
+    case 'audit':       return D.audit||null;
+    case 'equity':      return D.equity||null;
+    case 'global':      return D.global_coverage||null;
+    case 'leadtime':    return D.leadtime||null;
+    default:            return null;
+  }
+}
+
+function downloadFigure(btn){
+  const host = btn.closest('.panel, article, section') || document;
+  const svg = (btn.dataset.fig && document.getElementById(btn.dataset.fig)?.querySelector('svg'))
+            || host.querySelector('.mapbox svg, .chart svg, svg');
+  if(!svg){alert('There is no figure on this panel to save yet.');return}
+  const clone = svg.cloneNode(true);
+  clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  if(!clone.getAttribute('viewBox')&&svg.viewBox?.baseVal)
+    clone.setAttribute('viewBox',`0 0 ${svg.viewBox.baseVal.width} ${svg.viewBox.baseVal.height}`);
+  // Credit travels with the picture: an exported figure separated from this
+  // site must still say which run produced it.
+  const t=document.createElementNS('http://www.w3.org/2000/svg','title');
+  t.textContent=`NWGS Grid™ — run ${R.run_id}, data through ${R.data_as_of} — © Victoria Love Franklin — https://nwgsgrid.com`;
+  clone.insertBefore(t, clone.firstChild);
+  const cmt=document.createComment(` ${CITE_LINES().join(' | ')} `);
+  const blob=new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n',cmt.data?`<!--${cmt.data}-->\n`:'',
+                       new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`nwgs_${(btn.dataset.figname||'figure')}_${R.run_id}.svg`;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
+}
+const dlFig = (name, id) =>
+  `<button class="btn small dl" data-figdl="1" data-figname="${esc(name)}"${id?` data-fig="${esc(id)}"`:''}>Save figure (SVG)</button>`;
+document.addEventListener('click', e=>{
+  const f=e.target.closest('[data-figdl]'); if(f){downloadFigure(f);return}
+  const c=e.target.closest('[data-dl]'); if(c){const rows=dlRows(c.dataset.dl);
+    if(!rows||!rows.length){alert('That table has no data in this run, so there is nothing to download.');return}
+    downloadCSV(rows, c.dataset.dl); return}
+  if(e.target.closest('[data-pdf]')) window.print();
+});
 const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodata'),'No recent data']]);
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
@@ -1165,7 +1303,7 @@ function urbanicityPanel(){
   const metroUS=pct(sum(metro,'n_us_counties'),nUS);
   const metroReach=pct(sum(metro,'n_counties_surveilled'),sum(metro,'n_us_counties'));
   const nonReach=pct(sum(non,'n_counties_surveilled'),sum(non,'n_us_counties'));
-  return `<article class="panel c12"><header><h2>Urbanicity <button class="qmark" data-gloss="rucc" aria-label="What is a Rural-Urban Continuum Code?">?</button></h2><span class="small">the second equity axis, checked against a published figure</span></header>
+  return `<article class="panel c12"><header><span class="dlrow">${dlCSV('urbanicity')}</span><h2>Urbanicity <button class="qmark" data-gloss="rucc" aria-label="What is a Rural-Urban Continuum Code?">?</button></h2><span class="small">the second equity axis, checked against a published figure</span></header>
   <div class="statgrid">
     <div class="stat"><span class="label">Metropolitan share of the surveilled network</span><span class="big">${metroNet!=null?fmt(metroNet,1)+'%':'—'}</span></div>
     <div class="stat"><span class="label">Metropolitan share of all counties</span><span class="big">${metroUS!=null?fmt(metroUS,1)+'%':'—'}</span></div>
@@ -1174,6 +1312,7 @@ function urbanicityPanel(){
   </div>
   ${D.rucc_by_fips?`<h3 class="ov-sub">Where the classes are, and which counties are reached</h3>
   <div class="mapbox" id="u-map"></div>
+  ${dlFig('urbanicity_map','u-map')}
   ${legend([[UCOL[0][0],'Metro, reached'],[UCOL[0][1],'Metro, not reached'],
             [UCOL[1][0],'Nonmetro urban 20,000+, reached'],[UCOL[1][1],'Nonmetro urban 20,000+, not reached'],
             [UCOL[2][0],'Nonmetro urban under 20,000, reached'],[UCOL[2][1],'Nonmetro urban under 20,000, not reached'],
@@ -1734,7 +1873,7 @@ analytics(){
 
 leadtime(){
   const el=document.getElementById('v-leadtime');
-  const head=`<div class="head"><h1>Lead time, decomposed <button class="qmark" data-gloss="operational-lead" aria-label="What does operational lead mean?">?</button></h1>
+  const head=`<div class="head"><h1>Lead time, decomposed <button class="qmark" data-gloss="operational-lead" aria-label="What does operational lead mean?">?</button></h1><p class="dlrow">${dlCSV('leadtime','Download lead-time table (CSV)')} ${dlPDF()}</p>
     <p class="muted">Early warning is usually reported as one number. It is actually three, and only the third one tells a health department whether the signal arrived in time to act on.</p></div>
   <article class="panel c12 plain">
     <p>People shed viruses into wastewater before they feel sick enough to go to a hospital. That is the promise of this method: sewage can show an outbreak building before clinics do. The usual way of saying this is “wastewater gives one to three weeks of warning.”</p>
@@ -1880,7 +2019,7 @@ monitoring(){
     <div id="mon-answer"><p class="small">Pick a county above, or select one on the map.</p></div>
   </article>
 
-  <article class="panel c12"><header><h2>The national picture</h2></header>
+  <article class="panel c12"><header><h2>The national picture</h2><span class="dlrow">${dlCSV('monitoring','Download county table (CSV)')} ${dlPDF()}</span></header>
     ${NAT?`<div class="statgrid">
       <div class="stat"><span class="label">Counties where wastewater is being tested</span><span class="big">${num(NAT.counties_reporting)}</span><span class="small">of ${num(NAT.counties_total)}</span></div>
       <div class="stat"><span class="label">Counties with sewer service and no site reporting</span><span class="big">${num(NAT.counties_sewer_service_no_site)}</span></div>
@@ -1888,6 +2027,7 @@ monitoring(){
       <div class="stat"><span class="label">Residents on sewers in counties with no site reporting</span><span class="big">${NAT.sewered_population_without_site!=null?(Math.round(NAT.sewered_population_without_site/1e6)+' million'):'—'}</span></div>
     </div>`:''}
     <div class="mapbox" id="mon-map"></div>
+    ${dlFig('monitoring_map','mon-map')}
     ${legend([[SCOL[0],SLABEL[0]],[SCOL[1],SLABEL[1]],[SCOL[2],SLABEL[2]],[css('--nodata'),'Not classified']])}
     <p class="small">Most places where wastewater is not being tested do have sewers. That matters, because it means the limit is usually not the method. Wastewater testing can only see people whose homes drain to a sewer, and in counties shown in pale grey that is a small share of residents whatever is spent.</p>
     <p class="note"><b>This is a description, not a scorecard.</b> Taking part in national wastewater surveillance is voluntary, and there are sound reasons a county may not: the cost of sampling and laboratory work, distance from a laboratory, staffing, or a treatment plant too small to sample usefully. A site may also be operating and simply not reporting to the national system. Nothing here says that any county, utility or health department has fallen short.</p>
@@ -1920,7 +2060,7 @@ equity(){
   const g=D.equity[0];const sig=g.glm_p_value<.05;
   const line=sig?(g.glm_odds_ratio<1?'More socially vulnerable counties are less likely to have analysis-ready wastewater surveillance.':'More socially vulnerable counties are more likely to have analysis-ready surveillance.'):'No clear difference by social vulnerability.';
   el.innerHTML=`<div class="head"><h1>Coverage & equity</h1><p class="muted">Who the wastewater system reaches, measured on two axes: the CDC/ATSDR Social Vulnerability Index and USDA rural-urban classification.</p></div>
-  <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
+  <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2><span class="dlrow">${dlCSV('equity')} ${dlPDF()}</span></header><div class="chart" id="e-bars"></div>
     <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
   <article class="panel c12"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
     <p style="font-weight:600">${line}</p>
@@ -1969,7 +2109,7 @@ equity(){
 
 global(){
   const el=document.getElementById('v-global');
-  const head=`<div class="head"><h1>Global coverage <button class="qmark" data-gloss="global-coverage" aria-label="What does global coverage mean?">?</button></h1>
+  const head=`<div class="head"><h1>Global coverage <button class="qmark" data-gloss="global-coverage" aria-label="What does global coverage mean?">?</button></h1><p class="dlrow">${dlCSV('global','Download country table (CSV)')} ${dlPDF()}</p>
     <p class="muted">Wastewater surveillance can only ever see people whose waste reaches a monitored sewer. This page asks a different question from the rest of the site: not “what is rising,” but “who could this method ever detect in the first place?”</p></div>
   <article class="panel c12 plain">
     <p>Testing sewage for disease works by catching what a community flushes. If a household is not connected to a sewer system, whether it uses a pit latrine, a septic tank or no sanitation at all, nothing that household sheds ever arrives at a treatment plant, so no amount of testing will ever detect it.</p>
@@ -2287,7 +2427,8 @@ about(){
   <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><div class="why-body"><h2>Why I built NWGS Grid™</h2>
     <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor. But that signal is scattered across separate CDC datasets, clinical feeds and vulnerability indices, it changes every week, and it reaches some communities far better than others.</p>
     <p>I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses. <b>It is independent work.</b> I built every part of it, the pipeline, the validation checks, the weekly automation and this site, outside any employer, fellowship or sponsored program, using only public data.</p>
-    <p>That last one is personal: in my home state of Tennessee, ${tnNow} of 95 counties report wastewater data to CDC today.&nbsp;<span class="sig">— Victoria</span></p></div></article>
+    <p>Knowing which places are missed is not the same as knowing why, so the site measures that too. Of the counties where no site is reporting, <b>most already have sewer systems</b> &mdash; the limit is usually not the method. Only a small number are places where wastewater testing could never see many residents.</p>
+    <p>In Tennessee, where I live and study, ${tnNow} of 95 counties report wastewater data to CDC today.&nbsp;<span class="sig">— Victoria</span></p></div></article>
   <article class="panel c12"><h2>Credentials &amp; affiliations</h2>
     <h3>Education &amp; training</h3>
     <ul class="creds">
@@ -2469,7 +2610,7 @@ audit(){
   el.innerHTML=`<div class="head"><h1>Audit log</h1><p class="muted">Every validation check from this run. The app only updates when no check fails.</p></div>
   <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono" style="font-size:.86rem;line-height:1.5">${[[R.n_pass,'pass'],[R.n_warning,'warn'],...(R.n_info?[[R.n_info,'info']]:[]),[R.n_fail,'fail']].map(([n,w])=>`<span style="white-space:nowrap">${n}&nbsp;${w}</span>`).join(' · ')}</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
   ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
-  <article class="panel"><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
+  <article class="panel"><header><h2>Every check in this run</h2><span class="dlrow">${dlCSV('audit','Download audit log (CSV)')} ${dlPDF()}</span></header><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
   ${D.audit.map(a=>{const phil=/PHIL/.test(a.component)&&/PARTIAL_IMAGES/.test(a.status);return `<tr><td class="lead">${esc(a.component)}</td><td class="status-${phil?'INFO':cls(a.status)}" style="white-space:nowrap;font-weight:600">${phil?'INFO · OPTIONAL':esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}${phil?'. Optional photos from CDC’s image library (PHIL), which blocks automated downloads; no analysis uses them.':''}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`}).join('')}</table></div></article>
   <p class="note srcline"><b>Sources.</b> Checks are generated by the pipeline itself during the run (validation summary and per-table audits), together with export-time consistency checks that confirm every table in this build came from the same run. Nothing on this page is entered by hand. The run identifier and data-through date shown in the header identify the snapshot these results describe, and each week&rsquo;s log is archived with its tables and figures as a permanent release.</p>`;
 },
@@ -2584,6 +2725,18 @@ methods(){
   const el=document.getElementById('v-methods');
   const acc=new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   el.innerHTML=`<div class="head"><h1>Methods &amp; sources</h1><p class="muted">How the numbers on this site are made, and every dataset and tool they come from.</p></div>
+  <article class="panel c12"><header><h2>Download the data</h2><span class="small">everything on this page, and the full archive</span></header>
+    <p>Every table below is the one this run produced. Each file carries the citation, the run identifier and the data-through date in its opening lines, so a figure can still be traced back after it has been pasted into something else. Those lines begin with <span class="mono">#</span>, which pandas, R and Excel all skip.</p>
+    <div class="dlgrid">
+      <div><b>Where monitoring happens</b><p class="small">Every county: whether a site is reporting, residents on sewers, and vulnerability inside the sewered area.</p>${dlCSV('monitoring','County table (CSV)')}</div>
+      <div><b>Urbanicity</b><p class="small">Coverage by rural-urban class, against all U.S. counties.</p>${dlCSV('urbanicity','Urbanicity table (CSV)')}</div>
+      <div><b>Coverage &amp; equity</b><p class="small">Analysis-ready coverage by social vulnerability quartile.</p>${dlCSV('equity','Equity table (CSV)')}</div>
+      <div><b>Lead time</b><p class="small">Shedding lead, reporting lag and operational lead by state and pathogen.</p>${dlCSV('leadtime','Lead-time table (CSV)')}</div>
+      <div><b>Global coverage</b><p class="small">Sewer-connected share and observable population by country.</p>${dlCSV('global','Country table (CSV)')}</div>
+      <div><b>Audit log</b><p class="small">Every validation check from this run, with its outcome.</p>${dlCSV('audit','Audit log (CSV)')}</div>
+    </div>
+    <p class="small">Any page can be saved as a PDF with the <b>Save as PDF</b> button on it, or your browser&rsquo;s print command. The saved file carries the same citation and run identifier.</p>
+    <p class="note"><b>The complete archive.</b> These downloads hold what this page is showing. Every weekly run also publishes a permanent release with the full set of pipeline tables, the figures, the whole app export, the manifest and the run log: <a href="https://github.com/victorialovefranklin/nwgs-grid-site/releases" target="_blank" rel="noopener">github.com/victorialovefranklin/nwgs-grid-site/releases</a>. Cite the release your numbers came from, not the live site, because the live site moves every week and the release does not.</p></article>
   <article class="panel c12"><header><h2>Materials and methods</h2><span class="small muted">what the pipeline does, in order</span></header>
     <p>Every figure on this site is produced by one automated pipeline that runs weekly and rebuilds the whole site from a single frozen snapshot. The steps below run in this order; each is recorded in the run log, and the <a href="#audit" data-go="audit">Audit log</a> reports the result of every check.</p>
     <ol class="methodsteps">
@@ -2664,6 +2817,7 @@ drawAcct();
 let start=location.hash.slice(1);
 if(!start){try{start=localStorage.getItem('nwgs_view')||''}catch(e){}}
 go(start||'dashboard',false);
+_prRun();
 addEventListener('hashchange',()=>go(location.hash.slice(1),false));
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{Object.keys(built).forEach(k=>delete built[k]);go(location.hash.slice(1)||'dashboard',false)});
 new MutationObserver(()=>{Object.keys(built).forEach(k=>delete built[k]);go(location.hash.slice(1)||'dashboard',false)}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
