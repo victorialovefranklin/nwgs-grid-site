@@ -12,13 +12,13 @@ queried at page load: every figure is precomputed, so any page can be reproduced
 the archived release for its run. `scripts/build_site.py` substitutes one JSON payload into
 `site_src/template.html` and writes `site/index.html`.
 
-**Seventeen views, grouped into six sections in the header:**
+**Eighteen views, grouped into six sections in the header:**
 
 | Section | Views |
 |---|---|
 | Overview | Start here · Dashboard |
 | Surveillance | Surveillance map · Trends & timing · Lead time · Predictive models · Alerts · My alerts |
-| Coverage & equity | Coverage & equity · Global coverage · Tennessee |
+| Coverage & equity | Where monitoring happens · Coverage & equity · Global coverage · Tennessee |
 | Research & genomics | Genomics & AMR · Protein structures |
 | Data & methods | Audit log · Methods & sources · Glossary |
 | About | About the developer |
@@ -46,7 +46,7 @@ the theme tokens in full.
 
 **Author:** Victoria Love Franklin · Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
 
-**Contact, license requests and beta feedback:** victorialovefranklin@gmail.com
+**Contact, license requests and beta feedback:** info@nwgsgrid.com
 
 **Copyright © 2026 Victoria Love Franklin. All rights reserved.** No reuse without written
 permission; see [LICENSE](LICENSE). To cite, use **Cite this repository** on GitHub (from
@@ -72,6 +72,13 @@ actually does rather than what it did when someone last wrote them down.
 | [Dashboard audit](docs/DASHBOARD_AUDIT.md) | Review and record | Per-run audit: what the dashboard collects, validates, publishes and cannot claim |
 
 Each one is also kept as a Word file in `docs/`, named `NWGS_Grid_<DOCUMENT>.docx`.
+
+One document is hand-maintained rather than generated, because it records how
+external services are configured rather than what the code does:
+
+| Document | For | Covers |
+|---|---|---|
+| [Domain, email and sign-in](docs/DOMAIN_AND_EMAIL.md) | Whoever operates it | The custom domain end to end, the sending mailbox, Supabase redirects, and the registrar behaviour that makes each of them fail |
 
 Regenerate all of them from any run's export:
 
@@ -107,7 +114,11 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
 (`site_src/supabase.json` holds its public URL and publishable key; both are safe to publish).
 - Database tables and security rules: `supabase/schema.sql` (run once in the SQL Editor).
 - Weekly alert emails: `scripts/send_alerts.py`, run by the workflow after each passing run.
-  Secrets: `SUPABASE_SECRET_KEY`, `SMTP_USER`, `SMTP_PASSWORD` (Gmail App Password).
+  Secrets: `SUPABASE_SECRET_KEY`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_HOST` when the
+  mailbox is not on the default host. The sending mailbox is `info@nwgsgrid.com`.
+- Sign-in links are sent by Supabase itself, not by this repository, so its own SMTP settings
+  and redirect URLs have to be configured too. Both are in
+  [docs/DOMAIN_AND_EMAIL.md](docs/DOMAIN_AND_EMAIL.md).
 - Read feedback and license requests in Supabase → **Table Editor**.
 
 ## One-time setup
@@ -120,9 +131,11 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
    - `SUPABASE_SECRET_KEY`, `SMTP_USER`, `SMTP_PASSWORD` (weekly alert email)
 4. Custom domain. `site_src/CNAME` contains `nwgsgrid.com` and the build copies it into the
    published output, so the domain survives every deploy. To change or remove it, edit that
-   file. Also set the same domain under **Settings → Pages**, point the DNS at GitHub Pages
-   (four A records for the apex, plus a CNAME for `www`), and add the domain to Supabase under
-   **Authentication → URL Configuration**, or sign-in links will keep pointing at the old host.
+   file. Three things have to agree: that file, **Settings → Pages**, and four `A` records on
+   the apex at the DNS host. Nothing is published on `www`. Sign-in also needs the domain
+   added to Supabase under **Authentication → URL Configuration**, or links keep pointing at
+   the old host. Full procedure, including the registrar behaviour that breaks it:
+   [docs/DOMAIN_AND_EMAIL.md](docs/DOMAIN_AND_EMAIL.md).
 
 ## Folders
 | Path | Contents |
@@ -130,12 +143,33 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
 | `pipeline/` | The surveillance script (`nwgs_pipeline.py`) |
 | `scripts/` | Export (validation gate), site build, alert emails, documentation generators |
 | `site_src/` | Page template, images and U.S. county map (us-atlas, ISC license) |
-| `static_inputs/` | Files the pipeline doesn't download (SVI, AMR, forecast ledger seed); TIGER is downloaded each run |
+| `static_inputs/` | Files the pipeline doesn't download: SVI county and tract, USDA rural-urban codes, EPA sewershed crosswalks, AMR panel, forecast ledger seed. Provenance and caveats in `static_inputs/README.md`; TIGER is downloaded each run |
 | `supabase/` | Database tables and security rules for accounts and alerts |
 | `docs/` | Generated documentation (see above), in Markdown and Word |
+| `references/` | Every source the project cites, with links and access terms, plus BibTeX for manuscripts |
 | `sample_export/` | A saved export, used as a fixture for running the scripts offline |
 | `LICENSE`, `CITATION.cff` | Copyright terms and citation details |
 | `.gitattributes` | Pins LF line endings, so a Windows round-trip cannot rewrite every line of a data file |
+
+## Urbanicity layer
+`load_rucc()` and `rucc_coverage()` join USDA Economic Research Service
+[Rural-Urban Continuum Codes](https://www.ers.usda.gov/data-products/rural-urban-continuum-codes)
+(2023 vintage) to the county surveillance roster, giving coverage equity a second axis beside
+social vulnerability: codes 1–3 metropolitan, 4–9 nonmetropolitan graded by urban population
+and metro adjacency. Results go to `Table06d_RUCC_County_Coverage.csv`, and county identifiers
+the national county file does not contain go to `Table06e_RUCC_Unmatched_Counties.csv` rather
+than being dropped — a retired or invalid FIPS is worth seeing.
+
+Two properties of the published file are handled rather than assumed: it is distributed in
+Windows-1252, not UTF-8, because seventeen county names carry accented characters, and it is in
+long form with three rows per county, so it is pivoted before the join. The file is committed to
+`static_inputs/` rather than downloaded each run, because the published download URL carries a
+cache-busting token that changes when ERS republishes; the codes are revised about once a
+decade, so pinning the file also freezes provenance for every release.
+
+Because CDC's own description of NWSS reports the same metropolitan split, the result is
+checkable against a published figure rather than standing alone. The page states both numbers
+and says why they are not expected to match exactly.
 
 ## Structural annotation layer
 `pull_uniprot_functional_regions()` in the pipeline imports UniProtKB's curated feature table

@@ -159,7 +159,7 @@ jobs:
             echo
             echo "**Prepared by ${CREDIT_LINE}**"
             echo
-            echo "Contact, license requests and feedback: victorialovefranklin@gmail.com"
+            echo "Contact, license requests and feedback: info@nwgsgrid.com"
             echo
             echo "- Run ID: \`${RUN_ID}\`"
             echo "- Data through: ${AS_OF}"

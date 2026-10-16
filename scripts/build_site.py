@@ -133,16 +133,42 @@ def main(export_dir, site_dir):
     D["structures"] = recs(r("ProteinStructure"))
     sr_path = Path(export_dir) / "StructuralRegion.csv"
     if sr_path.exists():
-        sr = pd.read_csv(sr_path)
-        sr = sr[sr["mapping_status"].eq("MAPPED")] if "mapping_status" in sr else sr
+        sr_all = pd.read_csv(sr_path)
+        # The page shows only regions that could be placed on this structure's
+        # own residue numbering, but a count of those alone is unreadable: a
+        # reviewer cannot tell whether it is all of UniProt's annotations or
+        # some fraction. Carry the denominator and the reason for each
+        # omission, and keep the two reasons apart, because they are not the
+        # same claim. NOT_IN_STRUCTURE is a fact about the deposited model:
+        # UniProt annotates those residues, this entry does not resolve them.
+        # NO_ALIGNMENT is a limitation of our own mapping: no alignment was
+        # returned, so nothing can be said either way. Reporting the second
+        # as the first would dress a failed lookup up as biology.
+        if "mapping_status" in sr_all:
+            ms = sr_all["mapping_status"].astype(str)
+            D["regions_counts"] = {
+                p: {"total": int(len(q)),
+                    "mapped": int(q["mapping_status"].astype(str).eq("MAPPED").sum()),
+                    "not_in_structure": int(q["mapping_status"].astype(str).eq("NOT_IN_STRUCTURE").sum()),
+                    "no_alignment": int(q["mapping_status"].astype(str).eq("NO_ALIGNMENT").sum())}
+                for p, q in sr_all.groupby("pdb_entry_id")
+            }
+            sr = sr_all[ms.eq("MAPPED")]
+        else:
+            D["regions_counts"] = {}
+            sr = sr_all
         cols = ["feature_type", "feature_description", "uniprot_accession", "uniprot_start", "uniprot_end",
                 "pdb_chain", "pdb_start", "pdb_end", "evidence_count", "annotation_source_url"]
         D["regions"] = {p: recs(q[[c for c in cols if c in q.columns]])
                         for p, q in sr.groupby("pdb_entry_id")} if len(sr) else {}
-        D["regions_review"] = (str(sr["expert_review_status"].iloc[0])
-                               if len(sr) and "expert_review_status" in sr else None)
+        # Review status is a property of the whole imported set, so read it
+        # from the full table rather than from the mapped subset, which can be
+        # empty in a run where no alignment was returned.
+        D["regions_review"] = (str(sr_all["expert_review_status"].iloc[0])
+                               if len(sr_all) and "expert_review_status" in sr_all else None)
     else:
         D["regions"] = {}
+        D["regions_counts"] = {}
         D["regions_review"] = None
     # ------------------------------------------------------------
     # Surveillance-gap analytics (pipeline section 21c / export v5.22+).
@@ -185,6 +211,55 @@ def main(export_dir, site_dir):
         "state_monitored_svi", "svi_gap", "representativeness", "representativeness_tier"])
     D["rep_national"] = opt("RepresentativenessNational", how="first")
     D["assay_targets"] = opt("AssayTarget")
+    # Monitoring status, packed as {fips: [status, sites, sewered_pop,
+    # sewer_share, sewered_svi]} so the county lookup can answer instantly
+    # without shipping a second copy of the county roster.
+    mp = Path(export_dir) / "MonitoringStatus.csv"
+    if mp.exists():
+        try:
+            md = pd.read_csv(mp, dtype={"county_fips": str}, low_memory=False)
+            md["county_fips"] = md["county_fips"].str.zfill(5)
+            CODE = {"REPORTING": 0, "SEWER_SERVICE_NO_SITE": 1, "LIMITED_SEWER_SERVICE": 2}
+            D["monitoring"] = {
+                r.county_fips: [CODE.get(str(r.monitoring_status), 2),
+                                int(r.n_sites_reporting or 0),
+                                int(round(float(r.sewered_population or 0))),
+                                R(r.sewer_share), R(r.sewered_svi)]
+                for r in md.itertuples()
+            }
+            D["monitoring_names"] = {r.county_fips: [str(r.county_name or ""), str(r.state_code or "")]
+                                     for r in md.itertuples()}
+        except Exception as exc:
+            print(f"[WARN] MonitoringStatus.csv unreadable ({exc}); the lookup will report it as unavailable.")
+            D["monitoring"] = None
+            D["monitoring_names"] = None
+    else:
+        D["monitoring"] = None
+        D["monitoring_names"] = None
+    D["monitoring_national"] = opt("MonitoringNational", how="first")
+
+    # Per-county urbanicity, packed as {fips: [code, surveilled]} so the map
+    # can colour by class and distinguish covered from uncovered inside each
+    # class, which is how CDC draws the same figure.
+    up = Path(export_dir) / "UrbanicityCounty.csv"
+    if up.exists():
+        try:
+            ud = pd.read_csv(up, dtype={"county_fips": str})
+            ud["county_fips"] = ud["county_fips"].str.zfill(5)
+            ud = ud.dropna(subset=["rucc_2023"])
+            D["rucc_by_fips"] = {
+                f: [int(c), 1 if str(s).strip().lower() in ("true", "1", "yes") else 0]
+                for f, c, s in zip(ud["county_fips"], ud["rucc_2023"], ud["surveilled"])
+            }
+        except Exception as exc:
+            print(f"[WARN] UrbanicityCounty.csv unreadable ({exc}); the map will report it as unavailable.")
+            D["rucc_by_fips"] = None
+    else:
+        D["rucc_by_fips"] = None
+    D["urbanicity"] = opt("UrbanicityCoverage", [
+        "rucc_2023", "rucc_label", "is_metro", "n_us_counties", "n_counties_surveilled",
+        "pct_of_class_surveilled", "pct_of_surveilled_network", "pct_of_us_counties",
+        "population_2020_us", "population_2020_surveilled"])
     D["global_coverage"] = opt("GlobalCoverage", [
         "country", "iso3", "sewer_connected_pct", "income_group", "population",
         "observable_population", "unobservable_population", "has_open_feed",

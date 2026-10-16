@@ -600,6 +600,9 @@ def main(export_dir, out_path):
 
     A(f"""# NWGS Grid — Dashboard Audit
 
+**Live site:** [nwgsgrid.com](https://nwgsgrid.com/) ·
+**Repository:** [github.com/victorialovefranklin/nwgs-grid-site](https://github.com/victorialovefranklin/nwgs-grid-site)
+
 **Run:** `{run_id}` · **Data through:** {as_of} · **Validation gate:** {gate}
 
 **Sources pulled:** {pulled}

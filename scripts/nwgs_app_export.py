@@ -377,6 +377,36 @@ def main(table_dir, out_dir, allow_mixed=False):
         eq[f"glm_{k}"] = m[k]
     ents["EquitySummary"] = eq
 
+    # UrbanicityCoverage (Table06d, v5.24+; optional so older runs still export)
+    t06d = find(table_dir, "Table06d_RUCC_County_Coverage", required=False)
+    if t06d is not None and len(t06d):
+        keep = ["rucc_2023", "rucc_label", "is_metro", "n_us_counties",
+                "n_counties_surveilled", "pct_of_class_surveilled",
+                "pct_of_surveilled_network", "pct_of_us_counties",
+                "population_2020_us", "population_2020_surveilled"]
+        ents["UrbanicityCoverage"] = t06d[[c for c in keep if c in t06d.columns]]
+    # MonitoringStatus (Table06g/06h, v5.24+; optional so older runs still export)
+    t06g = find(table_dir, "Table06g_County_Monitoring_Status", required=False)
+    if t06g is not None and len(t06g):
+        ms = t06g.copy()
+        ms["county_fips"] = fips5(ms["county_fips"])
+        ents["MonitoringStatus"] = ms[[c for c in [
+            "county_fips", "state_code", "county_name", "county_population",
+            "rucc_2023", "n_sites_reporting", "n_sewersheds", "sewered_population",
+            "sewer_share", "sewered_svi", "county_svi", "monitoring_status",
+            "rule_version", "sewer_service_min_share"] if c in ms.columns]]
+    t06h = find(table_dir, "Table06h_Monitoring_Status_National", required=False)
+    if t06h is not None and len(t06h):
+        ents["MonitoringNational"] = t06h
+
+    t06f = find(table_dir, "Table06f_RUCC_County_Detail", required=False)
+    if t06f is not None and len(t06f):
+        uc = t06f.copy()
+        uc["county_fips"] = fips5(uc["county_fips"])
+        ents["UrbanicityCounty"] = uc[[c for c in ["county_fips", "state_code", "county_name",
+                                                   "rucc_2023", "rucc_label", "is_metro",
+                                                   "surveilled"] if c in uc.columns]]
+
     # ModelPerformance (Table12 + 12d + 12h)
     t12 = find(table_dir, "Table12_Exploratory_ML_Benchmark")
     t12d = find(table_dir, "Table12d_Wastewater_Only_Benchmark")

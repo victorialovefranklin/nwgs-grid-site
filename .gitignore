@@ -5,3 +5,7 @@ app_export/
 site/
 .env
 *.log
+
+# Downloaded papers: linked in references/REFERENCES.md, not stored here.
+references/pdfs/*
+!references/pdfs/.gitkeep

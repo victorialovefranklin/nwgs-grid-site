@@ -545,6 +545,14 @@ tr.unsup td{opacity:.62}
 .cov-wrap .ov-kpi{flex-direction:column;gap:12px;margin:0}
 .ov .alert p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ov-alerts{display:flex;flex-direction:column;gap:2px}
+/* Where monitoring happens: the county answer card */
+.lookup .form{max-width:460px}
+.ansbox{border:1px solid var(--line);border-radius:10px;padding:var(--sp-3);margin-top:var(--sp-2)}
+.ansbox h2{margin:0 0 var(--sp-1)}
+.ansbox .chip{display:inline-block;margin-bottom:var(--sp-2)}
+.ansbox .ans-lead{margin:0 0 var(--sp-2)}
+.ansbox .sspec{margin:0}
+
 @media (max-width:980px){.metric-value{font-size:2.1rem}}
 
 .sh-go{white-space:nowrap}
@@ -684,6 +692,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-analytics" hidden></section>
     <section class="view" id="v-leadtime" hidden></section>
     <section class="view" id="v-predictive" hidden></section>
+    <section class="view" id="v-monitoring" hidden></section>
     <section class="view" id="v-equity" hidden></section>
     <section class="view" id="v-global" hidden></section>
     <section class="view" id="v-tennessee" hidden></section>
@@ -715,7 +724,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 <script>
 const D = JSON.parse(document.getElementById('data').textContent);
 const TOPO = JSON.parse(document.getElementById('topo').textContent);
-const EMAIL = ['victorialovefranklin','gmail.com'].join('@');
+const EMAIL = ['info','nwgsgrid.com'].join('@');
 const ROUTINE = ['SARS-CoV-2','RSV','Influenza A'];
 const EMERGING = ['Influenza A(H5)','Measles','Mpox'];
 const LEVELS = ['Very Low','Low','Typical','Elevated','High'];
@@ -870,7 +879,7 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['start','Start here'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
+const VIEWS=[['start','Start here'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
 const built={};
 let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
@@ -882,7 +891,7 @@ const highAlerts=D.alerts.filter(a=>a.severity==='high').length;
 const GROUPS=[
   ['Overview',           ['start','dashboard']],
   ['Surveillance',       ['map','analytics','leadtime','predictive','alerts','myalerts']],
-  ['Coverage & equity',  ['equity','global','tennessee']],
+  ['Coverage & equity',  ['monitoring','equity','global','tennessee']],
   ['Research & genomics',['genomics','structures']],
   ['Data & methods',     ['audit','methods','glossary']],
   ['About',              ['about']],
@@ -1132,6 +1141,57 @@ function repPanel(){
   ${defn}</article>`;
 }
 
+// Three urbanicity bands, each with a full tone for counties the network
+// reaches and a pale tone for those it does not. Three bands rather than nine
+// because nine fills cannot be told apart on a county map, and the break at
+// urban population 20,000 is where the coverage gradient actually falls.
+const UBAND=c=>c<=3?0:c<=5?1:2;
+const UCOL=[['#14213a','#8fa0bd'],['#1d4f91','#a9c2e0'],['#c49a4a','#ecd9ae']];
+const UBAND_LABEL=['Metro','Nonmetro, urban 20,000+','Nonmetro, urban under 20,000'];
+
+function urbanicityPanel(){
+  const cite=`<p class="note"><b>Definition.</b> Each county carries one USDA Economic Research Service <a href="https://www.ers.usda.gov/data-products/rural-urban-continuum-codes" target="_blank" rel="noopener">Rural-Urban Continuum Code</a> (2023 vintage). Codes 1&ndash;3 are metropolitan, graded by the size of the metro area; codes 4&ndash;9 are nonmetropolitan, graded by urban population and by whether the county adjoins a metro area. Adjacency is kept rather than collapsed because a county that adjoins a metro area can be reached by a treatment plant that serves one. The denominator is the 3,144 counties and county-equivalents of the 50 states and the District of Columbia; territories are excluded so that the comparison below is against the same population.</p>
+  <p class="note"><b>Why this sits beside the vulnerability model.</b> Social vulnerability and urbanicity are different questions with different mechanisms. A rural county is largely unobservable because its households are on septic systems rather than sewers, which is a ceiling on what wastewater surveillance can ever see rather than a funding decision. Reporting only the vulnerability model would leave that ceiling out of the account.</p>`;
+  if(!D.urbanicity||!D.urbanicity.length)
+    return `<article class="panel c12"><header><h2>Urbanicity</h2></header>
+      ${notLoaded('Urbanicity coverage','USDA Economic Research Service Rural-Urban Continuum Codes, 2023 vintage, joined to the county surveillance roster','Without the county classification the metropolitan and nonmetropolitan shares are undefined. They are left blank rather than inferred from county population.')}${cite}</article>`;
+  const U=D.urbanicity.slice().sort((a,b)=>a.rucc_2023-b.rucc_2023);
+  const sum=(rows,k)=>rows.reduce((t,r)=>t+(+r[k]||0),0);
+  const metro=U.filter(r=>r.is_metro===true||r.is_metro==='True'||r.is_metro===1);
+  const non=U.filter(r=>!(r.is_metro===true||r.is_metro==='True'||r.is_metro===1));
+  const nUS=sum(U,'n_us_counties'), nNet=sum(U,'n_counties_surveilled');
+  const pct=(a,b)=>b?100*a/b:null;
+  const metroNet=pct(sum(metro,'n_counties_surveilled'),nNet);
+  const metroUS=pct(sum(metro,'n_us_counties'),nUS);
+  const metroReach=pct(sum(metro,'n_counties_surveilled'),sum(metro,'n_us_counties'));
+  const nonReach=pct(sum(non,'n_counties_surveilled'),sum(non,'n_us_counties'));
+  return `<article class="panel c12"><header><h2>Urbanicity <button class="qmark" data-gloss="rucc" aria-label="What is a Rural-Urban Continuum Code?">?</button></h2><span class="small">the second equity axis, checked against a published figure</span></header>
+  <div class="statgrid">
+    <div class="stat"><span class="label">Metropolitan share of the surveilled network</span><span class="big">${metroNet!=null?fmt(metroNet,1)+'%':'—'}</span></div>
+    <div class="stat"><span class="label">Metropolitan share of all counties</span><span class="big">${metroUS!=null?fmt(metroUS,1)+'%':'—'}</span></div>
+    <div class="stat"><span class="label">Metropolitan counties reached</span><span class="big">${metroReach!=null?fmt(metroReach,1)+'%':'—'}</span></div>
+    <div class="stat"><span class="label">Nonmetropolitan counties reached</span><span class="big">${nonReach!=null?fmt(nonReach,1)+'%':'—'}</span></div>
+  </div>
+  ${D.rucc_by_fips?`<h3 class="ov-sub">Where the classes are, and which counties are reached</h3>
+  <div class="mapbox" id="u-map"></div>
+  ${legend([[UCOL[0][0],'Metro, reached'],[UCOL[0][1],'Metro, not reached'],
+            [UCOL[1][0],'Nonmetro urban 20,000+, reached'],[UCOL[1][1],'Nonmetro urban 20,000+, not reached'],
+            [UCOL[2][0],'Nonmetro urban under 20,000, reached'],[UCOL[2][1],'Nonmetro urban under 20,000, not reached'],
+            [css('--nodata'),'Not classified']])}
+  <p class="small">Drawn the way CDC draws the same figure: colour carries the class, and a county the network reaches is shown in the full tone of its class while one it does not reach is shown in the pale tone. Coverage is therefore read inside each class rather than as a separate layer.</p>`:''}
+  <h3 class="ov-sub">Share of each class the network reaches</h3>
+  <div class="chart" id="u-bars"></div>
+  <div class="tbl"><table class="stack"><tr><th>Code</th><th>Class</th><th class="n">U.S. counties</th><th class="n">Surveilled</th><th class="n">Class reached</th><th class="n">Share of network</th><th class="n">Share of counties</th></tr>
+    ${U.map(r=>`<tr><td class="lead nw">${r.rucc_2023}</td><td>${esc(r.rucc_label)}</td>
+      <td class="n">${(+r.n_us_counties).toLocaleString()}</td>
+      <td class="n">${(+r.n_counties_surveilled).toLocaleString()}</td>
+      <td class="n"><b>${r.pct_of_class_surveilled!=null?fmt(r.pct_of_class_surveilled,1)+'%':'—'}</b></td>
+      <td class="n">${r.pct_of_surveilled_network!=null?fmt(r.pct_of_surveilled_network,1)+'%':'—'}</td>
+      <td class="n">${r.pct_of_us_counties!=null?fmt(r.pct_of_us_counties,1)+'%':'—'}</td></tr>`).join('')}</table></div>
+  <p class="note"><b>This result is checkable against a published figure, which is why it is reported this way.</b> CDC's own description of the system reports that metropolitan counties were about 60% of the counties NWSS served but 39% of all U.S. counties (<a href="https://wwwnc.cdc.gov/eid/article/32/13/26-1118_article" target="_blank" rel="noopener">Mark-Carew et al., <i>Emerg Infect Dis</i> 2026;32(Suppl)</a>). This run computes ${metroNet!=null?fmt(metroNet,1)+'%':'—'} and ${metroUS!=null?fmt(metroUS,1)+'%':'—'} from the current county roster and the USDA codes. The two are measured over different periods &mdash; CDC's figure covers calendar year 2024 and counts counties with more than one sample in that year, while this run counts counties in the current window &mdash; so they are not expected to match exactly, and the agreement is a check on the join rather than a replication.</p>
+  ${cite}</article>`;
+}
+
 function attritionPanel(){
   const defn=`<p class="note"><b>Definition.</b> A site is <b>dormant</b> when its most recent sample is more than ${D.attrition_sites&&D.attrition_sites.length?esc(D.attrition_sites[0].dormant_threshold_weeks):'8'} weeks before the latest sample week anywhere in the run. That is a statement about reporting, not about the facility: a dormant site may still be operating and simply not reporting to CDC NWSS.</p>
   <p class="note">This measure exists only because every weekly run is frozen and versioned. A platform that overwrites its own values cannot reconstruct when a site stopped reporting, which is why coverage attrition has no published equivalent.</p>`;
@@ -1270,6 +1330,7 @@ start(){
     <div class="tbl"><table class="stack guidetbl"><tr><th>If you want to know…</th><th>Go to</th><th>What you will find</th></tr>
       ${row('What is happening right now','dashboard','Dashboard','Current level for each respiratory virus nationally, the direction of travel, and how many counties are high.')}
       ${row('What is happening where I live','map','Surveillance map','A county map you can click. Select a county to see its level, its history and how many sites report there.')}
+      ${row('Whether anywhere near me is being tested','monitoring','Where monitoring happens','Look up your county: whether wastewater here is tested, how many residents are on sewers, and what that depends on.')}
       ${row('Whether my state has counties at a high level','alerts','Alerts','Every state with counties above the high threshold, listed county by county.')}
       ${row('Whether wastewater gives advance warning','leadtime','Lead time','Warning time split into the part that is biology and the part that is reporting delay.')}
       ${row('Who the system reaches, and who it misses','equity','Coverage &amp; equity','Coverage against social vulnerability, how representative each county\'s monitoring is, and which sites have stopped reporting.')}
@@ -1764,11 +1825,101 @@ predictive(){
   ROUTINE.forEach(p=>hbars(document.getElementById('p-shap-'+p.replace(/\W/g,'')),D.shap.filter(s=>s.pathogen===p).slice(0,8).map(s=>({label:FEAT(s.feature),v:s.mean_abs_shap,color:/^(ww_|wastewater)/.test(s.feature)?css('--el'):css('--muted')})),{left:150,w:360,bh:18,fmt:v=>v<.01?v.toFixed(3):v.toFixed(2)}));
 },
 
+monitoring(){
+  const el=document.getElementById('v-monitoring');
+  const head=`<div class="head"><h1>Where monitoring happens</h1><p>Look up any county to see whether wastewater from your area is being tested, and what the answer depends on.</p></div>`;
+  const M=D.monitoring, N=D.monitoring_names, NAT=D.monitoring_national;
+  if(!M){el.innerHTML=head+`<article class="panel c12">${notLoaded('Monitoring status by county','CDC NWSS site reports, EPA National Sewershed Dataset and the USDA county classification','Without the sewer figures a county cannot be described as reachable or not, and no description is guessed in their place.')}</article>`;return}
+
+  // Three states. The distinction between the last two is the whole point of
+  // the page: one is a place this method could reach today, the other is a
+  // place where it would see few people however well it was funded.
+  const SLABEL=['Wastewater here is being tested',
+                'Sewer service here, no site reporting',
+                'Few homes here are on sewers'];
+  const SCOL=['#1d4f91','#c49a4a','#dfe4ea'];
+  const pct=v=>v==null?'—':Math.round(v*100)+'%';
+  const num=v=>v==null?'—':Number(v).toLocaleString();
+
+  const answer=f=>{
+    const v=M[f]; if(!v)return `<p>No information for that county in this run.</p>`;
+    const [s,sites,sewered,share,ssvi]=v, nm=(N&&N[f])||['',''];
+    const name=nm[0]?`${esc(nm[0])}${nm[1]?', '+esc(nm[1]):''}`:cname(f);
+    const lines=[];
+    if(s===0){
+      lines.push(`<p class="ans-lead"><b>${sites}</b> site${sites===1?'':'s'} reported wastewater results here in this update.`
+        +(share!=null?` About <b>${pct(share)}</b> of residents are served by sewers, so that is roughly the share of the county this testing can see.`:'')+`</p>`);
+    }else if(s===1){
+      lines.push(`<p class="ans-lead">No site reported wastewater results here in this update. About <b>${num(sewered)}</b> residents are on sewer systems, so testing here would reach a substantial part of the county.</p>`);
+    }else{
+      lines.push(`<p class="ans-lead">No site reported wastewater results here in this update. Only about <b>${pct(share)}</b> of residents are on sewer systems, so wastewater testing would see a small share of this county whatever resources were put into it.</p>`);
+    }
+    return `<div class="ansbox"><h2>${name}</h2>
+      <span class="chip" style="background:${SCOL[s]};color:${s===2?'#203047':'#fff'}">${SLABEL[s]}</span>
+      ${lines.join('')}
+      <dl class="sspec">
+        <div><dt>Sites reporting</dt><dd class="mono">${sites}</dd></div>
+        <div><dt>Residents on sewers</dt><dd class="mono">${num(sewered)}</dd></div>
+        <div><dt>Share of county on sewers</dt><dd class="mono">${pct(share)}</dd></div>
+      </dl>
+      ${ssvi!=null?`<p class="small">Across the sewered parts of this county, social vulnerability averages <b>${fmt(ssvi,2)}</b> on a scale from 0 to 1. <button class="qmark" data-gloss="svi-gap" aria-label="What does social vulnerability mean here?">?</button></p>`:''}
+      </div>`};
+
+  const opts=Object.keys(M).sort((a,b)=>{const x=(N&&N[a])||[''],y=(N&&N[b])||[''];
+    return (x[1]||'').localeCompare(y[1]||'')||(x[0]||'').localeCompare(y[0]||'')});
+
+  el.innerHTML=head+`<div class="grid">
+  <article class="panel c12 lookup"><header><h2>Find your county</h2></header>
+    <form class="form" id="mon-form" autocomplete="off">
+      <label>County
+        <input list="mon-list" id="mon-in" placeholder="Start typing a county name" aria-label="County name">
+        <datalist id="mon-list">${opts.map(f=>{const n=(N&&N[f])||['',''];
+          return `<option value="${esc(n[0])}${n[1]?', '+esc(n[1]):''}" data-f="${f}">`}).join('')}</datalist>
+      </label>
+    </form>
+    <div id="mon-answer"><p class="small">Pick a county above, or select one on the map.</p></div>
+  </article>
+
+  <article class="panel c12"><header><h2>The national picture</h2></header>
+    ${NAT?`<div class="statgrid">
+      <div class="stat"><span class="label">Counties where wastewater is being tested</span><span class="big">${num(NAT.counties_reporting)}</span><span class="small">of ${num(NAT.counties_total)}</span></div>
+      <div class="stat"><span class="label">Counties with sewer service and no site reporting</span><span class="big">${num(NAT.counties_sewer_service_no_site)}</span></div>
+      <div class="stat"><span class="label">Counties where few homes are on sewers</span><span class="big">${num(NAT.counties_limited_sewer_service)}</span></div>
+      <div class="stat"><span class="label">Residents on sewers in counties with no site reporting</span><span class="big">${NAT.sewered_population_without_site!=null?(Math.round(NAT.sewered_population_without_site/1e6)+' million'):'—'}</span></div>
+    </div>`:''}
+    <div class="mapbox" id="mon-map"></div>
+    ${legend([[SCOL[0],SLABEL[0]],[SCOL[1],SLABEL[1]],[SCOL[2],SLABEL[2]],[css('--nodata'),'Not classified']])}
+    <p class="small">Most places where wastewater is not being tested do have sewers. That matters, because it means the limit is usually not the method. Wastewater testing can only see people whose homes drain to a sewer, and in counties shown in pale grey that is a small share of residents whatever is spent.</p>
+    <p class="note"><b>This is a description, not a scorecard.</b> Taking part in national wastewater surveillance is voluntary, and there are sound reasons a county may not: the cost of sampling and laboratory work, distance from a laboratory, staffing, or a treatment plant too small to sample usefully. A site may also be operating and simply not reporting to the national system. Nothing here says that any county, utility or health department has fallen short.</p>
+    <p class="note"><b>Where the sewer figures come from.</b> Sewer service is measured from the <a href="https://github.com/USEPA/Sewersheds" target="_blank" rel="noopener">EPA National Sewershed Dataset</a>, which maps the area draining to each treatment plant and shares out census population by building footprints. EPA produced ${NAT&&NAT.sewersheds_modelled?num(NAT.sewersheds_modelled):'most'} of those boundaries with a model and ${NAT&&NAT.sewersheds_sourced?num(NAT.sewersheds_sourced):'the rest'} from boundaries reported by the utilities themselves, so an individual county's sewer share is an estimate rather than a survey. The counts above move if the modelled boundaries are excluded; <a href="#methods" data-go="methods">Methods &amp; sources</a> gives the range. Vulnerability figures use the <a href="https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html" target="_blank" rel="noopener">CDC/ATSDR Social Vulnerability Index</a> for 2022.</p>
+  </article></div>`;
+
+  const byName={}; opts.forEach(f=>{const n=(N&&N[f])||['',''];
+    byName[`${n[0]}${n[1]?', '+n[1]:''}`.toLowerCase()]=f});
+  const show=f=>{document.getElementById('mon-answer').innerHTML=answer(f)};
+  const inp=document.getElementById('mon-in');
+  inp.oninput=()=>{const f=byName[inp.value.trim().toLowerCase()];if(f)show(f)};
+  document.getElementById('mon-form').onsubmit=e=>{e.preventDefault();
+    const f=byName[inp.value.trim().toLowerCase()];
+    if(f)show(f);else document.getElementById('mon-answer').innerHTML='<p class="small">No county of that name. Start typing and pick from the list.</p>'};
+
+  countyMap(document.getElementById('mon-map'),
+    f=>{const v=M[f];return v?SCOL[v[0]]:css('--nodata')},
+    f=>{const v=M[f];if(!v)return `<b>${cname(f)}</b><div>Not classified</div>`;
+        return `<b>${cname(f)}</b><div>${SLABEL[v[0]]}</div><div>${pct(v[3])} of residents on sewers</div>`},
+    {label:'Map of which counties have wastewater testing'});
+  const mm=document.getElementById('mon-map');
+  if(mm) mm.querySelectorAll('path.county').forEach(p=>{p.style.cursor='pointer';
+    p.addEventListener('click',()=>{const f=p.__data__&&p.__data__.id;if(f&&M[f]){
+      const n=(N&&N[f])||['','']; inp.value=`${n[0]}${n[1]?', '+n[1]:''}`; show(f);
+      document.getElementById('mon-answer').scrollIntoView({behavior:'smooth',block:'center'})}})});
+},
+
 equity(){
   const el=document.getElementById('v-equity');
   const g=D.equity[0];const sig=g.glm_p_value<.05;
   const line=sig?(g.glm_odds_ratio<1?'More socially vulnerable counties are less likely to have analysis-ready wastewater surveillance.':'More socially vulnerable counties are more likely to have analysis-ready surveillance.'):'No clear difference by social vulnerability.';
-  el.innerHTML=`<div class="head"><h1>Coverage & equity</h1><p class="muted">Who the wastewater system reaches, measured against the CDC/ATSDR Social Vulnerability Index (SVI).</p></div>
+  el.innerHTML=`<div class="head"><h1>Coverage & equity</h1><p class="muted">Who the wastewater system reaches, measured on two axes: the CDC/ATSDR Social Vulnerability Index and USDA rural-urban classification.</p></div>
   <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
     <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
   <article class="panel c12"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
@@ -1777,8 +1928,26 @@ equity(){
     <div class="mapbox" id="e-map"></div>${legend([['var(--accent)','Analysis-ready'],['var(--lo)','Observed, not ready'],['var(--nodata)','No surveillance']])}
     <p class="note">Analysis-ready = at least 52 qualifying weeks and at least 70% completeness across the active span. Association, not cause.</p>
     <p class="note"><b>A closely related analysis is already published, and this model is presented against it.</b> <a href="https://doi.org/10.1016/j.focus.2025.100434" target="_blank" rel="noopener">Alkhouri NB, Fisher V, Abuelezam NN, <i>AJPM Focus</i> 2025;5(1):100434</a> examined NWSS coverage across 859 of 3,143 U.S. counties (about 106 million people) using generalized linear mixed models with state as a random effect and American Community Survey measures, and reported county percent White positively associated with having surveillance in the fully adjusted model (OR 1.36, 95% CI 1.10&ndash;1.69), with state accounting for 22.3% of the variance. <b>The design here is related but not identical:</b> the outcome is <i>analysis-ready</i> coverage rather than presence of any surveillance, and the predictor is the composite CDC/ATSDR SVI rather than individual ACS measures. The contribution here is not the finding but the frame: the model is refitted on every county in the weekly run, the inputs are published as analysis-ready tables, and the result is recomputed and re-versioned each week rather than fixed at one point in time. The two measures below, representativeness and attrition, are the parts of this page with no published equivalent.</p></article></div>
+  ${urbanicityPanel()}
   ${repPanel()}
   ${attritionPanel()}`;
+  if(D.rucc_by_fips){
+    const um=document.getElementById('u-map');
+    if(um) countyMap(um,
+      f=>{const v=D.rucc_by_fips[f];return v?UCOL[UBAND(v[0])][v[1]?0:1]:css('--nodata')},
+      f=>{const v=D.rucc_by_fips[f];
+          if(!v)return `<b>${cname(f)}</b><div>Not classified by USDA</div>`;
+          return `<b>${cname(f)}</b><div>RUCC ${v[0]} · ${UBAND_LABEL[UBAND(v[0])]}</div><div>${v[1]?'Reached by the network':'Not reached'}</div>`},
+      {label:'County urbanicity and surveillance coverage map'});
+  }
+  if(D.urbanicity&&D.urbanicity.length){
+    const ue=document.getElementById('u-bars');
+    if(ue) hbars(ue,D.urbanicity.slice().sort((a,b)=>a.rucc_2023-b.rucc_2023)
+      .map(r=>({label:String(r.rucc_2023)+' · '+(r.is_metro===true||r.is_metro==='True'||r.is_metro===1?'Metro':'Nonmetro'),
+                v:+r.pct_of_class_surveilled||0,
+                color:(r.is_metro===true||r.is_metro==='True'||r.is_metro===1)?'#1d4f91':'#c49a4a'})),
+      {min:0,max:100,left:130,bh:30,fmt:v=>fmt(v,1)+'%'});
+  }
   hbars(document.getElementById('e-bars'),D.equity.map(q=>({label:q.svi_quartile.replace(' vulnerability',''),v:q.pct_analysis_ready})),{min:0,max:100,left:120,bh:38,fmt:v=>v.toFixed(1)+'%'});
   if(D.rep_by_fips){
     const re=document.getElementById('r-map');
@@ -1921,14 +2090,25 @@ structures(){
     return '⚠ Status: imported automatically from UniProt and not yet reviewed by a structural biology collaborator. Residue ranges are provisional; verify against the cited UniProt entry before using them in any analysis or publication.'};
   const RT=['Domain','Region','Motif','Binding site','Active site','Functional site','Topological domain','Transmembrane','Intramembrane','Signal peptide','Coiled coil'];
   const regionBlock=s=>{const rs=(D.regions||{})[s.pdb_entry_id]||[];
-    if(!rs.length)return `<p class="small muted">Functional regions appear here after the next weekly update.</p>`;
+    const C=(D.regions_counts||{})[s.pdb_entry_id]||null;
+    // A bare count of mapped regions cannot be checked by a reader. State the
+    // denominator, and account for every annotation that is not on the list:
+    // residues this entry does not resolve (a fact about the model) are kept
+    // separate from annotations no alignment was returned for (a limit of our
+    // own mapping, which claims nothing about the protein either way).
+    if(!rs.length){
+      if(C&&C.total&&!C.mapped)return `<div class="regions"><h3>Functional regions <span class="small">· 0 of ${C.total} mapped</span></h3>
+        <p class="small">UniProt lists ${C.total} curated region${C.total===1?'':'s'} for this protein, and none could be placed on this structure&rsquo;s residue numbering in this run${C.no_alignment?`: no sequence alignment was returned for ${C.no_alignment===C.total?'any of them':`${C.no_alignment} of them`}`:''}. Nothing is shown rather than approximated. The regions remain in the archived table for this run.</p></div>`;
+      return `<p class="small">Functional regions appear here after the next weekly update.</p>`}
     const ordered=[...rs].sort((a,b)=>(RT.indexOf(a.feature_type)-RT.indexOf(b.feature_type))||(a.pdb_start-b.pdb_start));
-    return `<div class="regions"><h3>Functional regions <span class="muted small">· ${ordered.length} from UniProt</span></h3>
+    const total=C&&C.total?C.total:ordered.length;
+    const countTxt=total>ordered.length?`${ordered.length} of ${total} mapped`:`${ordered.length} from UniProt`;
+    return `<div class="regions"><h3>Functional regions <span class="small">· ${countTxt}</span></h3>
       <ul class="rlist">${ordered.map(r=>`<li><button class="rbtn" data-mol="${s.pdb_entry_id}" data-name="${esc(s.pathogen+' · '+s.protein)}" data-chain="${esc(r.pdb_chain)}" data-start="${r.pdb_start}" data-end="${r.pdb_end}" data-rname="${esc(r.feature_description)}" title="Highlight in 3D">
         <span class="rtype rt-${esc(String(r.feature_type).toLowerCase().replace(/\s+/g,'-'))}">${esc(r.feature_type)}</span>
         <span class="rname">${esc(r.feature_description)}</span>
         <span class="rres mono">${esc(r.pdb_chain)} ${r.pdb_start===r.pdb_end?r.pdb_start:`${r.pdb_start}–${r.pdb_end}`}</span></button></li>`).join('')}</ul>
-      <p class="small muted">Residues shown in this structure’s numbering. Source: UniProt <span class="mono">${esc(ordered[0].uniprot_accession||'')}</span>.</p></div>`};
+      <p class="small">Residues shown in this structure’s numbering. Source: UniProt <span class="mono">${esc(ordered[0].uniprot_accession||'')}</span>.${C&&C.not_in_structure?` ${C.not_in_structure} further region${C.not_in_structure===1?'':'s'} UniProt annotates ${C.not_in_structure===1?'falls':'fall'} outside the residues this entry resolves, so ${C.not_in_structure===1?'it is':'they are'} not shown.`:''}${C&&C.no_alignment?` ${C.no_alignment} could not be aligned to this entry in this run.`:''}</p></div>`};
   el.innerHTML=`<div class="head"><h1>Protein structures</h1><p class="muted">One reference structure per pathogen from the RCSB Protein Data Bank, each passing the pipeline’s structural QC. Each card lists the protein’s curated functional regions from UniProt, mapped onto that structure’s own residue numbering; select a region to highlight it in 3D.</p></div>
   <div class="grid">${D.structures.map(s=>`<article class="panel c4 scard">
     <figure class="sfig">
@@ -2137,7 +2317,7 @@ about(){
     </ul></article>
   </div>
   <article class="panel c12 origin"><h2>Where this came from</h2>
-    <p>NWGS Grid™ began as a poster. In 2025 Victoria proposed a conceptual framework for combining GIS and metagenomics to enhance wastewater surveillance, presented at the <b>Wastewater Disease Surveillance Summit</b>, and awarded <b>First Place</b> for the School of Applied Computational Sciences at the <b>69th Annual Research Day</b> at Meharry Medical College.</p>
+    <p>NWGS Grid™ began as a poster. Victoria has been building it since <b>Fall 2024</b>. In 2025 she proposed a conceptual framework for combining GIS and metagenomics to enhance wastewater surveillance, presented at the <b>Wastewater Disease Surveillance Summit</b>, and awarded <b>First Place</b> for the School of Applied Computational Sciences at the <b>69th Annual Research Day</b> at Meharry Medical College.</p>
     <figure class="posterfig">
       <img src="img/poster-gis-metagenomics.webp" alt="Research poster: Using GIS and Metagenomics to Enhance Wastewater Surveillance, by Victoria Love Franklin, Todd Gary, Bishnu Sarker and Reginald Archer." loading="lazy">
       <figcaption class="small muted">Franklin VL, Gary T, Sarker B, Archer R. “Using GIS and Metagenomics to Enhance Wastewater Surveillance.” School of Applied Computational Sciences, Meharry Medical College; Department of Environmental Sciences, Tennessee State University (2025).</figcaption>
@@ -2319,6 +2499,9 @@ glossary(){
     ['representativeness','Representativeness','How much of a county is actually inside a monitored sewershed, and whether the monitored part resembles the county as a whole. Combines sewer share with a social-vulnerability gap. Wastewater surveillance only observes people connected to a monitored sewer, so a county can be “covered” on a map while most of its residents are invisible to the system.'],
     ['sewer-share','Sewer share','The population served by the monitored sites in a county, divided by the county’s population. A county with one small plant in a large rural county can have a very low sewer share while still appearing as a monitored county.'],
     ['svi-gap','SVI gap','A county’s social vulnerability minus the population-weighted average vulnerability of the monitored counties in its state. A positive gap means this county is more vulnerable than the places its state is actually watching.'],
+    ['sewer-service','Sewer service','The share of a county’s residents whose homes drain to a sewer system rather than a septic tank. Wastewater testing can only see people on sewers, so this is the ceiling on how much of a county the method could ever observe. Measured here from EPA’s National Sewershed Dataset, which maps the area draining to each treatment plant.'],
+    ['monitoring-status','Monitoring status','Which of three descriptions fits a county in this run: wastewater here is being tested; there is sewer service but no site reporting; or few homes are on sewers, so testing would reach a small share of residents. It describes the state of the network, not the conduct of any county or health department, and taking part is voluntary.'],
+    ['rucc','Rural-Urban Continuum Code (RUCC)','A USDA classification giving every U.S. county one code from 1 to 9. Codes 1 to 3 are metropolitan, graded by the size of the metro area. Codes 4 to 9 are nonmetropolitan, graded by urban population and by whether the county adjoins a metro area. It is used here as a second equity axis alongside social vulnerability, because a rural county is unobservable for a different reason: its households are more often on septic systems than on sewers, which is a limit on the method rather than a funding decision.'],
     ['dormant-site','Dormant site','A site whose most recent sample is more than eight weeks old relative to the newest sample anywhere in the run. This describes reporting, not the facility: a dormant site may still be operating and simply not reporting to CDC NWSS.'],
     ['attrition','Coverage attrition','Sites that stopped reporting, when they stopped, and how many people they had been covering. This can only be measured because every weekly run is frozen and kept; a system that overwrites its own values cannot reconstruct when coverage was lost.'],
    ]],
@@ -2401,7 +2584,7 @@ methods(){
   const el=document.getElementById('v-methods');
   const acc=new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   el.innerHTML=`<div class="head"><h1>Methods &amp; sources</h1><p class="muted">How the numbers on this site are made, and every dataset and tool they come from.</p></div>
-  <article class="panel c12"><header><h2>Methods</h2><span class="small muted">what the pipeline does, in order</span></header>
+  <article class="panel c12"><header><h2>Materials and methods</h2><span class="small muted">what the pipeline does, in order</span></header>
     <p>Every figure on this site is produced by one automated pipeline that runs weekly and rebuilds the whole site from a single frozen snapshot. The steps below run in this order; each is recorded in the run log, and the <a href="#audit" data-go="audit">Audit log</a> reports the result of every check.</p>
     <ol class="methodsteps">
       <li><b>Acquisition.</b> Six CDC National Wastewater Surveillance System pathogen datasets, the NSSP emergency-department series and CDC PLACES are pulled from the Socrata API on data.cdc.gov. Each dataset is saved unmodified as a frozen snapshot with its row count and the provider's own update timestamp, so the inputs to any past run can be recovered exactly.</li>
@@ -2415,6 +2598,11 @@ methods(){
     </ol>
     <p class="note"><b>What this pipeline does not do.</b> It does not infer or impute missing observations, estimate values for unmonitored counties, carry numbers over from a previous run, or adjust published figures after the fact. Where a source does not load, the affected panel says so and shows nothing. Where an annotation comes from an external database it is reproduced and cited rather than predicted.</p>
   </article>
+  <article class="panel"><header><h2>How far the sewer figures can be trusted</h2></header>
+    <p>Sewer service is measured from EPA&rsquo;s National Sewershed Dataset. EPA produced 13,826 of its 17,079 sewershed boundaries with a machine-learning model and took 3,253 from boundaries reported by utilities and states, so a county&rsquo;s sewer share is an estimate rather than a survey. How much that matters depends on which figure is being read.</p>
+    <p>The count of counties with sewer service and no site reporting is sensitive to it. Using every boundary, 1,607 counties fall in that group. Restricting to boundaries EPA either sourced directly or modelled at a mean probability of 0.9 or above gives 1,129. Using only boundaries reported by utilities gives 278 &mdash; a floor rather than a correction, because reported boundaries cover larger systems, so excluding the modelled ones removes much of rural America by construction rather than by evidence.</p>
+    <p>The comparison of who lives on sewers against who does not is not sensitive to it. Residents on sewers are more socially vulnerable than residents who are not, on every basis: by 0.082 using all boundaries, 0.028 at the higher confidence threshold, and 0.031 using reported boundaries alone. The size of the difference moves; its direction does not.</p>
+    <p class="note">Both are reported here rather than only the larger one. A figure that changes with the assumptions behind it belongs in public with that range attached.</p></article>
   <article class="panel"><header><h2>Data sources &amp; references</h2><span class="small muted">accessed ${acc}</span></header>
   <ol class="refs">
     ${D.sources.map(s=>`<li>Centers for Disease Control and Prevention. <i>${esc(s.dataset_name)}</i> [dataset <span class="mono">${s.dataset_id}</span>]. National Wastewater Surveillance System (NWSS). data.cdc.gov; updated ${dateFmt(String(s.updated_utc).slice(0,10))}; ${s.rows.toLocaleString()} rows. <a href="${s.source_url}" target="_blank" rel="noopener">${s.source_url.replace('https://','')}</a></li>`).join('')}
@@ -2422,7 +2610,7 @@ methods(){
     <li>Centers for Disease Control and Prevention. <i>PLACES: Local Data for Better Health, County Data</i> [dataset <span class="mono">swc5-untb</span>]. County health context measures. <a href="https://data.cdc.gov/d/swc5-untb" target="_blank" rel="noopener">data.cdc.gov/d/swc5-untb</a></li>
     <li>Centers for Disease Control and Prevention / Agency for Toxic Substances and Disease Registry / Geospatial Research, Analysis, and Services Program. <i>CDC/ATSDR Social Vulnerability Index 2022 Database, US (county)</i>. <a href="https://www.atsdr.cdc.gov/place-health/php/svi/" target="_blank" rel="noopener">atsdr.cdc.gov/place-health/php/svi</a></li>
     <li>U.S. Census Bureau. <i>2025 TIGER/Line Shapefiles: Counties</i>. <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target="_blank" rel="noopener">census.gov TIGER/Line</a></li>
-    <li><i>U.S. wastewater antimicrobial-resistance gene (ARG) detections, 2024</i> [file US_Wastewater_AMR_ARG_2024.csv]. Used for the resistance-gene panels. Full source citation pending.</li>
+    <li>Kim S, Zulli A, Chan EMG, Duong D, Linfield RY, McCormack C, White BJ, Wolfe MK, Boehm AB, Pickering AJ. Wastewater surveillance reveals patterns of antibiotic resistance across the United States. <i>medRxiv</i>. 2025. <a href="https://doi.org/10.1101/2025.04.02.25325128" target="_blank" rel="noopener">doi:10.1101/2025.04.02.25325128</a>. Resistance-gene panels use the <span class="mono">Averaged</span> sheet of that study’s published data, unchanged: 163 treatment plants in 39 states, eleven resistance genes measured by digital droplet PCR and normalised to 16S rRNA. Detection calls, z-scores and outlier flags are the authors’, not ours.</li>
     <li>National Center for Biotechnology Information. <i>NCBI Virus</i> and <i>NCBI Datasets API v2</i>. National Library of Medicine. <a href="https://www.ncbi.nlm.nih.gov/datasets/" target="_blank" rel="noopener">ncbi.nlm.nih.gov/datasets</a></li>
     <li>Berman HM, Westbrook J, Feng Z, et al. The Protein Data Bank. <i>Nucleic Acids Research</i>. 2000;28(1):235–242. RCSB PDB entries ${D.structures.map(s=>`<a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">${s.pdb_entry_id}</a>`).join(', ')}. <a href="https://www.rcsb.org" target="_blank" rel="noopener">rcsb.org</a></li>
     <li>Bostock M. <i>us-atlas</i>: U.S. state and county boundaries in TopoJSON, derived from U.S. Census Bureau cartographic boundary files. ISC License. <a href="https://github.com/topojson/us-atlas" target="_blank" rel="noopener">github.com/topojson/us-atlas</a></li>

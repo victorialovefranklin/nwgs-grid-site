@@ -524,6 +524,15 @@ STATIC_ROOT = Path(os.getenv("NWGS_STATIC_ROOT", "/content"))
 SVI_PATH = Path(os.getenv("NWGS_SVI_PATH", str(STATIC_ROOT / "SVI_2022_US_COUNTY.csv")))
 TIGER_SHP = Path(os.getenv("NWGS_TIGER_SHP", str(STATIC_ROOT / "tl_2025_us_county.shp")))
 AMR_PATH = Path(os.getenv("NWGS_AMR_PATH", str(STATIC_ROOT / "US_Wastewater_AMR_ARG_2024.csv")))
+RUCC_PATH = Path(os.getenv("NWGS_RUCC_PATH", str(STATIC_ROOT / "RUCC_2023_US_COUNTY.csv")))
+SVI_TRACT_PATH = Path(os.getenv("NWGS_SVI_TRACT_PATH",
+                                str(STATIC_ROOT / "SVI_2022_US_TRACT.csv.gz")))
+EPA_CW_BG_PATH = Path(os.getenv("NWGS_EPA_CROSSWALK_BG_PATH",
+                                str(STATIC_ROOT / "EPA_Sewershed_Crosswalk_block_groups.csv.gz")))
+EPA_CW_TR_PATH = Path(os.getenv("NWGS_EPA_CROSSWALK_TR_PATH",
+                                str(STATIC_ROOT / "EPA_Sewershed_Crosswalk_tracts.csv.gz")))
+EPA_SEWERSHED_PATH = Path(os.getenv("NWGS_EPA_SEWERSHED_PATH",
+                                    str(STATIC_ROOT / "EPA_Sewershed_Attributes.csv.gz")))
 
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 PROC_DIR = PROJECT_ROOT / "data" / "processed"
@@ -760,6 +769,9 @@ RCSB_REFERENCE_STRUCTURES = [
     },
 ]
 RCSB_SEQUENCE_COORDINATES = "https://sequence-coordinates.rcsb.org/graphql"
+RUCC_SOURCE_URL = "https://www.ers.usda.gov/data-products/rural-urban-continuum-codes"
+EPA_SEWERSHED_SOURCE_URL = "https://github.com/USEPA/Sewersheds"
+SVI_SOURCE_URL = "https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html"
 
 
 # ============================================================
@@ -2391,6 +2403,356 @@ def coverage_equity(coverage):
     )
     eq["pct_analysis_ready"] *= 100
     return eq
+
+
+# ------------------------------------------------------------
+# Urbanicity (v5.24)
+#
+# The equity analysis above runs on social vulnerability alone. That answers
+# whether surveillance reaches disadvantaged counties, but not whether it
+# reaches rural ones, and the two are different questions with different
+# mechanisms: a rural county is unobservable largely because its households
+# are on septic systems rather than sewers, which is a ceiling on the method
+# itself rather than a funding choice. USDA's Rural-Urban Continuum Codes
+# supply the second axis, and because CDC's own description of NWSS reports
+# the same split (Mark-Carew et al., Emerg Infect Dis 2026), the result is
+# checkable against a published figure instead of standing alone.
+#
+# The codes are revised about once a decade, so the file is committed to the
+# repository rather than downloaded each run: the published download URL
+# carries a cache-busting token that changes when ERS republishes, which
+# would turn a run-time fetch into a silent failure one week.
+# ------------------------------------------------------------
+
+RUCC_METRO_MAX = 3          # codes 1-3 are metropolitan, 4-9 are not
+RUCC_LABELS = {
+    1: "Metro, 1 million or more",
+    2: "Metro, 250,000 to 1 million",
+    3: "Metro, fewer than 250,000",
+    4: "Nonmetro, urban 20,000+, adjacent to metro",
+    5: "Nonmetro, urban 20,000+, not adjacent",
+    6: "Nonmetro, urban 5,000-20,000, adjacent to metro",
+    7: "Nonmetro, urban 5,000-20,000, not adjacent",
+    8: "Nonmetro, urban under 5,000, adjacent to metro",
+    9: "Nonmetro, urban under 5,000, not adjacent",
+}
+# Territories are excluded from the denominator so that the comparison is
+# against the 50 states and DC, which is the population CDC's figure covers.
+RUCC_TERRITORIES = {"AS", "GU", "MP", "PR", "VI"}
+
+
+def load_rucc():
+    """
+    USDA ERS Rural-Urban Continuum Codes, 2023 vintage.
+
+    Two properties of the published file have to be handled rather than
+    assumed. It is distributed in Windows-1252, not UTF-8, because seventeen
+    county names carry accented characters (Dona Ana, Bayamon, and fifteen
+    more); reading it as UTF-8 raises UnicodeDecodeError part way through and
+    would fail the run. And it is in long form, three rows per county keyed on
+    an Attribute column, so it has to be pivoted before it can be joined to
+    anything.
+    """
+    if not RUCC_PATH.exists():
+        print(f"[RUCC] no urbanicity file at {RUCC_PATH}; skipping the layer")
+        return pd.DataFrame()
+
+    raw = None
+    for enc in ("utf-8-sig", "cp1252", "latin-1"):
+        try:
+            raw = pd.read_csv(RUCC_PATH, dtype=str, encoding=enc)
+            break
+        except UnicodeDecodeError:
+            continue
+    if raw is None:
+        print(f"[RUCC] {RUCC_PATH.name} could not be decoded; skipping the layer")
+        return pd.DataFrame()
+
+    needed = {"FIPS", "State", "County_Name", "Attribute", "Value"}
+    if not needed.issubset(raw.columns):
+        print(f"[RUCC] unexpected columns {list(raw.columns)}; skipping the layer")
+        return pd.DataFrame()
+
+    wide = (raw.pivot_table(index=["FIPS", "State", "County_Name"],
+                            columns="Attribute", values="Value", aggfunc="first")
+               .reset_index())
+    wide.columns.name = None
+    wide["county_fips"] = wide["FIPS"].map(normalize_fips)
+    wide["rucc_2023"] = pd.to_numeric(wide.get("RUCC_2023"), errors="coerce")
+    wide["population_2020"] = pd.to_numeric(wide.get("Population_2020"), errors="coerce")
+    out = wide.rename(columns={"State": "state_code", "County_Name": "county_name",
+                               "Description": "rucc_description"})
+    keep = ["county_fips", "state_code", "county_name", "rucc_2023",
+            "rucc_description", "population_2020"]
+    out = out[[c for c in keep if c in out.columns]]
+    out = out.dropna(subset=["county_fips"]).drop_duplicates("county_fips")
+    save_df(out, RAW_DIR / "RUCC_2023_US_COUNTY_FROZEN.csv")
+    n_class = int(out["rucc_2023"].notna().sum())
+    print(f"[RUCC] {len(out)} county-equivalents, {n_class} classified")
+    return out
+
+
+def rucc_coverage(coverage, rucc):
+    """
+    Share of surveilled counties that are metropolitan, against the share of
+    all counties that are metropolitan.
+
+    One row per code, plus the counties in the surveillance roster that the
+    USDA file does not classify. Those are not dropped quietly: the roster is
+    built from CDC's own county identifiers, and anything the national county
+    file has never heard of is either a retired code or an invalid one, which
+    is worth seeing rather than discarding.
+    """
+    if rucc.empty or coverage.empty:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    universe = rucc[~rucc["state_code"].isin(RUCC_TERRITORIES)].copy()
+    served = set(coverage["county_fips"].dropna().astype(str))
+
+    unmatched = sorted(served - set(rucc["county_fips"]))
+    if unmatched:
+        names = (coverage.dropna(subset=["county_fips"])
+                         .drop_duplicates("county_fips")
+                         .set_index("county_fips"))
+        unmatched_df = pd.DataFrame([{
+            "county_fips": f,
+            "county_name_in_roster": (names.at[f, "COUNTY"]
+                                      if f in names.index and "COUNTY" in names.columns
+                                      else None),
+            "state_in_roster": (names.at[f, "ST_ABBR"]
+                                if f in names.index and "ST_ABBR" in names.columns
+                                else None),
+        } for f in unmatched])
+    else:
+        unmatched_df = pd.DataFrame(columns=["county_fips", "county_name_in_roster",
+                                             "state_in_roster"])
+
+    universe["surveilled"] = universe["county_fips"].isin(served)
+    classified = universe.dropna(subset=["rucc_2023"]).copy()
+    classified["rucc_2023"] = classified["rucc_2023"].astype(int)
+
+    n_us = len(classified)
+    n_served = int(classified["surveilled"].sum())
+    rows = []
+    for code, g in classified.groupby("rucc_2023"):
+        served_g = int(g["surveilled"].sum())
+        rows.append({
+            "rucc_2023": int(code),
+            "rucc_label": RUCC_LABELS.get(int(code), f"Code {int(code)}"),
+            "is_metro": bool(int(code) <= RUCC_METRO_MAX),
+            "n_us_counties": int(len(g)),
+            "n_counties_surveilled": served_g,
+            # Within-class coverage: of the counties in this class, how many
+            # the network reaches. This is the number a health department in a
+            # rural county cares about.
+            "pct_of_class_surveilled": round(100.0 * served_g / len(g), 1) if len(g) else None,
+            # Composition: what share of the whole network, and of the whole
+            # country, this class makes up. These are the two shares CDC
+            # published, and the pair is what shows the skew.
+            "pct_of_surveilled_network": round(100.0 * served_g / n_served, 1) if n_served else None,
+            "pct_of_us_counties": round(100.0 * len(g) / n_us, 1) if n_us else None,
+            "population_2020_us": int(g["population_2020"].fillna(0).sum()),
+            "population_2020_surveilled": int(g.loc[g["surveilled"], "population_2020"].fillna(0).sum()),
+        })
+    summary = pd.DataFrame(rows).sort_values("rucc_2023").reset_index(drop=True)
+
+    # Per-county detail, so the map can be drawn the way CDC draws its own:
+    # colour by class, and distinguish covered from uncovered within each
+    # class rather than showing coverage as a separate binary layer.
+    detail = classified[["county_fips", "state_code", "county_name",
+                         "rucc_2023", "surveilled"]].copy()
+    detail["rucc_label"] = detail["rucc_2023"].map(RUCC_LABELS)
+    detail["is_metro"] = detail["rucc_2023"].le(RUCC_METRO_MAX)
+    detail = detail.sort_values("county_fips").reset_index(drop=True)
+    return summary, unmatched_df, detail
+
+
+def rucc_headline(summary):
+    """The two shares as a dict, for the audit row and the app export."""
+    if summary.empty:
+        return {}
+    metro = summary[summary["is_metro"]]
+    n_us = int(summary["n_us_counties"].sum())
+    n_served = int(summary["n_counties_surveilled"].sum())
+    return {
+        "n_us_counties": n_us,
+        "n_counties_surveilled": n_served,
+        "metro_pct_of_network": round(100.0 * int(metro["n_counties_surveilled"].sum()) / n_served, 1) if n_served else None,
+        "metro_pct_of_us_counties": round(100.0 * int(metro["n_us_counties"].sum()) / n_us, 1) if n_us else None,
+        "nonmetro_pct_of_class_surveilled": (
+            round(100.0 * int(summary.loc[~summary["is_metro"], "n_counties_surveilled"].sum())
+                  / int(summary.loc[~summary["is_metro"], "n_us_counties"].sum()), 1)
+            if int(summary.loc[~summary["is_metro"], "n_us_counties"].sum()) else None),
+        "metro_pct_of_class_surveilled": (
+            round(100.0 * int(metro["n_counties_surveilled"].sum())
+                  / int(metro["n_us_counties"].sum()), 1)
+            if int(metro["n_us_counties"].sum()) else None),
+    }
+
+
+# ------------------------------------------------------------
+# Monitoring status by county (v5.24)
+#
+# The coverage work above answers a national question: is surveillance
+# distributed evenly. Most people arriving at the site are asking a local
+# one instead - whether anywhere near them is being watched, and if not,
+# what stands in the way. Those have different answers and the second one
+# cannot be read off the first.
+#
+# Three states, and the distinction between the last two is the point.
+# A county with sewers but no reporting site is a place the method could
+# reach today. A county where few homes are on sewers is a place where
+# wastewater testing would see a small share of residents however well it
+# was funded. Treating those two as one number ("not covered") hides the
+# only part a reader could act on.
+#
+# Nothing here is phrased as a failing. Participation in NWSS is voluntary,
+# a site may operate without reporting, and small systems face real costs.
+# The tables describe the state of the network, not the conduct of anyone
+# running it.
+# ------------------------------------------------------------
+
+# Versioned like the representativeness definition, so a change to the
+# threshold is visible between runs rather than silently moving counties
+# from one description to another.
+MONITORING_RULE_VERSION = "nwgs-monitoring-status-v1"
+SEWER_SERVICE_MIN_SHARE = 0.25   # share of residents on sewers
+
+
+def load_svi_tracts():
+    """
+    CDC/ATSDR SVI 2022, census tract, United States ranking.
+
+    -999 is CDC's code for a value it could not supply, and CDC excludes
+    those cells from its own derived figures. Read literally it would
+    enter a weighted mean as a large negative vulnerability, so it is
+    converted to missing here and the affected tracts are reported as
+    unscored rather than dropped without trace.
+    """
+    if not SVI_TRACT_PATH.exists():
+        print(f"[SVI] no tract file at {SVI_TRACT_PATH}; sewershed vulnerability is skipped")
+        return pd.DataFrame()
+    df = pd.read_csv(SVI_TRACT_PATH, dtype={"FIPS": str}, low_memory=False)
+    df["tract_fips"] = df["FIPS"].astype(str).str.zfill(11)
+    df["svi"] = pd.to_numeric(df.get("RPL_THEMES"), errors="coerce").replace(-999, np.nan)
+    df["tract_population"] = pd.to_numeric(df.get("E_TOTPOP"), errors="coerce")
+    out = df[["tract_fips", "svi", "tract_population"]].drop_duplicates("tract_fips")
+    print(f"[SVI] {len(out)} tracts, {int(out['svi'].isna().sum())} unscored")
+    return out
+
+
+def load_sewershed_crosswalk(path, geo_len):
+    """EPA sewershed to census-geography crosswalk, as published."""
+    if not path.exists():
+        print(f"[EPA] no sewershed crosswalk at {path}; the layer is skipped")
+        return pd.DataFrame()
+    df = pd.read_csv(path, dtype={"CWNS_ID": str, "GEOID": str})
+    df["GEOID"] = df["GEOID"].astype(str).str.zfill(geo_len)
+    df["county_fips"] = df["GEOID"].str[:5]
+    df["Population"] = pd.to_numeric(df["Population"], errors="coerce").fillna(0.0)
+    print(f"[EPA] sewershed crosswalk {path.name}: {len(df)} rows, "
+          f"{df['CWNS_ID'].nunique()} sewersheds, {df['county_fips'].nunique()} counties")
+    return df
+
+
+def county_monitoring_status(coverage, rucc, cw_bg, cw_tr, svi_tracts, svi_county):
+    """
+    One row per county: whether a site reported there this run, how many
+    residents are on sewers, and who those residents are.
+    """
+    if rucc.empty or cw_bg.empty:
+        return pd.DataFrame()
+
+    base = rucc[~rucc["state_code"].isin(RUCC_TERRITORIES)].dropna(subset=["rucc_2023"]).copy()
+    base["rucc_2023"] = base["rucc_2023"].astype(int)
+    base["county_population"] = pd.to_numeric(base["population_2020"], errors="coerce")
+
+    sewered = (cw_bg.groupby("county_fips")
+                    .agg(sewered_population=("Population", "sum"),
+                         n_sewersheds=("CWNS_ID", "nunique"))
+                    .reset_index())
+    m = base.merge(sewered, on="county_fips", how="left")
+    m["sewered_population"] = m["sewered_population"].fillna(0.0)
+    m["n_sewersheds"] = m["n_sewersheds"].fillna(0).astype(int)
+    m["sewer_share"] = (m["sewered_population"] / m["county_population"]).clip(0, 1)
+
+    # Sites reporting in this run, from the surveillance roster itself.
+    if coverage is not None and not coverage.empty:
+        sites = (coverage.dropna(subset=["county_fips"])
+                         .groupby("county_fips")["n_sites"].max().reset_index()
+                         .rename(columns={"n_sites": "n_sites_reporting"}))
+        m = m.merge(sites, on="county_fips", how="left")
+    else:
+        m["n_sites_reporting"] = np.nan
+    m["n_sites_reporting"] = m["n_sites_reporting"].fillna(0).astype(int)
+    m["is_reporting"] = m["n_sites_reporting"] > 0
+
+    # Who lives inside the sewered area, where the tract layer is available.
+    if not svi_tracts.empty and not cw_tr.empty:
+        j = cw_tr.merge(svi_tracts, left_on="GEOID", right_on="tract_fips", how="left")
+        j = j.dropna(subset=["svi"])
+        j["w"] = j["Population"]
+        g = j.groupby("county_fips").apply(
+            lambda q: np.average(q["svi"], weights=q["w"]) if q["w"].sum() > 0 else np.nan,
+            include_groups=False)
+        m = m.merge(g.rename("sewered_svi").reset_index(), on="county_fips", how="left")
+    else:
+        m["sewered_svi"] = np.nan
+
+    if svi_county is not None and not svi_county.empty and "RPL_THEMES" in svi_county.columns:
+        cs = svi_county[["county_fips", "RPL_THEMES"]].drop_duplicates("county_fips").copy()
+        cs["county_svi"] = pd.to_numeric(cs["RPL_THEMES"], errors="coerce").replace(-999, np.nan)
+        m = m.merge(cs[["county_fips", "county_svi"]], on="county_fips", how="left")
+    else:
+        m["county_svi"] = np.nan
+
+    def status(r):
+        if r["is_reporting"]:
+            return "REPORTING"
+        if r["sewer_share"] >= SEWER_SERVICE_MIN_SHARE:
+            return "SEWER_SERVICE_NO_SITE"
+        return "LIMITED_SEWER_SERVICE"
+    m["monitoring_status"] = m.apply(status, axis=1)
+    m["rule_version"] = MONITORING_RULE_VERSION
+    m["sewer_service_min_share"] = SEWER_SERVICE_MIN_SHARE
+
+    cols = ["county_fips", "state_code", "county_name", "county_population",
+            "rucc_2023", "n_sites_reporting", "is_reporting", "n_sewersheds",
+            "sewered_population", "sewer_share", "sewered_svi", "county_svi",
+            "monitoring_status", "rule_version", "sewer_service_min_share"]
+    out = m[[c for c in cols if c in m.columns]].sort_values("county_fips").reset_index(drop=True)
+    print(f"[MONITORING] {len(out)} counties: "
+          + ", ".join(f"{k} {v}" for k, v in out["monitoring_status"].value_counts().items()))
+    return out
+
+
+def monitoring_national(status, attrs):
+    """National totals, including the basis the sewered figures rest on."""
+    if status.empty:
+        return pd.DataFrame()
+    rep = status[status["monitoring_status"].eq("REPORTING")]
+    svc = status[status["monitoring_status"].eq("SEWER_SERVICE_NO_SITE")]
+    lim = status[status["monitoring_status"].eq("LIMITED_SEWER_SERVICE")]
+    modelled = sourced = np.nan
+    if attrs is not None and not attrs.empty and "method" in attrs.columns:
+        modelled = int(attrs["method"].eq("Modeled").sum())
+        sourced = int(attrs["method"].eq("Sourced").sum())
+    row = {
+        "counties_total": int(len(status)),
+        "counties_reporting": int(len(rep)),
+        "counties_sewer_service_no_site": int(len(svc)),
+        "counties_limited_sewer_service": int(len(lim)),
+        "population_total": float(status["county_population"].sum()),
+        "population_sewered": float(status["sewered_population"].sum()),
+        "sewered_population_in_reporting_counties": float(rep["sewered_population"].sum()),
+        "sewered_population_without_site": float(svc["sewered_population"].sum()),
+        "sewersheds_modelled": modelled,
+        "sewersheds_sourced": sourced,
+        "rule_version": MONITORING_RULE_VERSION,
+        "sewer_service_min_share": SEWER_SERVICE_MIN_SHARE,
+    }
+    return pd.DataFrame([row])
+
 
 def plot_equity(eq):
     if eq.empty:
@@ -5909,8 +6271,15 @@ def assay_target_panel(path=ASSAY_TARGET_PATH):
     required = ["pathogen", "assay_name", "target_gene", "reference_accession",
                 "region_start", "region_end", "citation"]
     if not path.exists():
+        # v5.24: this detail is published on the Audit log page, so it names
+        # the input by name rather than by its absolute path inside the run
+        # container. The path is still printed to the run log, where the
+        # operator can see it; the public row says what is missing and what
+        # the site does about it, which is the part a reader can act on.
+        print(f"[ASSAY] no curated assay-target panel at {path}")
         record_source("Assay-target panel (curated input)", "EMPTY",
-                      f"no curated file at {path}; the view reports this rather than showing rows")
+                      f"no curated panel file ({path.name}) was supplied for this run; "
+                      "the assay-target view says so rather than showing rows")
         return pd.DataFrame(columns=required + ["citation_url", "notes", "dropped_reason"])
     try:
         a = pd.read_csv(path)
@@ -6601,7 +6970,7 @@ def build_validation_summary(
     spatial_attrition=None, pathogen_manifest=None, detection_source_profile=None,
     amr_classification_audit=None, seasonal_national=None,
     portrait_self_check=None, ml_collinearity=None, ml_wastewater_only=None,
-    ml_outliers=None,
+    ml_outliers=None, rucc_summary=None, rucc_unmatched=None, monitoring=None,
 ):
     rows = []
 
@@ -6762,6 +7131,49 @@ def build_validation_summary(
         "detail": detail
     })
 
+    # v5.24: urbanicity. Two things are checked here and they fail separately.
+    # The comparison itself is reported whatever it says, because a skewed
+    # network is a finding rather than a fault. What can be wrong is the join:
+    # a county identifier in the surveillance roster that the national county
+    # file does not contain is either a retired code or an invalid one, and
+    # every such county is silently absent from this axis until someone looks.
+    if rucc_summary is not None and not rucc_summary.empty:
+        head = rucc_headline(rucc_summary)
+        n_unmatched = 0 if rucc_unmatched is None else int(len(rucc_unmatched))
+        detail = (
+            f"metropolitan counties are {head.get('metro_pct_of_network')}% of the surveilled "
+            f"network but {head.get('metro_pct_of_us_counties')}% of all counties; the network "
+            f"reaches {head.get('metro_pct_of_class_surveilled')}% of metropolitan and "
+            f"{head.get('nonmetro_pct_of_class_surveilled')}% of nonmetropolitan counties"
+        )
+        if n_unmatched:
+            detail += (f"; {n_unmatched} county identifier(s) in the roster are not in the "
+                       "USDA county file and are absent from this axis (see Table06e)")
+        rows.append({
+            "component": "Urbanicity coverage (USDA RUCC 2023)",
+            "status": "WARNING_UNMATCHED_COUNTIES" if n_unmatched else "PASS",
+            "detail": detail,
+        })
+
+    # v5.24: monitoring status by county. What can go wrong is the sewered
+    # population, which comes from EPA boundaries that are mostly modelled,
+    # so the check reports the basis rather than only the result.
+    if monitoring is not None and not monitoring.empty:
+        vc = monitoring["monitoring_status"].value_counts()
+        no_svi = int(monitoring["sewered_svi"].isna().sum())
+        rows.append({
+            "component": "Monitoring status by county",
+            "status": "WARNING_PARTIAL_VULNERABILITY" if no_svi else "PASS",
+            "detail": (
+                f"{len(monitoring):,} counties: {int(vc.get('REPORTING', 0)):,} with a site "
+                f"reporting, {int(vc.get('SEWER_SERVICE_NO_SITE', 0)):,} with sewer service and "
+                f"no reporting site, {int(vc.get('LIMITED_SEWER_SERVICE', 0)):,} where few "
+                f"residents are on sewers"
+                + (f"; {no_svi:,} counties have no vulnerability figure for their sewered "
+                   "residents and are reported as unscored" if no_svi else "")
+            ),
+        })
+
     if pathogen_manifest is not None and not pathogen_manifest.empty:
         downloaded = int(pathogen_manifest["download_status"].eq("PASS").sum())
         rows.append({
@@ -6791,10 +7203,20 @@ def build_validation_summary(
                 pre_w_s = f"{int(pre_w)}" if pd.notna(pre_w) else "?"
                 pre_h_s = f"{int(pre_h)}" if pd.notna(pre_h) else "?"
                 pre = f" (was {pre_w_s}x{pre_h_s}px before padding)"
+            # v5.24: the component name and detail are read by members of the
+            # public on the Audit log page, so they must stand on their own.
+            # "Portrait self-check" named an internal routine, and the detail
+            # ended in an absolute path inside the run container - a string a
+            # reader cannot open, cannot interpret, and which only published
+            # this machine's directory layout. The check itself stays in the
+            # log at full strength; only its wording changed.
             rows.append({
-                "component": f"Portrait self-check: {r.label}",
+                "component": f"Manuscript figure layout: {r.label}",
                 "status": display_status,
-                "detail": f"{dims}{pre}; {r.path}",
+                "detail": (
+                    f"Page aspect {dims}{pre}. Figure prepared for the "
+                    "manuscript at portrait aspect; not used on the website."
+                ),
             })
 
     # v5.18 addition: surface the wastewater/clinical-lags collinearity
@@ -7897,6 +8319,59 @@ def main():
     save_df(equity_county, TABLE_DIR / "Table06c_Coverage_Equity_CountyModelInput.csv")
     plot_equity(equity)
 
+    # Urbanicity, the second equity axis. Optional: a missing file skips the
+    # layer and the app says the layer has not populated, rather than the run
+    # failing over a county attribute no analysis depends on.
+    rucc = load_rucc()
+    rucc_summary, rucc_unmatched, rucc_detail = rucc_coverage(coverage, rucc)
+    rucc_head = rucc_headline(rucc_summary)
+    if not rucc_summary.empty:
+        save_df(rucc_summary, TABLE_DIR / "Table06d_RUCC_County_Coverage.csv")
+        save_df(rucc_unmatched, TABLE_DIR / "Table06e_RUCC_Unmatched_Counties.csv")
+        save_df(rucc_detail, TABLE_DIR / "Table06f_RUCC_County_Detail.csv")
+        record_source(
+            "USDA ERS Rural-Urban Continuum Codes 2023", "OK",
+            f"{rucc_head.get('n_us_counties')} counties classified; "
+            f"metropolitan counties are {rucc_head.get('metro_pct_of_network')}% of the "
+            f"surveilled network and {rucc_head.get('metro_pct_of_us_counties')}% of all counties",
+            RUCC_SOURCE_URL,
+        )
+    else:
+        record_source("USDA ERS Rural-Urban Continuum Codes 2023", "EMPTY",
+                      f"no urbanicity file at {RUCC_PATH.name}; the layer is skipped",
+                      RUCC_SOURCE_URL)
+
+    # Monitoring status by county: what a visitor looking up their own county
+    # is told. Optional in the same way as the layers above - a missing input
+    # skips the page's data rather than failing the run.
+    svi_tracts = load_svi_tracts()
+    cw_bg = load_sewershed_crosswalk(EPA_CW_BG_PATH, 12)
+    cw_tr = load_sewershed_crosswalk(EPA_CW_TR_PATH, 11)
+    sewershed_attrs = (pd.read_csv(EPA_SEWERSHED_PATH, low_memory=False)
+                       if EPA_SEWERSHED_PATH.exists() else pd.DataFrame())
+    monitoring = county_monitoring_status(coverage, rucc, cw_bg, cw_tr, svi_tracts, svi)
+    monitoring_nat = monitoring_national(monitoring, sewershed_attrs)
+    if not monitoring.empty:
+        save_df(monitoring, TABLE_DIR / "Table06g_County_Monitoring_Status.csv")
+        save_df(monitoring_nat, TABLE_DIR / "Table06h_Monitoring_Status_National.csv")
+        n_mod = int(sewershed_attrs["method"].eq("Modeled").sum()) if "method" in sewershed_attrs else 0
+        n_src = int(sewershed_attrs["method"].eq("Sourced").sum()) if "method" in sewershed_attrs else 0
+        record_source(
+            "EPA National Sewershed Dataset v1.2", "OK",
+            f"{len(cw_bg):,} crosswalk rows over {cw_bg['CWNS_ID'].nunique():,} sewersheds; "
+            f"{n_src:,} boundaries reported by their operators and {n_mod:,} modelled",
+            EPA_SEWERSHED_SOURCE_URL,
+        )
+        if not svi_tracts.empty:
+            record_source("CDC/ATSDR Social Vulnerability Index 2022 (census tract)", "OK",
+                          f"{len(svi_tracts):,} tracts, "
+                          f"{int(svi_tracts['svi'].isna().sum()):,} unscored and excluded",
+                          SVI_SOURCE_URL)
+    else:
+        record_source("EPA National Sewershed Dataset v1.2", "EMPTY",
+                      "no sewershed crosswalk supplied; monitoring status by county is skipped",
+                      EPA_SEWERSHED_SOURCE_URL)
+
     print("\n[9/19] Building redesigned pathogen activity maps...")
     activity = latest_county_activity(wastewater)
     save_df(activity, TABLE_DIR / "Table07_Recent_County_Pathogen_Activity.csv")
@@ -8150,6 +8625,9 @@ def main():
         ml_collinearity=ml_collinearity,
         ml_wastewater_only=ml_wastewater_only,
         ml_outliers=ml_outliers,
+        rucc_summary=rucc_summary,
+        rucc_unmatched=rucc_unmatched,
+        monitoring=monitoring,
     )
     save_df(validation, TABLE_DIR / "Table13_NWGS_Validation_Summary.csv")
 

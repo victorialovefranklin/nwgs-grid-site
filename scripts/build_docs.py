@@ -40,10 +40,20 @@ from doc_columns import describe                   # noqa: E402
 STAMP = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+# The published address, carried in every generated document so that a copy
+# which has been emailed, printed or filed still says where the live site is
+# and which repository produced it.
+SITE_URL = "https://nwgsgrid.com/"
+REPO_URL = "https://github.com/victorialovefranklin/nwgs-grid-site"
+
+
 def header(title, subtitle, run_id, as_of):
     return f"""# {title}
 
 {subtitle}
+
+**Live site:** [{SITE_URL.replace('https://', '').rstrip('/')}]({SITE_URL}) ·
+**Repository:** [github.com/victorialovefranklin/nwgs-grid-site]({REPO_URL})
 
 **Run described:** `{run_id}` · **Data through:** {as_of} · **Generated:** {STAMP}
 
@@ -70,6 +80,9 @@ def user_guide(E, run_id, as_of):
         ("analytics", "Trends & timing", "Long-run trends, seasonal peaks, and how wastewater lines up with clinical data."),
         ("leadtime", "Lead time", "Whether the signal arrives early enough to act on, split into biology and reporting delay."),
         ("predictive", "Predictive models", "How well models trained on earlier weeks did on weeks they had never seen."),
+        ("monitoring", "Where monitoring happens",
+         "Look up any county: whether wastewater here is being tested, how many "
+         "residents are on sewers, and which of those two explains the answer."),
         ("equity", "Coverage & equity", "Who the system reaches and who it misses."),
         ("global", "Global coverage", "How much of each country's population this method could ever observe."),
         ("tennessee", "Tennessee", "A worked state-level example."),
