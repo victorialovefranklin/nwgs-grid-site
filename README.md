@@ -1,4 +1,4 @@
-# NWGS Grid™ site
+# NWGS Grid™ — National Wastewater Genomics Smart Grid
 
 ### 🌐 Live site: **[nwgsgrid.com](https://nwgsgrid.com/)**
 
@@ -12,7 +12,7 @@ queried at page load: every figure is precomputed, so any page can be reproduced
 the archived release for its run. `scripts/build_site.py` substitutes one JSON payload into
 `site_src/template.html` and writes `site/index.html`.
 
-**Eighteen views, grouped into six sections in the header:**
+**Nineteen views, grouped into six sections in the header:**
 
 | Section | Views |
 |---|---|
@@ -20,8 +20,11 @@ the archived release for its run. `scripts/build_site.py` substitutes one JSON p
 | Surveillance | Surveillance map · Trends & timing · Lead time · Predictive models · Alerts · My alerts |
 | Coverage & equity | Where monitoring happens · Coverage & equity · Global coverage · Tennessee |
 | Research & genomics | Genomics & AMR · Protein structures |
-| Data & methods | Audit log · Methods & sources · Glossary |
+| Data & methods | Data & reports · Audit log · Methods & sources · Glossary |
 | About | About the developer |
+
+**Data & reports** lets a reader choose an area and pathogens and take away a written report —
+narrative, figures, maps and figure descriptions for that selection — rather than a bare table.
 
 The grouping is presentation only. Every view key and `#hash` route is unchanged, so existing
 links keep working. Below roughly 760px the header collapses to a menu button and the groups
@@ -145,7 +148,7 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
 | `pipeline/` | The surveillance script (`nwgs_pipeline.py`) |
 | `scripts/` | Export (validation gate), site build, alert emails, documentation generators |
 | `site_src/` | Page template, images and U.S. county map (us-atlas, ISC license) |
-| `static_inputs/` | Files the pipeline doesn't download: SVI county and tract, USDA rural-urban codes, EPA sewershed crosswalks, AMR panel, forecast ledger seed. Provenance and caveats in `static_inputs/README.md`; TIGER is downloaded each run |
+| `static_inputs/` | Files the pipeline doesn't download: SVI county and tract, USDA rural-urban codes, EPA sewershed crosswalks, AMR panel. The forecast ledger is not seeded here; the workflow creates it on the first run that produces one. Provenance and caveats in `static_inputs/README.md`; TIGER is downloaded each run |
 | `supabase/` | Database tables and security rules for accounts and alerts |
 | `docs/` | Generated documentation (see above), in Markdown and Word |
 | `references/` | Every source the project cites, with links and access terms, plus BibTeX for manuscripts |
