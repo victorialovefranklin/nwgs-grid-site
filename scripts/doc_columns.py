@@ -5,7 +5,7 @@ upstream dataset are described here. A column absent from this file is printed
 with its type, nullability and an example value, and its description is left
 blank: an undocumented column is better than an invented one.
 
-Author: Victoria Love Franklin - Ph.D. Data Science Student, GIS, AI & ML, Developer, Published Researcher
+Author: Victoria Love Franklin - PhD Data Science Student, Published Research Scholar, Developer
 Copyright (c) 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 """
 

@@ -15,7 +15,7 @@ and how to change any of them again.
 | Registrar and DNS host | IONOS |
 | Hosting | GitHub Pages, published by Actions from `site_src/template.html` |
 | `www` host | No DNS record. The apex is the only published name. |
-| Contact address on the site, README, LICENSE and CITATION | `info@nwgsgrid.com` |
+| Contact address, Reply-To and sending mailbox | `alerts@nwgsgrid.com` (one mailbox for all three) |
 | Sending mailbox for sign-in links and alert emails | `alerts@nwgsgrid.com` at IONOS |
 | Accounts, sign-in and alert rules | Supabase |
 
@@ -152,8 +152,7 @@ that neither looks like a stranger in the inbox.
 
 ### Creating the mailbox
 
-In IONOS, open **Email**, create the mailbox on the domain, and set a password. Two addresses are in use: `alerts@nwgsgrid.com` sends automated mail, and `info@nwgsgrid.com` receives it, because that is the address published on the site, in LICENSE and in CITATION.cff and set as the Reply-To. `info@` must exist as a mailbox or an alias, or replies to every alert bounce.
-The `MX` records already in the zone deliver to it; no DNS change is needed.
+In IONOS, open **Email**, create the mailbox on the domain, and set a password. One mailbox does both jobs: `alerts@nwgsgrid.com` sends the sign-in links and the weekly alerts, and receives replies, because it is also the Reply-To and the contact address published on the site, in LICENSE and in CITATION.cff. Anyone answering an alert reaches that mailbox, so it has to be read, not left as a send-only address.
 
 ### Pointing Supabase at it
 
@@ -216,7 +215,7 @@ than written out, which keeps it out of the simplest address scrapers. Keep
 that shape when changing it:
 
 ```javascript
-const EMAIL = ['info','nwgsgrid.com'].join('@');
+const EMAIL = ['alerts','nwgsgrid.com'].join('@');
 ```
 
 Then check nothing was missed:

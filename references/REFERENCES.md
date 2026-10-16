@@ -113,6 +113,8 @@ the specific entry rather than to this reference alone.
 | Rural-Urban Continuum Codes, 2023 | USDA Economic Research Service | The urbanicity axis of coverage | https://www.ers.usda.gov/data-products/rural-urban-continuum-codes | Public domain |
 | National Sewershed Dataset, v1.2 | EPA | Measured sewered population per county | https://github.com/USEPA/Sewersheds | Public domain |
 | Clean Watersheds Needs Survey 2022 | EPA | Treatment facility inventory behind the sewershed data | https://www.epa.gov/cwns | Public domain |
+| Robert Koch Institute AMELAG | RKI (Germany) | The open national feed named on Global coverage | https://github.com/robert-koch-institut/Abwassersurveillance_AMELAG | CC BY 4.0 |
+| UniProtKB curated feature table | UniProt Consortium | Functional regions on Protein structures | https://www.uniprot.org | CC BY 4.0 |
 | TIGER/Line county boundaries, 2025 | U.S. Census Bureau | County geography | https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html | Public domain |
 | NCBI Virus and NCBI Datasets API v2 | National Library of Medicine | Sequence records and genomic summaries | https://www.ncbi.nlm.nih.gov/datasets | Public domain |
 | Protein Data Bank entries | RCSB PDB | Reference structures | https://www.rcsb.org | Open, cite per entry |
@@ -145,8 +147,8 @@ weekly release your numbers came from. Every figure belongs to one dated run, so
 a citation without the run identifier cannot be checked later.
 
 ```
-Franklin, V. L. (2026). NWGS Grid™: National Wastewater Genomic Surveillance
-Grid [Software and web dashboard]. Release <run_id>.
+Franklin, V. L. (2026). NWGS Grid™: National Wastewater Genomics Smart Grid
+[Software and web dashboard]. Release <run_id>.
 https://nwgsgrid.com
 ```
 

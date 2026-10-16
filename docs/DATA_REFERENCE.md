@@ -285,10 +285,12 @@ its fetch for the run.
 
 ### 3.15 MonitoringNational
 
-1 rows, 12 columns.
+1 rows, 14 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
+| `run_id` | text | no | `run_20261009T1509Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
+| `data_as_of` | date | no | `2026-09-05` | End of the data window for the run, as published. |
 | `counties_total` | integer | no | `3144` |  |
 | `counties_reporting` | integer | no | `1077` |  |
 | `counties_sewer_service_no_site` | integer | no | `1607` |  |
@@ -304,10 +306,12 @@ its fetch for the run.
 
 ### 3.16 MonitoringStatus
 
-3,144 rows, 15 columns.
+3,144 rows, 17 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
+| `run_id` | text | no | `run_20261009T1509Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
+| `data_as_of` | date | no | `2026-09-05` | End of the data window for the run, as published. |
 | `county_fips` | integer | no | `1001` | Five-digit FIPS code identifying the county. |
 | `state_code` | text | no | `AL` | Two-letter US state or territory abbreviation. |
 | `county_name` | text | no | `Autauga County` | County name as published by CDC. |
@@ -572,10 +576,12 @@ its fetch for the run.
 
 ### 3.31 UrbanicityCounty
 
-3,144 rows, 7 columns.
+3,144 rows, 9 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
+| `run_id` | text | no | `run_20261009T1509Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
+| `data_as_of` | date | no | `2026-09-05` | End of the data window for the run, as published. |
 | `county_fips` | integer | no | `1001` | Five-digit FIPS code identifying the county. |
 | `state_code` | text | no | `AL` | Two-letter US state or territory abbreviation. |
 | `county_name` | text | no | `Autauga County` | County name as published by CDC. |
@@ -586,10 +592,12 @@ its fetch for the run.
 
 ### 3.32 UrbanicityCoverage
 
-9 rows, 10 columns.
+9 rows, 12 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
+| `run_id` | text | no | `run_20261009T1509Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
+| `data_as_of` | date | no | `2026-09-05` | End of the data window for the run, as published. |
 | `rucc_2023` | integer | no | `1` |  |
 | `rucc_label` | text | no | `Metro, 1 million or more` |  |
 | `is_metro` | boolean | no | `True` |  |

@@ -36,8 +36,8 @@ and nothing compiled: every line below is read as it was written.
 | Language | Files | Lines | Used for |
 |---|---|---|---|
 | Python | 7 | 10,623 | Pipeline, export, validation, site build, alert email, documentation |
-| HTML, CSS, JavaScript | 1 | 2,543 | The published page: markup, styles and script in one file |
-| Markdown | 12 | 2,116 | Documentation sources |
+| HTML, CSS, JavaScript | 1 | 2,839 | The published page: markup, styles and script in one file |
+| Markdown | 12 | 2,145 | Documentation sources |
 | JavaScript (Node) | 1 | 329 | Markdown to Word conversion |
 | YAML | 1 | 184 | GitHub Actions workflow |
 | SQL (PostgreSQL) | 1 | 120 | Database tables and row-level security |

@@ -1,5 +1,5 @@
 -- NWGS Grid™ backend schema (Supabase / Postgres)
--- Author: Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
+-- Author: Victoria Love Franklin — PhD Data Science Student · Published Research Scholar · Developer
 -- Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 --
 -- Run once: Supabase dashboard → SQL Editor → New query → paste this file → Run.

@@ -140,7 +140,7 @@ jobs:
         if: success()
         env:
           GH_TOKEN: ${{ github.token }}
-          CREDIT_LINE: "Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher"
+          CREDIT_LINE: "Victoria Love Franklin — PhD Data Science Student · Published Research Scholar · Developer"
         shell: bash
         run: |
           RUN_ID=$(python -c "import json;print(json.load(open('app_export/manifest.json'))['run_id'])")
@@ -159,7 +159,7 @@ jobs:
             echo
             echo "**Prepared by ${CREDIT_LINE}**"
             echo
-            echo "Contact, license requests and feedback: info@nwgsgrid.com"
+            echo "Contact, license requests and feedback: alerts@nwgsgrid.com"
             echo
             echo "- Run ID: \`${RUN_ID}\`"
             echo "- Data through: ${AS_OF}"
@@ -168,7 +168,7 @@ jobs:
             echo
             echo "Cite tables and figures from one release only; CDC data changes every week."
             echo
-            echo "**How to cite:** Franklin, V. L. (${AS_OF:0:4}). *NWGS Grid™: National Wastewater Genomic Surveillance Grid* (data through ${AS_OF}, release ${TAG}) [Software and dataset]. ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG}"
+            echo "**How to cite:** Franklin, V. L. (${AS_OF:0:4}). *NWGS Grid™: National Wastewater Genomics Smart Grid* (data through ${AS_OF}, release ${TAG}) [Software and dataset]. ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG}"
             echo
             echo "Copyright © 2026 Victoria Love Franklin. All rights reserved. No reuse without written permission; see LICENSE. Underlying CDC, Census, NCBI and RCSB data remain subject to their providers' terms."
           } > release/notes.md

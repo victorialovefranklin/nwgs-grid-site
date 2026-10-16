@@ -44,9 +44,9 @@ become one stacked list, so no view is more than one tap away.
 The front end reference documents the data object, the view functions, the chart helpers and
 the theme tokens in full.
 
-**Author:** Victoria Love Franklin · Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
+**Author:** Victoria Love Franklin · PhD Data Science Student · Published Research Scholar · Developer
 
-**Contact, license requests and beta feedback:** info@nwgsgrid.com
+**Contact, license requests and beta feedback:** alerts@nwgsgrid.com
 
 **Copyright © 2026 Victoria Love Franklin. All rights reserved.** No reuse without written
 permission; see [LICENSE](LICENSE). To cite, use **Cite this repository** on GitHub (from
@@ -115,8 +115,9 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
 - Database tables and security rules: `supabase/schema.sql` (run once in the SQL Editor).
 - Weekly alert emails: `scripts/send_alerts.py`, run by the workflow after each passing run.
   Secrets: `SUPABASE_SECRET_KEY`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_HOST` when the
-  mailbox is not on the default host. Automated mail is sent from `alerts@nwgsgrid.com`;
-  `info@nwgsgrid.com` is the contact address and the Reply-To, so both mailboxes must exist.
+  mailbox is not on the default host. One mailbox, `alerts@nwgsgrid.com`, both sends the
+  automated mail and receives replies: it is the sender, the Reply-To, and the contact
+  address published on the site, in LICENSE and in CITATION.cff.
 - Sign-in links are sent by Supabase itself, not by this repository, so its own SMTP settings
   and redirect URLs have to be configured too. Both are in
   [docs/DOMAIN_AND_EMAIL.md](docs/DOMAIN_AND_EMAIL.md).

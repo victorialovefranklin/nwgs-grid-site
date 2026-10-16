@@ -80,7 +80,23 @@ li{text-wrap:pretty}
 .fulllogo{display:block;width:100%;max-width:184px;height:auto;margin:0 auto;border-radius:10px}
 .markbadge{flex:none;width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;
   box-shadow:0 0 0 1.5px var(--rail-line)}
-.markbadge img{width:30px;height:auto;display:block}
+.markbadge img{width:auto;height:30px;display:block}
+.pathset{border:1px solid var(--line);border-radius:8px;padding:var(--sp-2);margin-top:var(--sp-2)}
+.honour{margin:0 0 var(--sp-2);padding:10px 14px;border-left:3px solid var(--rose-deep);background:#fdf4f7;border-radius:0 8px 8px 0;font-size:.9375rem}
+.honour-k{text-transform:uppercase;letter-spacing:.06em;font-size:.6875rem;font-weight:700;color:var(--rose-deep);margin-right:10px}
+.honour.quote{border-left-color:var(--teal-deep);background:#f1f7f7}
+.honour.quote .honour-k{color:var(--teal-deep)}
+.honour.quote blockquote{margin:6px 0 0;font-style:italic}
+.honour.quote figcaption{margin-top:8px;font-size:.8125rem}
+.qacards{margin:0 0 var(--sp-3);display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.qacards img{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--line)}
+.qacards figcaption{grid-column:1/-1;font-size:.8125rem;margin-top:2px}
+@media (max-width:620px){.qacards{grid-template-columns:1fr}}
+.head.sub{margin-top:var(--sp-4)}
+.head.sub h2{font-size:1.25rem}
+.whywords{letter-spacing:.08em;text-transform:uppercase;font-size:.8125rem;font-weight:700;color:var(--rose-deep);margin:0 0 var(--sp-2)}
+.pathset legend{padding:0 6px}
+.pchk{display:inline-flex;align-items:center;gap:6px;margin:0 14px 6px 0;font-size:.9375rem}
 .wlogo{width:min(220px,60%);height:auto;display:block;margin:0 0 4px}
 .brand .wm{display:flex;flex-direction:column;gap:1px}
 .brand b{font:700 1.25rem/1.1 var(--display);letter-spacing:-.02em;color:var(--rail-ink)}
@@ -181,7 +197,7 @@ details>summary.btn::-webkit-details-marker{display:none}
    wrapped in its own element and the two sit side by side.
    .panel sets display:flex later in the sheet, hence both classes. */
 .panel.why{display:flex;flex-direction:row;align-items:flex-start;gap:var(--sp-3)}
-.panel.why .wlogo{flex:none;width:190px;max-width:38%;margin:2px 0 0}
+.panel.why .wlogo{flex:none;width:300px;max-width:46%;margin:2px 0 0}
 .why-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:14px}
 /* All three paragraphs read at one size; the opening is not a pull quote. */
 .why .lede{font:400 1rem/1.6 var(--body);color:var(--ink)}
@@ -398,9 +414,10 @@ tr.unsup td{opacity:.62}
 .plainlist{max-width:none;margin:10px 0 12px;padding-left:20px;text-align:left}
 .plainlist li{margin:6px 0}
 /* Opening screen: a short hero, one primary action, then four indicators. */
-.hero{padding:var(--sp-3) 0 var(--sp-2);max-width:74ch;text-align:left}
-.hero h1{font-size:2rem;line-height:1.18;margin-bottom:12px}
-.hero-sub{font-size:1rem;line-height:1.6;max-width:70ch;margin-bottom:var(--sp-4)}
+.hero{padding:var(--sp-3) 0 var(--sp-2);text-align:left}
+.hero h1{font-size:2rem;line-height:1.18;margin-bottom:12px;text-wrap:balance}
+.hero-sub{font-size:1rem;line-height:1.6;margin-bottom:var(--sp-4);text-align:left}
+@media (max-width:899px){.hero-sub{text-wrap:balance}}
 .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--rose-deep);color:#fff;
   font-weight:600;font-size:1rem;padding:12px 22px;border-radius:999px;text-decoration:none;
   border:1px solid var(--rose-deep)}
@@ -714,8 +731,8 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   <header class="topbar">
     <div class="topbar-in">
       <a class="brand" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid home">
-        <span class="markbadge"><img src="img/nwgs-mark.webp" alt="" width="149" height="160"></span>
-        <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomic Surveillance</small></span></a>
+        <span class="markbadge"><img src="img/nwgs-mark.webp" alt="" width="320" height="426"></span>
+        <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomics Smart Grid</small></span></a>
       <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="nav"><svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
       <nav class="nav" id="nav" aria-label="Sections"></nav>
     </div>
@@ -729,9 +746,9 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-leadtime" hidden></section>
     <section class="view" id="v-predictive" hidden></section>
     <div class="printonly" aria-hidden="true">
-      <h1>NWGS Grid™ — National Wastewater Genomic Surveillance Grid</h1>
+      <h1>NWGS Grid™ — National Wastewater Genomics Smart Grid</h1>
       <p id="pr-run"></p>
-      <p>Franklin, V. L. NWGS Grid™: National Wastewater Genomic Surveillance Grid [Software and web dashboard]. https://nwgsgrid.com</p>
+      <p>Franklin, V. L. NWGS Grid™: National Wastewater Genomics Smart Grid [Software and web dashboard]. https://nwgsgrid.com</p>
       <p>© Victoria Love Franklin. All rights reserved. Citation required; see LICENSE. Cite the run identifier above with any figure.</p>
     </div>
     <section class="view" id="v-reports" hidden></section>
@@ -749,7 +766,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
       <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
-      <span>Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher</span>
+      <span>PhD Data Science Student · Published Research Scholar · Developer</span>
       <span class="footmail"></span>
       <span>NWGS Grid™ · <a href="#about" data-go="about">About, contact &amp; how to cite</a></span>
     </footer>
@@ -767,7 +784,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
 <script>
 const D = JSON.parse(document.getElementById('data').textContent);
 const TOPO = JSON.parse(document.getElementById('topo').textContent);
-const EMAIL = ['info','nwgsgrid.com'].join('@');
+const EMAIL = ['alerts','nwgsgrid.com'].join('@');
 const ROUTINE = ['SARS-CoV-2','RSV','Influenza A'];
 const EMERGING = ['Influenza A(H5)','Measles','Mpox'];
 const LEVELS = ['Very Low','Low','Typical','Elevated','High'];
@@ -927,68 +944,15 @@ const legend = items => `<div class="legend">${items.map(([c,l])=>`<span><i styl
    is the one thing the whole project is built to make possible. The header
    lines start with # so pandas, R and Excel can all skip them.          */
 const CITE_LINES = () => [
-  `NWGS Grid™ — National Wastewater Genomic Surveillance Grid`,
-  `Franklin, V. L. (${new Date(R.data_pulled_utc).getUTCFullYear()}). NWGS Grid™: National Wastewater Genomic Surveillance Grid`,
+  `NWGS Grid™ — National Wastewater Genomics Smart Grid`,
+  `Franklin, V. L. (${new Date(R.data_pulled_utc).getUTCFullYear()}). NWGS Grid™: National Wastewater Genomics Smart Grid`,
   `[Software and web dashboard]. Run ${R.run_id}. https://nwgsgrid.com`,
   `Run: ${R.run_id} · Data through: ${R.data_as_of} · Downloaded: ${new Date().toISOString().slice(0,10)}`,
   `© ${new Date().getUTCFullYear()} Victoria Love Franklin. All rights reserved. Citation required; see LICENSE.`,
 ];
-const csvCell = v => {
-  if(v===null||v===undefined) return '';
-  const s=String(v);
-  return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
-};
-function toCSV(rows, cols){
-  if(!rows||!rows.length) return '';
-  const keys = cols || Object.keys(rows[0]);
-  const head = CITE_LINES().map(l=>'# '+l).join('\n')+'\n';
-  return head + keys.join(',') + '\n'
-       + rows.map(r=>keys.map(k=>csvCell(r[k])).join(',')).join('\n') + '\n';
-}
-function downloadCSV(rows, slug, cols){
-  const csv = toCSV(rows, cols);
-  if(!csv){alert('Nothing to download from this table in this run.');return}
-  const name = `nwgs_${slug}_${R.run_id}.csv`;
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = name;
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()}, 0);
-}
-/* Buttons are wired by delegation so a view can render one without having to
-   remember to attach a handler after each rerender. */
-const dlCSV = (slug, label) => {
-  // Rendered only when the route actually has rows. A button that explains
-  // itself with an alert after being pressed is worse than no button.
-  const r = dlRows(slug);
-  return (r && r.length)
-    ? `<button class="btn small dl" data-dl="${esc(slug)}">${esc(label||'Download CSV')}</button>`
-    : '';
-};
 const dlPDF = () =>
   `<button class="btn small dl" data-pdf="1" title="Opens your browser's print dialog; choose Save as PDF">Save as PDF</button>`;
 
-/* What each download slug exports. Kept in one place so the citation, the
-   column order and the row source cannot drift apart between views. */
-function dlRows(slug){
-  const N = D.monitoring_names || {};
-  switch(slug){
-    case 'monitoring': {
-      if(!D.monitoring) return null;
-      const L=['Wastewater here is being tested','Sewer service here, no site reporting','Few homes here are on sewers'];
-      return Object.entries(D.monitoring).map(([f,v])=>({
-        county_fips:f, county_name:(N[f]||['',''])[0], state:(N[f]||['',''])[1],
-        status:L[v[0]], sites_reporting:v[1], residents_on_sewers:v[2],
-        share_on_sewers:v[3], vulnerability_of_sewered_area:v[4]}));
-    }
-    case 'urbanicity':  return D.urbanicity||null;
-    case 'audit':       return D.audit||null;
-    case 'equity':      return D.equity||null;
-    case 'global':      return D.global_coverage||null;
-    case 'leadtime':    return D.leadtime||null;
-    default:            return null;
-  }
-}
 
 function downloadFigure(btn){
   const host = btn.closest('.panel, article, section') || document;
@@ -1016,9 +980,6 @@ const dlFig = (name, id) =>
   `<button class="btn small dl" data-figdl="1" data-figname="${esc(name)}"${id?` data-fig="${esc(id)}"`:''}>Save figure (SVG)</button>`;
 document.addEventListener('click', e=>{
   const f=e.target.closest('[data-figdl]'); if(f){downloadFigure(f);return}
-  const c=e.target.closest('[data-dl]'); if(c){const rows=dlRows(c.dataset.dl);
-    if(!rows||!rows.length){alert('That table has no data in this run, so there is nothing to download.');return}
-    downloadCSV(rows, c.dataset.dl); return}
   if(e.target.closest('[data-pdf]')) window.print();
 });
 const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodata'),'No recent data']]);
@@ -1260,7 +1221,7 @@ function forecastPanel(){
 /* ---------- coverage sub-panels (representativeness, attrition) ---------- */
 function repPanel(){
   const defn=`<p class="note"><b>Definition.</b> Sewer share is the summed population served by the distinct monitored sites mapped to a county, divided by county population. The SVI gap is the county's social vulnerability minus the population-weighted mean vulnerability of monitored counties in the same state, so a positive gap means monitoring is skewed away from this county. Representativeness is the sewer share penalized by the absolute SVI gap. The definition is versioned (<span class="mono">nwgs-representativeness-v1</span>) so a change to it is visible between runs.</p>
-  <p class="note"><b>Stated limitation.</b> The vulnerability term is a county-level proxy. A true within-sewershed demographic comparison needs service-area boundaries. CDC does collect them &mdash; its own review reports sewershed boundaries submitted for 1,233 of 1,871 sites (82%) in 2024 (<a href="https://wwwnc.cdc.gov/eid/article/32/13/26-1118_article" target="_blank" rel="noopener">Mark-Carew et al., <i>Emerg Infect Dis</i> 2026;32(Suppl)</a>) &mdash; but they are not released publicly, so they cannot be used here. The limit is disclosure rather than collection, and it is reported rather than worked around.</p>`;
+  <p class="note"><b>Stated limitation, now partly resolved.</b> The vulnerability term in the score below is still a county-level proxy. A true within-sewershed comparison needs service-area boundaries, and this page used to report that CDC collects them &mdash; its own review counts boundaries submitted for 1,233 of 1,871 sites in 2024 (<a href="https://wwwnc.cdc.gov/eid/article/32/13/26-1118_article" target="_blank" rel="noopener">Mark-Carew et al., <i>Emerg Infect Dis</i> 2026;32(Suppl)</a>) &mdash; without publishing them. EPA publishes equivalent boundaries, so the comparison is now computed: vulnerability inside each county&rsquo;s sewered area appears on <a href="#monitoring" data-go="monitoring">Where monitoring happens</a>, from the <a href="https://github.com/USEPA/Sewersheds" target="_blank" rel="noopener">EPA National Sewershed Dataset</a>. Two limits remain, and both are stated rather than worked around: 13,826 of EPA&rsquo;s 17,079 boundaries are modelled rather than reported by their operators, so a single sewershed&rsquo;s population is an estimate; and the representativeness score on this page has not yet been rebuilt on the measured figure.</p>`;
   if(!D.representativeness||!D.representativeness.length)
     return `<article class="panel c12"><header><h2>Representativeness</h2></header>
       <p>PHA4GE's wastewater reporting guidance calls for a representativeness measure and does not define one. This page supplies an explicit definition.</p>
@@ -1311,7 +1272,7 @@ function urbanicityPanel(){
   const metroUS=pct(sum(metro,'n_us_counties'),nUS);
   const metroReach=pct(sum(metro,'n_counties_surveilled'),sum(metro,'n_us_counties'));
   const nonReach=pct(sum(non,'n_counties_surveilled'),sum(non,'n_us_counties'));
-  return `<article class="panel c12"><header><span class="dlrow">${dlCSV('urbanicity')}</span><h2>Urbanicity <button class="qmark" data-gloss="rucc" aria-label="What is a Rural-Urban Continuum Code?">?</button></h2><span class="small">the second equity axis, checked against a published figure</span></header>
+  return `<article class="panel c12"><header><h2>Urbanicity <button class="qmark" data-gloss="rucc" aria-label="What is a Rural-Urban Continuum Code?">?</button></h2><span class="small">the second equity axis, checked against a published figure</span></header>
   <div class="statgrid">
     <div class="stat"><span class="label">Metropolitan share of the surveilled network</span><span class="big">${metroNet!=null?fmt(metroNet,1)+'%':'—'}</span></div>
     <div class="stat"><span class="label">Metropolitan share of all counties</span><span class="big">${metroUS!=null?fmt(metroUS,1)+'%':'—'}</span></div>
@@ -1372,6 +1333,11 @@ function attritionPanel(){
    resistance per treatment plant, so neither exists for a single county, and
    the tab says so rather than quietly showing less. */
 const RSCOPE = {kind:'us', code:'', label:'United States'};
+// Which pathogens the report covers. Defaults to all of them; a reader
+// following one pathogen should not have to read past the others.
+let RPATH = null;   // null means every pathogen in this run
+const rPathogens = () => Object.keys(D.activity||{}).sort();
+const rPathOn = p => !RPATH || RPATH.includes(p);
 const STATES_WITH_DATA = () => {
   const s=new Set();
   Object.values(D.monitoring_names||{}).forEach(n=>{if(n&&n[1])s.add(n[1])});
@@ -1381,69 +1347,6 @@ const inScope = f => RSCOPE.kind==='us' ? true
   : RSCOPE.kind==='county' ? f===RSCOPE.code
   : ((D.monitoring_names||{})[f]||[])[1]===RSCOPE.code;
 
-/* What each dataset is, and the scopes it can honestly answer. */
-const RDATA = [
-  {id:'monitoring', name:'Monitoring status by county',
-   note:'Whether a site is reporting, residents on sewers, vulnerability of the sewered area.',
-   scopes:['us','state','county']},
-  {id:'activity', name:'Current activity by county and pathogen',
-   note:'The four-week level for each pathogen, with the standardised value behind it.',
-   scopes:['us','state','county']},
-  {id:'coverage', name:'Surveillance record by county',
-   note:'Weeks of data, whether the county is analysis-ready, social vulnerability.',
-   scopes:['us','state','county']},
-  {id:'statelag', name:'Lead time by state',
-   note:'Shedding lead, reporting lag and operational lead.',
-   scopes:['us','state'], why:'computed per state, so it has no single-county value'},
-  {id:'amr_state', name:'Resistance genes by state',
-   note:'Detections summarised from treatment-plant measurements.',
-   scopes:['us','state'], why:'measured per treatment plant, not per county'},
-  {id:'urbanicity', name:'Coverage by rural-urban class',
-   note:'How much of each class the network reaches, against all U.S. counties.',
-   scopes:['us'], why:'classes are counted against every county in the country'},
-  {id:'equity', name:'Coverage by vulnerability quartile',
-   note:'Analysis-ready coverage across social vulnerability quartiles.',
-   scopes:['us'], why:'quartiles are ranked across all counties at once'},
-  {id:'audit', name:'Validation checks for this run',
-   note:'Every check the pipeline ran, and what it found.',
-   scopes:['us'], why:'checks describe the whole run, not one place'},
-];
-
-/* Rows for a dataset at the current scope. One place, so a filtered download
-   and the report it accompanies can never disagree. */
-function rRows(id){
-  const N=D.monitoring_names||{}, nm=f=>(N[f]||['',''])[0], st=f=>(N[f]||['',''])[1];
-  switch(id){
-    case 'monitoring':{
-      if(!D.monitoring) return [];
-      const L=['Wastewater here is being tested','Sewer service here, no site reporting','Few homes here are on sewers'];
-      return Object.entries(D.monitoring).filter(([f])=>inScope(f)).map(([f,v])=>({
-        county_fips:f, county_name:nm(f), state:st(f), status:L[v[0]],
-        sites_reporting:v[1], residents_on_sewers:v[2], share_on_sewers:v[3],
-        vulnerability_of_sewered_area:v[4]}));
-    }
-    case 'activity':{
-      const out=[];
-      Object.entries(D.activity||{}).forEach(([p,byF])=>
-        Object.entries(byF).filter(([f])=>inScope(f)).forEach(([f,v])=>out.push({
-          county_fips:f, county_name:nm(f)||((D.names||{})[f]||[''])[0], state:st(f),
-          pathogen:p, level:category(v[0]), activity_z:v[0], n_sites:v[1]})));
-      return out;
-    }
-    case 'coverage':
-      return Object.entries(D.coverage||{}).filter(([f])=>inScope(f)).map(([f,v])=>({
-        county_fips:f, county_name:nm(f)||((D.names||{})[f]||[''])[0], state:st(f),
-        weeks_of_data:v[0], analysis_ready:v[1], social_vulnerability:v[2]}));
-    case 'statelag':
-      return (D.statelag||[]).filter(r=>RSCOPE.kind==='us'||r.state_code===RSCOPE.code);
-    case 'amr_state':
-      return (D.amr_state||[]).filter(r=>RSCOPE.kind==='us'||r.state_code===RSCOPE.code);
-    case 'urbanicity': return D.urbanicity||[];
-    case 'equity':     return D.equity||[];
-    case 'audit':      return D.audit||[];
-    default:           return [];
-  }
-}
 const category = z => z==null?'Unknown': z<=-1?'Very Low': z<=-0.25?'Low': z<=0.25?'Typical': z<=1?'Elevated':'High';
 const rSlug = () => RSCOPE.kind==='us' ? 'united_states'
   : (RSCOPE.label||RSCOPE.code).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
@@ -1473,7 +1376,7 @@ function buildReport(){
         lim=fips.filter(f=>mono[f][0]===2).length;
   const sewered=fips.reduce((a,f)=>a+(mono[f][2]||0),0);
   const acts=[];
-  Object.entries(D.activity||{}).forEach(([pth,byF])=>{
+  Object.entries(D.activity||{}).filter(([pth])=>rPathOn(pth)).forEach(([pth,byF])=>{
     const vals=Object.entries(byF).filter(([f])=>inScope(f)).map(([f,v])=>v[0]).filter(v=>v!=null);
     if(vals.length) acts.push({pathogen:pth, n:vals.length,
       mean:vals.reduce((a,b)=>a+b,0)/vals.length,
@@ -1483,8 +1386,8 @@ function buildReport(){
   // decomposition and is the one worth quoting; StateLag carries the best lag and
   // its correlation. Use whichever this run produced, and say which it is, rather
   // than printing a sentence about terms the table does not contain.
-  const lead3=(D.leadtime||[]).filter(r=>S.kind==='us'||r.state_code===S.code);
-  const lagC =(D.statelag||[]).filter(r=>S.kind==='us'||r.state_code===S.code);
+  const lead3=(D.leadtime||[]).filter(r=>(S.kind==='us'||r.state_code===S.code)&&rPathOn(r.pathogen));
+  const lagC =(D.statelag||[]).filter(r=>(S.kind==='us'||r.state_code===S.code)&&rPathOn(r.pathogen));
 
   // --- narrative -------------------------------------------------------
   let lead;
@@ -1635,7 +1538,7 @@ start(){
   })();
 
   el.innerHTML=`<div class="hero">
-    <h1>National Wastewater Genomic Surveillance</h1>
+    <h1>National Wastewater Genomics Smart Grid</h1>
     <p class="hero-sub">Explore wastewater pathogen activity, geographic coverage and public-health trends across the United States.</p>
     <p><a class="btn-primary" href="#dashboard" data-go="dashboard">Explore the dashboard</a></p>
   </div>
@@ -2096,7 +1999,7 @@ analytics(){
 
 leadtime(){
   const el=document.getElementById('v-leadtime');
-  const head=`<div class="head"><h1>Lead time, decomposed <button class="qmark" data-gloss="operational-lead" aria-label="What does operational lead mean?">?</button></h1><p class="dlrow">${dlCSV('leadtime','Download lead-time table (CSV)')} ${dlPDF()}</p>
+  const head=`<div class="head"><h1>Lead time, decomposed <button class="qmark" data-gloss="operational-lead" aria-label="What does operational lead mean?">?</button></h1>
     <p class="muted">Early warning is usually reported as one number. It is actually three, and only the third one tells a health department whether the signal arrived in time to act on.</p></div>
   <article class="panel c12 plain">
     <p>People shed viruses into wastewater before they feel sick enough to go to a hospital. That is the promise of this method: sewage can show an outbreak building before clinics do. The usual way of saying this is “wastewater gives one to three weeks of warning.”</p>
@@ -2210,6 +2113,9 @@ reports(){
                     return `<option value="${f}"${f===RSCOPE.code?' selected':''}>${esc(n[0])}${n[1]?', '+esc(n[1]):''}</option>`}).join('')
                 : states.map(s=>`<option value="${s}"${s===RSCOPE.code?' selected':''}>${esc(STATE_NAMES[s]||s)}</option>`).join('')}</select></label>
           </div>
+          <fieldset class="pathset"><legend class="small">Pathogens to include</legend>
+            ${rPathogens().map(pn=>`<label class="pchk"><input type="checkbox" class="r-path" value="${esc(pn)}"${rPathOn(pn)?' checked':''}> ${esc(pn)}</label>`).join('')}
+          </fieldset>
         </form>
         <p class="small">Showing: <b id="r-label">${esc(RSCOPE.label)}</b></p>
       </article>
@@ -2219,19 +2125,7 @@ reports(){
         <div><button class="btn primary" id="r-build">Build report for ${esc(RSCOPE.label)}</button></div>
       </article>
 
-      <article class="panel c12"><header><h2>Tables</h2><span class="small">as CSV, filtered to the area above</span></header>
-        <div class="dlgrid">${RDATA.map(d=>{
-          const ok=d.scopes.includes(RSCOPE.kind);
-          const rows=ok?rRows(d.id).length:0;
-          return `<div${ok?'':' class="rdim"'}><b>${esc(d.name)}</b>
-            <p class="small">${esc(d.note)}</p>
-            ${ok ? (rows?`<button class="btn small" data-rdl="${d.id}">Download CSV · ${rows.toLocaleString()} row${rows===1?'':'s'}</button>`
-                        : `<p class="small"><b>No rows for this area in this run.</b></p>`)
-                 : `<p class="small"><b>Not available for ${RSCOPE.kind==='county'?'a single county':'one state'}</b> &mdash; ${esc(d.why||'')}.</p>`}
-          </div>`}).join('')}</div>
-        <p class="note">Each file opens with the citation, the run identifier and the data-through date on lines beginning with <span class="mono">#</span>, which pandas, R and Excel all skip. The complete archive for every run, including the pipeline tables and figures, is published at <a href="https://github.com/victorialovefranklin/nwgs-grid-site/releases" target="_blank" rel="noopener">the releases page</a>.</p>
-      </article>
-    </div>
+      </div>
     <div id="r-out"></div>`;
 
     const kind=document.getElementById('r-kind'), pick=document.getElementById('r-pick');
@@ -2248,10 +2142,9 @@ reports(){
         : (()=>{const n=D.monitoring_names[pick.value];return `${n[0]}${n[1]?', '+n[1]:''}`})();
       render();
     };
-    el.querySelectorAll('[data-rdl]').forEach(b=>b.onclick=()=>{
-      const rows=rRows(b.dataset.rdl);
-      if(!rows.length){alert('No rows for that area in this run.');return}
-      downloadCSV(rows, `${b.dataset.rdl}_${rSlug()}`);
+    el.querySelectorAll('.r-path').forEach(c=>c.onchange=()=>{
+      const on=[...el.querySelectorAll('.r-path:checked')].map(x=>x.value);
+      RPATH = on.length===rPathogens().length ? null : on;
     });
     document.getElementById('r-build').onclick=()=>{buildReport();
       document.getElementById('r-out').scrollIntoView({behavior:'smooth',block:'start'})};
@@ -2314,7 +2207,7 @@ monitoring(){
     <div id="mon-answer"><p class="small">Pick a county above, or select one on the map.</p></div>
   </article>
 
-  <article class="panel c12"><header><h2>The national picture</h2><span class="dlrow">${dlCSV('monitoring','Download county table (CSV)')} ${dlPDF()}</span></header>
+  <article class="panel c12"><header><h2>The national picture</h2></header>
     ${NAT?`<div class="statgrid">
       <div class="stat"><span class="label">Counties where wastewater is being tested</span><span class="big">${num(NAT.counties_reporting)}</span><span class="small">of ${num(NAT.counties_total)}</span></div>
       <div class="stat"><span class="label">Counties with sewer service and no site reporting</span><span class="big">${num(NAT.counties_sewer_service_no_site)}</span></div>
@@ -2355,7 +2248,7 @@ equity(){
   const g=D.equity[0];const sig=g.glm_p_value<.05;
   const line=sig?(g.glm_odds_ratio<1?'More socially vulnerable counties are less likely to have analysis-ready wastewater surveillance.':'More socially vulnerable counties are more likely to have analysis-ready surveillance.'):'No clear difference by social vulnerability.';
   el.innerHTML=`<div class="head"><h1>Coverage & equity</h1><p class="muted">Who the wastewater system reaches, measured on two axes: the CDC/ATSDR Social Vulnerability Index and USDA rural-urban classification.</p></div>
-  <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2><span class="dlrow">${dlCSV('equity')} ${dlPDF()}</span></header><div class="chart" id="e-bars"></div>
+  <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
     <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
   <article class="panel c12"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
     <p style="font-weight:600">${line}</p>
@@ -2404,7 +2297,7 @@ equity(){
 
 global(){
   const el=document.getElementById('v-global');
-  const head=`<div class="head"><h1>Global coverage <button class="qmark" data-gloss="global-coverage" aria-label="What does global coverage mean?">?</button></h1><p class="dlrow">${dlCSV('global','Download country table (CSV)')} ${dlPDF()}</p>
+  const head=`<div class="head"><h1>Global coverage <button class="qmark" data-gloss="global-coverage" aria-label="What does global coverage mean?">?</button></h1>
     <p class="muted">Wastewater surveillance can only ever see people whose waste reaches a monitored sewer. This page asks a different question from the rest of the site: not “what is rising,” but “who could this method ever detect in the first place?”</p></div>
   <article class="panel c12 plain">
     <p>Testing sewage for disease works by catching what a community flushes. If a household is not connected to a sewer system, whether it uses a pit latrine, a septic tank or no sanitation at all, nothing that household sheds ever arrives at a treatment plant, so no amount of testing will ever detect it.</p>
@@ -2703,13 +2596,28 @@ about(){
   const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
   const site=location.protocol.startsWith('http')?location.origin+location.pathname:'https://nwgsgrid.com/';
   const tnNow=(D.tn_county||[]).filter(c=>c.reporting_now).length;
-  el.innerHTML=`<div class="head"><h1>About The Developer</h1><p class="muted">Who built NWGS Grid™, why, and how to reach her, cite the work or request a license.</p></div>
+  el.innerHTML=`<div class="head"><h1>About</h1><p>What NWGS Grid™ is, who built it, and how to reach her, cite the work or request a license.</p></div>
+  <div class="grid">
+  <article class="panel c12"><header><h2>About NWGS Grid™</h2></header>
+    <p class="lede">NWGS Grid™ is a national view of what wastewater testing can see &mdash; and of who it cannot see at all.</p>
+    <p>Every Saturday it pulls the current wastewater results for six pathogens from the U.S. Centers for Disease Control and Prevention, together with emergency-department visits, county health measures, social vulnerability, sewer service and genomic records. It harmonises them, runs ${R.n_checks||(R.n_pass+R.n_warning+R.n_fail)} validation checks, and rebuilds this entire site from a single snapshot. If a check fails, nothing is published and last week&rsquo;s figures stay up.</p>
+    <p>Three things set it apart from a map of recent results. It separates how early a signal appears from how long it takes to reach the public, because only the second number tells a health department whether it could have acted in time. It measures how much of each county the testing can actually observe, rather than treating a county with one monitored plant as covered. And it keeps every weekly run frozen and citable, so a figure quoted from it can still be checked a year later.</p>
+    <p class="note">Built entirely from public data. What the site can and cannot support is set out on <a href="#methods" data-go="methods">Methods &amp; sources</a>, and every check from the latest run is published on the <a href="#audit" data-go="audit">Audit log</a>.</p></article>
+  </div>
+  <div class="head sub"><h2>The developer</h2></div>
   <div class="grid aboutgrid">
   <figure class="panel c4 portrait"><img src="img/vlf-portrait.jpg" alt="Portrait of Victoria Love Franklin" width="1080" height="1439" loading="lazy"></figure>
   <article class="panel c8 bio"><h2>Victoria Love Franklin, PSM, CPT</h2>
-    <p class="role">Ph.D. Data Science Student · GIS · AI &amp; ML · Developer · Published Researcher · Public Administration · Executive Leadership &amp; Policy</p>
-    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened her studies into Data Science with a cybersecurity concentration. Her multidisciplinary research spans data science, geospatial intelligence, genomics, <b>structural biology</b>, cybersecurity and public-sector technology.</p>
-    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance. Her professional and research experience includes work involving Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine. She has also trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and artificial intelligence.</p>
+    <p class="role">PhD Data Science Student · Published Research Scholar · Developer</p>
+    <p class="honour"><span class="honour-k">Recognition</span> Nominated as an Inspiring Black Scientist through <a href="https://www.wiley.com/en-us/research/inspiring-black-scientists" target="_blank" rel="noopener">Wiley’s Inspiring Black Scientists initiative</a>, 2026. <a href="https://www.instagram.com/p/DVRQ2Feka2z/" target="_blank" rel="noopener">Announcement</a></p>
+        <figure class="honour quote"><span class="honour-k">Featured</span><blockquote>&ldquo;She also developed the NWGS Grid Platform, a real-time infectious disease surveillance and analytics system that fuses multiple data sources, wastewater genomic data, clinical results, and contextual population data into a unified &lsquo;smart grid&rsquo; that public health teams can use to detect and monitor disease trends as they emerge.&rdquo;</blockquote><figcaption>Kyler Moore, <i>Exploring Wastewater Monitoring Research at HBCUs: A Q&amp;A with a Doctoral Student</i>, <a href="https://www.wastewaterscan.org" target="_blank" rel="noopener">WastewaterSCAN</a> &mdash; the national wastewater monitoring program led by Stanford University and Emory University.</figcaption></figure>
+        <figure class="qacards">
+      <img src="img/wwscan-qa-1.webp" width="720" height="900" loading="lazy" alt="Q&amp;A card introducing Victoria Love Franklin, PhD in Data Science pre-candidate at Meharry Medical College, and listing her core research areas: wastewater genomic surveillance and bioinformatics of infectious diseases, cybersecurity infrastructure, environmental health, geospatial analysis, and electricity power outages and grid resilience.">
+      <img src="img/wwscan-qa-2.webp" width="720" height="900" loading="lazy" alt="Q&amp;A card. Asked which concept about wastewater monitoring she would make common knowledge, Victoria Love Franklin answers that reporting through the health system is not always as quick as wanted, while wastewater sampling gives real-time, fast-track detection that policymakers can use to direct resources and support a reduction in infectious-disease transmission.">
+      <figcaption>Published by <a href="https://www.instagram.com/wwscan/" target="_blank" rel="noopener">WastewaterSCAN</a> as part of the Q&amp;A above. Cards and artwork are theirs, reproduced with credit.</figcaption>
+    </figure>
+    <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened her studies into Data Science with a cybersecurity concentration. Her multidisciplinary research spans data science, geospatial intelligence, <b>metagenomics</b>, cybersecurity and public-sector technology.</p>
+    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance. Her professional and research experience includes work involving Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine. She has also trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub and is a <b>certified phlebotomy technician</b>, and she teaches and mentors students in data science, GIS and artificial intelligence.</p>
     <p>Her work focuses on developing data-driven approaches and AI-enabled systems to address complex challenges in public health, critical infrastructure resilience and government operations. Through NWGS Grid™, she brings together wastewater surveillance data, geospatial analytics, genomic information and reference protein structures with curated functional regions to support a broader understanding of infectious-disease surveillance.</p>
     <div class="controls">
       <a class="btn primary" href="${mail('NWGS Grid inquiry')}">Email Victoria</a>
@@ -2719,10 +2627,11 @@ about(){
     </article>
   </div>
   <div class="grid">
-  <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo: National Wastewater Genomic Surveillance" width="520" height="496" loading="lazy"><div class="why-body"><h2>Why I built NWGS Grid™</h2>
+  <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo" width="1120" height="550" loading="lazy"><div class="why-body"><h2>Why I built NWGS Grid™</h2>
+    <p class="whywords">Detect · Analyze · Predict · Inform · Protect</p>
     <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor. But that signal is scattered across separate CDC datasets, clinical feeds and vulnerability indices, it changes every week, and it reaches some communities far better than others.</p>
-    <p>I built NWGS Grid™ to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where respiratory and emerging pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance still misses. <b>It is independent work.</b> I built every part of it, the pipeline, the validation checks, the weekly automation and this site, outside any employer, fellowship or sponsored program, using only public data.</p>
-    <p>Knowing which places are missed is not the same as knowing why, so the site measures that too. Of the counties where no site is reporting, <b>most already have sewer systems</b> &mdash; the limit is usually not the method. Only a small number are places where wastewater testing could never see many residents.</p>
+    <p>I have been building NWGS Grid™ since <b>Fall 2024</b> to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance misses. <b>It is independent work</b>, built outside any employer, fellowship or sponsored program, using only public data.</p>
+    <p>Knowing which places are missed is not the same as knowing why, so the site measures that too. Of the counties where no site is reporting, most already have sewer systems &mdash; the limit is usually not the method.</p>
     <p>In Tennessee, where I live and study, ${tnNow} of 95 counties report wastewater data to CDC today.&nbsp;<span class="sig">— Victoria</span></p></div></article>
   <article class="panel c12"><h2>Credentials &amp; affiliations</h2>
     <h3>Education &amp; training</h3>
@@ -2748,12 +2657,11 @@ about(){
     <ul class="creds">
       <li>APHL ID Lab Con 2027: three NWGS Grid abstracts submitted (one oral, two posters) · <b>pending review and selection</b></li>
       <li><b>Poster presenter</b>, <b>Wastewater Disease Surveillance Summit</b> (2025). Franklin et al., “Using GIS and Metagenomics to Enhance Wastewater Surveillance.”</li>
-      <li><b>First Place</b>, School of Applied Computational Sciences, <b>69th Annual Research Day</b>, Meharry Medical College (2025), for Franklin et al., “Using GIS and Metagenomics to Enhance Wastewater Surveillance.”</li>
-      <li>Featured, Wiley’s Index of Inspiring Black Scientists (2026)</li>
+      <li><b>First Place</b>, School of Applied Computational Sciences, <b>69th Annual Research Day</b>, Meharry Medical College (2025), for the poster above.</li>
     </ul></article>
   </div>
   <article class="panel c12 origin"><h2>Where this came from</h2>
-    <p>NWGS Grid™ began as a poster. Victoria has been building it since <b>Fall 2024</b>. In 2025 she proposed a conceptual framework for combining GIS and metagenomics to enhance wastewater surveillance, presented at the <b>Wastewater Disease Surveillance Summit</b>, and awarded <b>First Place</b> for the School of Applied Computational Sciences at the <b>69th Annual Research Day</b> at Meharry Medical College.</p>
+    <p>NWGS Grid™ began as a poster. In 2025 Victoria proposed a conceptual framework for combining GIS and metagenomics to enhance wastewater surveillance, presented at the <b>Wastewater Disease Surveillance Summit</b>, and awarded <b>First Place</b> for the School of Applied Computational Sciences at the <b>69th Annual Research Day</b> at Meharry Medical College.</p>
     <figure class="posterfig">
       <img src="img/poster-gis-metagenomics.webp" alt="Research poster: Using GIS and Metagenomics to Enhance Wastewater Surveillance, by Victoria Love Franklin, Todd Gary, Bishnu Sarker and Reginald Archer." loading="lazy">
       <figcaption class="small muted">Franklin VL, Gary T, Sarker B, Archer R. “Using GIS and Metagenomics to Enhance Wastewater Surveillance.” School of Applied Computational Sciences, Meharry Medical College; Department of Environmental Sciences, Tennessee State University (2025).</figcaption>
@@ -2768,7 +2676,7 @@ about(){
       <tr><td class="lead" data-l="In the poster">“Identify distinct spatial patterns in the distribution of targeted pathogens, correlating patterns with secondary data.”</td>
           <td data-l="Today" class="small">Local spatial clustering is computed each week and correlated against clinical emergency-department data and social vulnerability. <a href="#equity" data-go="equity">Coverage &amp; equity</a></td></tr>
     </table></div>
-    <p class="note">The poster’s stated limitation, missing sewer-access location data for the study site, is the same problem the representativeness measure now addresses at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is. The poster itself was collaborative work with the co-authors named above, while <b>NWGS Grid™ is independent work</b> that followed it, built entirely by Victoria outside any employer, fellowship or sponsored program, using only public data.</p></article>
+    <p class="note">The poster’s stated limitation, missing sewer-access location data for the study site, is the same problem this project set out to solve at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is. Since October 2026 it is measured rather than approximated, from EPA’s national sewershed boundaries. The poster itself was collaborative work with the co-authors named above, while <b>NWGS Grid™ is independent work</b> that followed it.</p></article>
   <article class="panel domains"><h2>Domains</h2>
     <p class="small">Victoria’s work runs along one thread: the critical systems communities depend on, namely health, energy and environment, and the geospatial and AI methods that reveal where those systems are strong, where they fail and whom they reach. NWGS Grid™ is the public-health expression of that thread.</p>
     <div class="tbl"><table class="stack dtable"><tr><th>Domain</th><th>Focus</th><th>Areas</th></tr><tr><td class="lead dname" data-l="Domain">Biosurveillance &amp; public health</td><td data-l="Focus" class="small">Turning environmental and clinical signals into early warning, and asking who the system reaches.</td><td data-l="Areas"><ul class="tags"><li>Wastewater biosurveillance</li><li>Genomic epidemiology</li><li>Spatial epidemiology</li><li>Metagenomics &amp; NGS</li><li>Structural biology</li><li>Health equity &amp; social vulnerability</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Critical infrastructure &amp; cybersecurity</td><td data-l="Focus" class="small">Protecting operational systems and modelling how they behave under stress.</td><td data-l="Areas"><ul class="tags"><li>Nuclear cybersecurity</li><li>ICS/OT security</li><li>Power grids &amp; smart grids</li><li>Grid resilience</li><li>Digital twins</li><li>Anomaly detection</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Environment &amp; remote sensing</td><td data-l="Focus" class="small">Measuring land, air and climate pressure from satellite and sensor data.</td><td data-l="Areas"><ul class="tags"><li>GIS &amp; geospatial intelligence</li><li>Remote sensing</li><li>Forestry &amp; biomass</li><li>Carbon sequestration</li><li>Air quality</li><li>Climate hazards &amp; wildfire risk</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">AI &amp; application development</td><td data-l="Focus" class="small">Building the models, pipelines and interfaces that put the analysis in people’s hands.</td><td data-l="Areas"><ul class="tags"><li>App development, front end &amp; back end</li><li>Machine learning &amp; explainable AI</li><li>Retrieval-augmented generation (RAG)</li><li>Automated data pipelines</li><li>Dashboards &amp; public data portals</li></ul></td></tr></table></div>
@@ -2794,11 +2702,11 @@ about(){
       <a class="btn" href="${mail('NWGS Grid collaboration')}">Get in touch</a></div></article>
   <div class="c5 stackcol">
   <article class="panel"><h2>How to cite</h2>
-    <p class="cite">Franklin, V. L. (${pulledYear}). <i>NWGS Grid™: National Wastewater Genomic Surveillance Grid</i> (data through ${dateFmt(R.data_as_of)}, ${esc(R.run_id)}) [Software and web dashboard]. ${esc(site)}</p>
+    <p class="cite">Franklin, V. L. (${pulledYear}). <i>NWGS Grid™: National Wastewater Genomics Smart Grid</i> (data through ${dateFmt(R.data_as_of)}, ${esc(R.run_id)}) [Software and web dashboard]. ${esc(site)}</p>
     <p class="small muted">Numbers change every week as CDC updates its data. Cite the data-through date and run ID shown here, and use one weekly release for all numbers in a paper.</p></article>
   <article class="panel"><h2>Copyright &amp; terms</h2>
     <p class="small">© ${copyYears} Victoria Love Franklin. All rights reserved. The code, analysis, design, text, tables and figures may not be copied, modified or redistributed without written permission. Linking and scholarly citation with attribution are welcome.</p>
-    <p class="small muted">Underlying data from CDC, CDC/ATSDR, the U.S. Census Bureau, NCBI and RCSB PDB remain subject to their providers’ terms. Maps use us-atlas, d3 and topojson (ISC licenses). For research and public-health information only; not medical advice. Not affiliated with or endorsed by CDC. NWGS Grid™ is a trademark of Victoria Love Franklin.</p></article>
+    <p class="small muted">Underlying data from CDC, CDC/ATSDR, the U.S. Census Bureau, USDA Economic Research Service, the U.S. Environmental Protection Agency, NCBI, RCSB PDB, UniProt, WHO/UNICEF JMP, the World Bank and the Robert Koch Institute remain subject to their providers’ terms. Maps use us-atlas, d3 and topojson (ISC licenses). For research and public-health information only; not medical advice. Not affiliated with or endorsed by CDC. NWGS Grid™ is a trademark of Victoria Love Franklin.</p></article>
   </div></div>`;
   const lic=document.getElementById('lic-form');
   if(lic) lic.onsubmit=async e=>{e.preventDefault();const out=document.getElementById('lic-out'),b=lic.querySelector('button');b.disabled=true;
@@ -2905,7 +2813,7 @@ audit(){
   el.innerHTML=`<div class="head"><h1>Audit log</h1><p class="muted">Every validation check from this run. The app only updates when no check fails.</p></div>
   <div class="statgrid"><div class="stat"><span class="label">Run</span><span class="mono">${R.run_id}</span></div><div class="stat"><span class="label">Gate</span><span class="big" style="font-size:1.2rem">${R.gate_status.replace(/_/g,' ')}</span></div><div class="stat"><span class="label">Checks</span><span class="mono" style="font-size:.86rem;line-height:1.5">${[[R.n_pass,'pass'],[R.n_warning,'warn'],...(R.n_info?[[R.n_info,'info']]:[]),[R.n_fail,'fail']].map(([n,w])=>`<span style="white-space:nowrap">${n}&nbsp;${w}</span>`).join(' · ')}</span></div><div class="stat"><span class="label">Same-run tables</span><span class="big" style="font-size:1.2rem;color:${R.consistency_ok?'var(--ok)':'var(--warn)'}">${R.consistency_ok?'Yes':'No'}</span></div></div>
   ${R.consistency_ok?'':'<p class="callout">This test build mixes Table07 from one pipeline run with Table13 from another (county counts differ by 1–2). The production export blocks this; rerun the pipeline once and export every table from that run.</p>'}
-  <article class="panel"><header><h2>Every check in this run</h2><span class="dlrow">${dlCSV('audit','Download audit log (CSV)')} ${dlPDF()}</span></header><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
+  <article class="panel"><header><h2>Every check in this run</h2></header><div class="tbl"><table class="stack"><tr><th>Component</th><th>Status</th><th>Detail</th><th>Source</th></tr>
   ${D.audit.map(a=>{const phil=/PHIL/.test(a.component)&&/PARTIAL_IMAGES/.test(a.status);return `<tr><td class="lead">${esc(a.component)}</td><td class="status-${phil?'INFO':cls(a.status)}" style="white-space:nowrap;font-weight:600">${phil?'INFO · OPTIONAL':esc(a.status.replace(/_/g,' '))}</td><td class="small" style="max-width:52ch;overflow-wrap:anywhere">${esc(a.detail).replace(/; /g,';<wbr> ')}${phil?'. Optional photos from CDC’s image library (PHIL), which blocks automated downloads; no analysis uses them.':''}</td><td class="small muted" data-l="Source">${esc(a.source)}</td></tr>`}).join('')}</table></div></article>
   <p class="note srcline"><b>Sources.</b> Checks are generated by the pipeline itself during the run (validation summary and per-table audits), together with export-time consistency checks that confirm every table in this build came from the same run. Nothing on this page is entered by hand. The run identifier and data-through date shown in the header identify the snapshot these results describe, and each week&rsquo;s log is archived with its tables and figures as a permanent release.</p>`;
 },
@@ -3020,18 +2928,9 @@ methods(){
   const el=document.getElementById('v-methods');
   const acc=new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   el.innerHTML=`<div class="head"><h1>Methods &amp; sources</h1><p class="muted">How the numbers on this site are made, and every dataset and tool they come from.</p></div>
-  <article class="panel c12"><header><h2>Download the data</h2><span class="small">everything on this page, and the full archive</span></header>
-    <p>Every table below is the one this run produced. Each file carries the citation, the run identifier and the data-through date in its opening lines, so a figure can still be traced back after it has been pasted into something else. Those lines begin with <span class="mono">#</span>, which pandas, R and Excel all skip.</p>
-    <div class="dlgrid">
-      <div><b>Where monitoring happens</b><p class="small">Every county: whether a site is reporting, residents on sewers, and vulnerability inside the sewered area.</p>${dlCSV('monitoring','County table (CSV)')}</div>
-      <div><b>Urbanicity</b><p class="small">Coverage by rural-urban class, against all U.S. counties.</p>${dlCSV('urbanicity','Urbanicity table (CSV)')}</div>
-      <div><b>Coverage &amp; equity</b><p class="small">Analysis-ready coverage by social vulnerability quartile.</p>${dlCSV('equity','Equity table (CSV)')}</div>
-      <div><b>Lead time</b><p class="small">Shedding lead, reporting lag and operational lead by state and pathogen.</p>${dlCSV('leadtime','Lead-time table (CSV)')}</div>
-      <div><b>Global coverage</b><p class="small">Sewer-connected share and observable population by country.</p>${dlCSV('global','Country table (CSV)')}</div>
-      <div><b>Audit log</b><p class="small">Every validation check from this run, with its outcome.</p>${dlCSV('audit','Audit log (CSV)')}</div>
-    </div>
-    <p class="small">Any page can be saved as a PDF with the <b>Save as PDF</b> button on it, or your browser&rsquo;s print command. The saved file carries the same citation and run identifier.</p>
-    <p class="note"><b>The complete archive.</b> These downloads hold what this page is showing. Every weekly run also publishes a permanent release with the full set of pipeline tables, the figures, the whole app export, the manifest and the run log: <a href="https://github.com/victorialovefranklin/nwgs-grid-site/releases" target="_blank" rel="noopener">github.com/victorialovefranklin/nwgs-grid-site/releases</a>. Cite the release your numbers came from, not the live site, because the live site moves every week and the release does not.</p></article>
+  <article class="panel c12"><header><h2>Getting the data</h2></header>
+    <p>Every weekly run publishes a permanent release holding the complete set of pipeline tables, the figures, the whole app export, the manifest and the run log: <a href="https://github.com/victorialovefranklin/nwgs-grid-site/releases" target="_blank" rel="noopener">github.com/victorialovefranklin/nwgs-grid-site/releases</a>. Cite the release your numbers came from rather than the live site, because the live site is rebuilt every week and a release does not change.</p>
+    <p class="small">For a written summary of any county, state or the country as a whole, with its maps and figures, use <a href="#reports" data-go="reports">Data &amp; reports</a>.</p></article>
   <article class="panel c12"><header><h2>Materials and methods</h2><span class="small muted">what the pipeline does, in order</span></header>
     <p>Every figure on this site is produced by one automated pipeline that runs weekly and rebuilds the whole site from a single frozen snapshot. The steps below run in this order; each is recorded in the run log, and the <a href="#audit" data-go="audit">Audit log</a> reports the result of every check.</p>
     <ol class="methodsteps">
@@ -3058,7 +2957,13 @@ methods(){
     <li>Centers for Disease Control and Prevention. <i>PLACES: Local Data for Better Health, County Data</i> [dataset <span class="mono">swc5-untb</span>]. County health context measures. <a href="https://data.cdc.gov/d/swc5-untb" target="_blank" rel="noopener">data.cdc.gov/d/swc5-untb</a></li>
     <li>Centers for Disease Control and Prevention / Agency for Toxic Substances and Disease Registry / Geospatial Research, Analysis, and Services Program. <i>CDC/ATSDR Social Vulnerability Index 2022 Database, US (county)</i>. <a href="https://www.atsdr.cdc.gov/place-health/php/svi/" target="_blank" rel="noopener">atsdr.cdc.gov/place-health/php/svi</a></li>
     <li>U.S. Census Bureau. <i>2025 TIGER/Line Shapefiles: Counties</i>. <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target="_blank" rel="noopener">census.gov TIGER/Line</a></li>
-    <li>Kim S, Zulli A, Chan EMG, Duong D, Linfield RY, McCormack C, White BJ, Wolfe MK, Boehm AB, Pickering AJ. Wastewater surveillance reveals patterns of antibiotic resistance across the United States. <i>Nature Communications</i>. 2026;17:4680. <a href="https://doi.org/10.1038/s41467-026-71195-4" target="_blank" rel="noopener">doi:10.1038/s41467-026-71195-4</a>. Open access under CC BY 4.0. Resistance-gene panels use the <span class="mono">Averaged</span> sheet of that study’s published data, unchanged: 163 treatment plants in 39 states, eleven resistance genes measured by digital droplet PCR and normalised to 16S rRNA. Detection calls, z-scores and outlier flags are the authors’, not ours.</li>
+    <li>U.S. Department of Agriculture, Economic Research Service. <i>Rural-Urban Continuum Codes</i>, 2023 edition [file RUCC_2023_US_COUNTY.csv]. Used for the rural-urban axis of coverage. <a href="https://www.ers.usda.gov/data-products/rural-urban-continuum-codes" target="_blank" rel="noopener">ers.usda.gov</a></li>
+    <li>U.S. Environmental Protection Agency. <i>National Sewershed Dataset</i>, version 1.2, derived from the 2022 Clean Watersheds Needs Survey. Used to measure how many residents of each county are served by sewers. <a href="https://github.com/USEPA/Sewersheds" target="_blank" rel="noopener">github.com/USEPA/Sewersheds</a> · <a href="https://www.epa.gov/cwns" target="_blank" rel="noopener">epa.gov/cwns</a></li>
+    <li>WHO/UNICEF Joint Monitoring Programme for Water Supply, Sanitation and Hygiene. <i>Sanitation data</i>. Supplies the sewer-connected share behind every figure on Global coverage. <a href="https://washdata.org" target="_blank" rel="noopener">washdata.org</a></li>
+    <li>World Bank. <i>World Development Indicators</i>: income classification and sanitation fallback. Used to group countries on Global coverage. <a href="https://data.worldbank.org" target="_blank" rel="noopener">data.worldbank.org</a> (CC BY 4.0)</li>
+    <li>Robert Koch Institute. <i>AMELAG</i> wastewater monitoring, Germany (CC BY 4.0). The open national feed named on Global coverage. <a href="https://github.com/robert-koch-institut/Abwassersurveillance_AMELAG" target="_blank" rel="noopener">AMELAG</a></li>
+    <li>The UniProt Consortium. <i>UniProtKB</i> curated feature table. Supplies the functional regions on Protein structures; each row carries its own accession. <a href="https://www.uniprot.org" target="_blank" rel="noopener">uniprot.org</a></li>
+    <li>Kim S, Zulli A, Chan EMG, Duong D, Linfield RY, McCormack C, White BJ, Wolfe MK, Boehm AB, Pickering AJ. Wastewater surveillance reveals patterns of antibiotic resistance across the United States. <i>Nature Communications</i>. 2026;17:4680. <a href="https://doi.org/10.1038/s41467-026-71195-4" target="_blank" rel="noopener">doi:10.1038/s41467-026-71195-4</a>. Open access under CC BY 4.0. Resistance-gene panels use the <span class="mono">Averaged</span> sheet of that study’s published data, unchanged: 163 treatment plants in 39 states, eleven resistance genes measured by digital droplet PCR and normalized to 16S rRNA. Detection calls, z-scores and outlier flags are the authors’, not ours.</li>
     <li>National Center for Biotechnology Information. <i>NCBI Virus</i> and <i>NCBI Datasets API v2</i>. National Library of Medicine. <a href="https://www.ncbi.nlm.nih.gov/datasets/" target="_blank" rel="noopener">ncbi.nlm.nih.gov/datasets</a></li>
     <li>Berman HM, Westbrook J, Feng Z, et al. The Protein Data Bank. <i>Nucleic Acids Research</i>. 2000;28(1):235–242. RCSB PDB entries ${D.structures.map(s=>`<a href="https://doi.org/10.2210/pdb${s.pdb_entry_id}/pdb" target="_blank" rel="noopener">${s.pdb_entry_id}</a>`).join(', ')}. <a href="https://www.rcsb.org" target="_blank" rel="noopener">rcsb.org</a></li>
     <li>Bostock M. <i>us-atlas</i>: U.S. state and county boundaries in TopoJSON, derived from U.S. Census Bureau cartographic boundary files. ISC License. <a href="https://github.com/topojson/us-atlas" target="_blank" rel="noopener">github.com/topojson/us-atlas</a></li>

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 NWGS Grid(TM) - weekly alert emails
-Author: Victoria Love Franklin — Ph.D. Data Science Student · GIS · AI & ML · Developer · Published Researcher
+Author: Victoria Love Franklin — PhD Data Science Student · Published Research Scholar · Developer
 Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 
     python3 scripts/send_alerts.py <EXPORT_DIR> [--dry-run]
@@ -110,7 +110,7 @@ def compose(email, items, as_of, run_id):
     foot = (f"See the map: {SITE}#map\nManage or pause your alerts: {SITE}#myalerts\n\n"
             "Levels compare each site with its own history; they describe relative change, not case counts. "
             "For information only; not medical advice.\n\n"
-            "NWGS Grid™ · © Victoria Love Franklin · info@nwgsgrid.com")
+            "NWGS Grid™ · © Victoria Love Franklin · alerts@nwgsgrid.com")
     msg.set_content(intro + "\n\n" + "\n".join(lines) + "\n\n" + foot)
     msg.add_alternative(
         f"<div style='font-family:Arial,sans-serif;font-size:14px;color:#13222a;max-width:560px'>"
@@ -118,7 +118,7 @@ def compose(email, items, as_of, run_id):
         f"<p style='margin-top:18px'><a href='{SITE}#map'>See the map</a> · <a href='{SITE}#myalerts'>Manage or pause your alerts</a></p>"
         f"<p style='color:#56686d;font-size:12px'>Levels compare each site with its own history; they describe relative change, "
         f"not case counts. For information only; not medical advice.<br>NWGS Grid™ · © Victoria Love Franklin · "
-        f"info@nwgsgrid.com</p></div>", subtype="html")
+        f"alerts@nwgsgrid.com</p></div>", subtype="html")
     return msg
 
 
@@ -167,7 +167,7 @@ def main(export_dir, dry_run=False):
                                           context=ssl.create_default_context(), timeout=60)
                 server.login(user, pw)
             msg["From"] = f"NWGS Grid alerts <{user}>"
-            msg["Reply-To"] = "info@nwgsgrid.com"
+            msg["Reply-To"] = "alerts@nwgsgrid.com"
             server.send_message(msg)
             n_mail += 1
             sb.upsert("alert_log", [{"rule_id": r["id"], "run_id": run_id,

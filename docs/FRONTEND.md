@@ -73,6 +73,7 @@ width.
 | `structures` | Protein structures |
 | `alerts` | Alerts |
 | `myalerts` | My alerts |
+| `reports` | Data & reports |
 | `audit` | Audit log |
 | `methods` | Methods & sources |
 | `glossary` | Glossary |
