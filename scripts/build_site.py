@@ -40,11 +40,22 @@ def D_summary_latest(ps):
 
 
 def copy_assets(out):
-    """Copy site images, and (when the pipeline ran here) small copies of its rendered protein structures."""
+    """Copy site images, the custom-domain file, and (when the pipeline ran
+    here) small copies of its rendered protein structures."""
     import shutil
     img = ROOT / "site_src" / "img"
     if img.exists():
         shutil.copytree(img, out / "img", dirs_exist_ok=True)
+    # GitHub Pages reads the custom domain from a CNAME file in the published
+    # output. Without this copy the domain is cleared on every deploy and the
+    # site silently reverts to the github.io address.
+    cname = ROOT / "site_src" / "CNAME"
+    if cname.exists():
+        shutil.copyfile(cname, out / "CNAME")
+        print(f"Custom domain: {cname.read_text(encoding='utf-8').strip()}")
+    # .nojekyll stops GitHub Pages running Jekyll, which would drop any file
+    # or folder whose name begins with an underscore.
+    (out / ".nojekyll").write_text("", encoding="utf-8")
     sdir = os.getenv("NWGS_STRUCTURE_DIR")
     if sdir and Path(sdir).exists():
         from PIL import Image

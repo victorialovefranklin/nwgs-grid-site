@@ -1,6 +1,6 @@
 # NWGS Grid™ site
 
-### 🌐 Live site: **[victorialovefranklin.github.io/nwgs-grid-site](https://victorialovefranklin.github.io/nwgs-grid-site/)**
+### 🌐 Live site: **[nwgsgrid.com](https://nwgsgrid.com/)**
 
 Weekly, validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties,
 rebuilt every Saturday by GitHub Actions. Sign in on the site to save alerts.
@@ -118,8 +118,11 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
    - `SOCRATA_KEY_ID` and `SOCRATA_KEY_SECRET` (data.cdc.gov → Developer Settings → API Keys)
    - `SOCRATA_APP_TOKEN`, `NCBI_API_KEY` (optional, raise rate limits)
    - `SUPABASE_SECRET_KEY`, `SMTP_USER`, `SMTP_PASSWORD` (weekly alert email)
-4. Custom domain: create `site_src/CNAME` containing `nwgsgrid.com`, set the same domain under
-   **Settings → Pages**, and point the domain's DNS to GitHub Pages.
+4. Custom domain. `site_src/CNAME` contains `nwgsgrid.com` and the build copies it into the
+   published output, so the domain survives every deploy. To change or remove it, edit that
+   file. Also set the same domain under **Settings → Pages**, point the DNS at GitHub Pages
+   (four A records for the apex, plus a CNAME for `www`), and add the domain to Supabase under
+   **Authentication → URL Configuration**, or sign-in links will keep pointing at the old host.
 
 ## Folders
 | Path | Contents |

@@ -34,7 +34,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE = "https://victorialovefranklin.github.io/nwgs-grid-site/"
+SITE = "https://nwgsgrid.com/"
 RANK = {"Very Low": 0, "Low": 1, "Typical": 2, "Elevated": 3, "High": 4}
 STATE_NAMES = {"AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado",
                "CT": "Connecticut", "DE": "Delaware", "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia",

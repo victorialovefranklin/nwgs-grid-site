@@ -2086,7 +2086,7 @@ myalerts(){
 about(){
   const el=document.getElementById('v-about');
   const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
-  const site=location.protocol.startsWith('http')?location.origin+location.pathname:'https://victorialovefranklin.github.io/nwgs-grid-site/';
+  const site=location.protocol.startsWith('http')?location.origin+location.pathname:'https://nwgsgrid.com/';
   const tnNow=(D.tn_county||[]).filter(c=>c.reporting_now).length;
   el.innerHTML=`<div class="head"><h1>About The Developer</h1><p class="muted">Who built NWGS Grid™, why, and how to reach her, cite the work or request a license.</p></div>
   <div class="grid aboutgrid">
