@@ -104,13 +104,13 @@ jobs:
           fi
           mkdir -p static_inputs
           cp "$LEDGER" static_inputs/NWGS_FORECAST_LEDGER.csv
-          if git diff --quiet -- static_inputs/NWGS_FORECAST_LEDGER.csv; then
+          git add static_inputs/NWGS_FORECAST_LEDGER.csv
+          if git diff --cached --quiet -- static_inputs/NWGS_FORECAST_LEDGER.csv; then
             echo "Ledger unchanged; no commit needed."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add static_inputs/NWGS_FORECAST_LEDGER.csv
           git commit -m "Record forecast ledger for run ${{ github.run_number }} [skip ci]"
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
