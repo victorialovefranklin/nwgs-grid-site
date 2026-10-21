@@ -2,6 +2,8 @@
 
 ### 🌐 Live site: **[nwgsgrid.com](https://nwgsgrid.com/)**
 
+**Full website file (download and open in a browser):** [snapshot/NWGS_Grid_website.html](snapshot/NWGS_Grid_website.html) · Page source: [site_src/template.html](site_src/template.html)
+
 Weekly, validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties,
 rebuilt every Saturday by GitHub Actions. Sign in on the site to save alerts.
 
