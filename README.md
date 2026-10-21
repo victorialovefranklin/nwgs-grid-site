@@ -21,6 +21,9 @@ site from one snapshot. If any check fails, nothing is published and the previou
 **Developer:** Victoria Love Franklin, PhD Data Science Student. Featured as an Inspiring Black Scientist through
 [Wiley's Inspiring Black Scientists initiative](https://www.wiley.com/en-us/research/inspiring-black-scientists), 2026.
 
+- **Paper accepted:** *Decoding Tennessee Wastewater Surveillance: A Multimodal Geospatial Assessment of Infectious-Disease Signals, Surveillance Coverage, and Public-Health Equity*, ICEPTP 2027, London (proceedings indexed in Scopus).
+- **Presented:** *Using GIS and Metagenomics to Enhance Wastewater Surveillance*, poster at the 2025 Wastewater Disease Surveillance Summit (Los Angeles, June 3–4; WEF with CDC), the work NWGS Grid™ grew from. 1st Place, Meharry 69th Annual Research Day. [Summit page](https://nwbe.org/?page_id=175#summit) · [Poster (PDF)](https://nwbe.org/wp-content/uploads/2025/06/Franklin-et-al-Using-GIS-and-metagenomics-to-enhance-wastewater-surveillance.pdf)
+
 ## The website
 
 One static HTML page. No framework, no bundler, no build step for the browser, and nothing
