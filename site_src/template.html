@@ -81,6 +81,18 @@ li{text-wrap:pretty}
 .markbadge{flex:none;width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;
   box-shadow:0 0 0 1.5px var(--rail-line)}
 .markbadge img{width:auto;height:30px;display:block}
+.rform{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);align-items:flex-end;margin:var(--sp-2) 0}
+.rform .rfield{display:flex;flex-direction:column;gap:4px;width:260px;max-width:100%}
+.rform .rfield{font-size:.82rem;color:var(--muted)}
+.rform .rfield select{width:100%;font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:7px 9px}
+.rform .rfield select:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.rpaths .pchk{font-size:.9rem;color:var(--ink)}
+.rpaths legend{color:var(--muted)}
+.rpaths{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rpaths legend{float:left;width:100%;padding:0 0 4px;font-size:.82rem}
+.rpaths .pchk{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;cursor:pointer}
+.rpaths .pchk input{margin:0}
+.ractions{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);align-items:center;margin-top:var(--sp-2)}
 .pathset{border:1px solid var(--line);border-radius:8px;padding:var(--sp-2);margin-top:var(--sp-2)}
 .honour{margin:0 0 var(--sp-2);padding:10px 14px;border-left:3px solid var(--rose-deep);background:#fdf4f7;border-radius:0 8px 8px 0;font-size:.9375rem}
 .honour-k{text-transform:uppercase;letter-spacing:.06em;font-size:.6875rem;font-weight:700;color:var(--rose-deep);margin-right:10px}
@@ -2099,30 +2111,25 @@ reports(){
       return (x[1]||'').localeCompare(y[1]||'')||(x[0]||'').localeCompare(y[0]||'')});
     el.innerHTML=`<div class="head"><h1>Data &amp; reports</h1><p>Take any of this away: the tables as spreadsheets, or a written report with its maps and figures. Everything carries the run it came from, so a figure can still be checked after it has been pasted into something else.</p></div>
     <div class="grid">
-      <article class="panel c12"><header><h2>Choose an area</h2></header>
-        <form class="form" id="r-form" autocomplete="off">
-          <div class="row2">
-            <label>Area type<select id="r-kind">
+      <article class="panel c12 rbuild"><header><h2>Build a written report</h2></header>
+        <p class="small">Choose an area and the pathogens to include. The report has narrative, maps and figures, with a caption on every figure.</p>
+        <form class="rform" id="r-form" autocomplete="off">
+          <label class="rfield">Area<select id="r-kind">
               <option value="us"${RSCOPE.kind==='us'?' selected':''}>The whole United States</option>
               <option value="state"${RSCOPE.kind==='state'?' selected':''}>One state</option>
               <option value="county"${RSCOPE.kind==='county'?' selected':''}>One county</option>
             </select></label>
-            <label id="r-pick-l"${RSCOPE.kind==='us'?' hidden':''}>${RSCOPE.kind==='county'?'County':'State'}
+          <label class="rfield" id="r-pick-l"${RSCOPE.kind==='us'?' hidden':''}>${RSCOPE.kind==='county'?'County':'State'}
               <select id="r-pick">${RSCOPE.kind==='county'
                 ? counties.map(f=>{const n=D.monitoring_names[f];
                     return `<option value="${f}"${f===RSCOPE.code?' selected':''}>${esc(n[0])}${n[1]?', '+esc(n[1]):''}</option>`}).join('')
                 : states.map(s=>`<option value="${s}"${s===RSCOPE.code?' selected':''}>${esc(STATE_NAMES[s]||s)}</option>`).join('')}</select></label>
-          </div>
-          <fieldset class="pathset"><legend class="small">Pathogens to include</legend>
+          <fieldset class="rpaths"><legend>Pathogens</legend>
             ${rPathogens().map(pn=>`<label class="pchk"><input type="checkbox" class="r-path" value="${esc(pn)}"${rPathOn(pn)?' checked':''}> ${esc(pn)}</label>`).join('')}
           </fieldset>
         </form>
-        <p class="small">Showing: <b id="r-label">${esc(RSCOPE.label)}</b></p>
-      </article>
-
-      <article class="panel c12"><header><h2>Written report</h2><span class="small">narrative, maps and figures, with a caption on every figure</span></header>
-        <p class="small">Opens the report below. Use <b>Save as PDF</b> on it, or your browser&rsquo;s print command, to keep a copy.</p>
-        <div><button class="btn primary" id="r-build">Build report for ${esc(RSCOPE.label)}</button></div>
+        <div class="ractions"><button class="btn primary" id="r-build">Build report for ${esc(RSCOPE.label)}</button>
+          <span class="small">Showing: <b id="r-label">${esc(RSCOPE.label)}</b> · Use <b>Save as PDF</b> or your browser&rsquo;s print command to keep a copy.</span></div>
       </article>
 
       </div>
