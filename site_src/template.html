@@ -2599,17 +2599,22 @@ about(){
   el.innerHTML=`<div class="head"><h1>About</h1><p>What NWGS Grid™ is, who built it, and how to reach her, cite the work or request a license.</p></div>
   <div class="grid">
   <article class="panel c12"><header><h2>About NWGS Grid™</h2></header>
-    <p class="lede">NWGS Grid™ is a national view of what wastewater testing can see &mdash; and of who it cannot see at all.</p>
-    <p>Every Saturday it pulls the current wastewater results for six pathogens from the U.S. Centers for Disease Control and Prevention, together with emergency-department visits, county health measures, social vulnerability, sewer service and genomic records. It harmonises them, runs ${R.n_checks||(R.n_pass+R.n_warning+R.n_fail)} validation checks, and rebuilds this entire site from a single snapshot. If a check fails, nothing is published and last week&rsquo;s figures stay up.</p>
-    <p>Three things set it apart from a map of recent results. It separates how early a signal appears from how long it takes to reach the public, because only the second number tells a health department whether it could have acted in time. It measures how much of each county the testing can actually observe, rather than treating a county with one monitored plant as covered. And it keeps every weekly run frozen and citable, so a figure quoted from it can still be checked a year later.</p>
-    <p class="note">Built entirely from public data. What the site can and cannot support is set out on <a href="#methods" data-go="methods">Methods &amp; sources</a>, and every check from the latest run is published on the <a href="#audit" data-go="audit">Audit log</a>.</p></article>
+    <p class="lede">NWGS Grid™ shows what wastewater testing can detect across the United States, and which communities it cannot see.</p>
+    <p>Every Saturday, it gathers CDC wastewater results for six pathogens, along with emergency department visits, county health measures, social vulnerability, sewer service and genomic records. It combines them, runs ${R.n_checks||(R.n_pass+R.n_warning+R.n_fail)} validation checks and rebuilds the site from one snapshot. If any check fails, nothing is published and the previous week&rsquo;s results stay up.</p>
+    <h3 style="margin:18px 0 8px">What sets it apart</h3>
+    <ul style="margin:0 0 14px 20px;padding:0;line-height:1.6">
+      <li><b>Timeliness.</b> It separates how early a signal appears from how long it takes to reach the public, so a health department can see whether it could have acted in time.</li>
+      <li><b>Coverage.</b> It measures how much of each county testing actually reaches, instead of counting a county with one monitored plant as covered.</li>
+      <li><b>Reproducibility.</b> Every weekly run is saved and citable, so any figure can be checked a year later.</li>
+    </ul>
+    <p class="note">Built entirely from public data. See <a href="#methods" data-go="methods">Methods &amp; sources</a> for what the site can and cannot support, and the <a href="#audit" data-go="audit">Audit log</a> for every check in the latest run.</p></article>
   </div>
   <div class="head sub"><h2>The developer</h2></div>
   <div class="grid aboutgrid">
   <figure class="panel c4 portrait"><img src="img/vlf-portrait.jpg" alt="Portrait of Victoria Love Franklin" width="1080" height="1439" loading="lazy"></figure>
   <article class="panel c8 bio"><h2>Victoria Love Franklin, PSM, CPT</h2>
     <p class="role">PhD Data Science Student · Published Research Scholar · Developer</p>
-    <p class="honour"><span class="honour-k">Recognition</span> Nominated as an Inspiring Black Scientist through <a href="https://www.wiley.com/en-us/research/inspiring-black-scientists" target="_blank" rel="noopener">Wiley’s Inspiring Black Scientists initiative</a>, 2026. <a href="https://www.instagram.com/p/DVRQ2Feka2z/" target="_blank" rel="noopener">Announcement</a></p>
+    <p class="honour"><span class="honour-k">Recognition</span> Featured as an Inspiring Black Scientist through <a href="https://www.wiley.com/en-us/research/inspiring-black-scientists" target="_blank" rel="noopener">Wiley’s Inspiring Black Scientists initiative</a>, 2026. <a href="https://www.instagram.com/p/DVRQ2Feka2z/" target="_blank" rel="noopener">Announcement</a></p>
         <figure class="honour quote"><span class="honour-k">Featured</span><blockquote>&ldquo;She also developed the NWGS Grid Platform, a real-time infectious disease surveillance and analytics system that fuses multiple data sources, wastewater genomic data, clinical results, and contextual population data into a unified &lsquo;smart grid&rsquo; that public health teams can use to detect and monitor disease trends as they emerge.&rdquo;</blockquote><figcaption>Kyler Moore, <i>Exploring Wastewater Monitoring Research at HBCUs: A Q&amp;A with a Doctoral Student</i>, <a href="https://www.wastewaterscan.org" target="_blank" rel="noopener">WastewaterSCAN</a> &mdash; the national wastewater monitoring program led by Stanford University and Emory University.</figcaption></figure>
         <figure class="qacards">
       <img src="img/wwscan-qa-1.webp" width="720" height="900" loading="lazy" alt="Q&amp;A card introducing Victoria Love Franklin, PhD in Data Science pre-candidate at Meharry Medical College, and listing her core research areas: wastewater genomic surveillance and bioinformatics of infectious diseases, cybersecurity infrastructure, environmental health, geospatial analysis, and electricity power outages and grid resilience.">

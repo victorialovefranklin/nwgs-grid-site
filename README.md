@@ -5,6 +5,20 @@
 Weekly, validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties,
 rebuilt every Saturday by GitHub Actions. Sign in on the site to save alerts.
 
+## About
+
+NWGS Grid™ shows what wastewater testing can detect across the United States, and which communities it cannot see.
+Every Saturday it gathers CDC wastewater results for six pathogens, along with emergency department visits, county
+health measures, social vulnerability, sewer service and genomic records, runs its validation checks and rebuilds the
+site from one snapshot. If any check fails, nothing is published and the previous week's results stay up.
+
+- **Timeliness:** separates how early a signal appears from how long it takes to reach the public.
+- **Coverage:** measures how much of each county testing actually reaches.
+- **Reproducibility:** every weekly run is saved and citable, so any figure can be checked later.
+
+**Developer:** Victoria Love Franklin, PhD Data Science Student. Featured as an Inspiring Black Scientist through
+[Wiley's Inspiring Black Scientists initiative](https://www.wiley.com/en-us/research/inspiring-black-scientists), 2026.
+
 ## The website
 
 One static HTML page. No framework, no bundler, no build step for the browser, and nothing
