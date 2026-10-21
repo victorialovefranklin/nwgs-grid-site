@@ -18,7 +18,7 @@ judgement are written here. A column whose meaning is not established is listed
 with its type and an example and left without a description, because an
 undocumented column is better than an invented one.
 
-Author: Victoria Love Franklin - PhD Data Science Student, Published Research Scholar, Developer
+Author: Victoria Love Franklin - PhD Data Science Student, Peer-Reviewed Published Scientist, Developer
 Copyright (c) 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 """
 import re

@@ -66,7 +66,7 @@ become one stacked list, so no view is more than one tap away.
 The front end reference documents the data object, the view functions, the chart helpers and
 the theme tokens in full.
 
-**Author:** Victoria Love Franklin · PhD Data Science Student · Published Research Scholar · Developer
+**Author:** Victoria Love Franklin · PhD Data Science Student · Peer-Reviewed Published Scientist · Developer
 
 **Contact, license requests and beta feedback:** alerts@nwgsgrid.com
 

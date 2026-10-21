@@ -2,7 +2,7 @@
 """
 NWGS Grid(TM) - app export step
 ================================
-Author: Victoria Love Franklin — PhD Data Science Student · Published Research Scholar · Developer
+Author: Victoria Love Franklin — PhD Data Science Student · Peer-Reviewed Published Scientist · Developer
 Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 
 Turns one pipeline run's output tables into the site's data files.
@@ -527,7 +527,7 @@ def main(table_dir, out_dir, allow_mixed=False):
     # ---- 5. write -----------------------------------------------------------
     manifest = {"run_id": run_id, "data_as_of": data_as_of, "data_pulled_utc": pulled.isoformat(),
                 "gate_status": gate, "consistency_checks": checks, "entities": {},
-                "author": "Victoria Love Franklin — PhD Data Science Student · Published Research Scholar · Developer",
+                "author": "Victoria Love Franklin — PhD Data Science Student · Peer-Reviewed Published Scientist · Developer",
                 "copyright": "Copyright © 2026 Victoria Love Franklin. All rights reserved. See LICENSE."}
     payload = {}
     for name, df in ents.items():

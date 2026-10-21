@@ -9,7 +9,7 @@ identifier and source-load outcome is read from the export, so the document
 cannot drift away from the run it describes. A figure that is not in the export
 is printed as "not in this run" rather than guessed.
 
-Author: Victoria Love Franklin - PhD Data Science Student, Published Research Scholar, Developer
+Author: Victoria Love Franklin - PhD Data Science Student, Peer-Reviewed Published Scientist, Developer
 Copyright (c) 2026 Victoria Love Franklin. All rights reserved. See LICENSE.
 """
 import json
