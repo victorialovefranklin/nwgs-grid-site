@@ -2371,6 +2371,95 @@ def coverage_equity_model(coverage):
     return summary, county
 
 
+def coverage_equity_adjusted(coverage, svi, rucc):
+    """
+    Population- and rurality-adjusted equity models (Table06i).
+
+    coverage_equity_model() above is unadjusted (SVI only) and, because the
+    coverage table is built from wastewater records, it only contains
+    counties that already report wastewater data. This function fits two
+    outcomes, each unadjusted and adjusted, so the two questions are not
+    confused:
+
+      ready_among_monitored : analysis_ready, among counties with any
+                              wastewater data (same universe as Table06b)
+      any_data_all_counties : has any wastewater data, among ALL counties in
+                              the 50 states + DC (RUCC 2023 universe), so
+                              unmonitored counties are in the denominator
+
+    Adjusted models add nonmetro status (USDA RUCC 2023 codes 4-9) and
+    log10 county population (2020, from the RUCC file). One row per model
+    term. Exploratory ecological associations; not causal.
+    """
+    if coverage is None or coverage.empty or rucc is None or rucc.empty or svi is None or svi.empty:
+        print("[EQUITY-ADJ] skipped: coverage, SVI or RUCC unavailable")
+        return pd.DataFrame()
+
+    base = rucc[~rucc["state_code"].isin(RUCC_TERRITORIES)][
+        ["county_fips", "rucc_2023", "population_2020"]].copy()
+    s = svi[["county_fips", "RPL_THEMES"]].drop_duplicates("county_fips").copy()
+    s["RPL_THEMES"] = pd.to_numeric(s["RPL_THEMES"], errors="coerce")
+    s = s[s["RPL_THEMES"].between(0, 1)]  # SVI codes missing as -999
+    base = base.merge(s, on="county_fips", how="inner")
+    base = base.dropna(subset=["rucc_2023", "population_2020", "RPL_THEMES"])
+    base = base[base["population_2020"] > 0].copy()
+    base["svi_10pct"] = base["RPL_THEMES"] * 10.0
+    base["nonmetro"] = (base["rucc_2023"] >= 4).astype(int)
+    base["log10_population"] = np.log10(base["population_2020"])
+
+    ready = (coverage.groupby("county_fips")["analysis_ready"].max()
+                     .astype(int).rename("analysis_ready").reset_index())
+    base = base.merge(ready, on="county_fips", how="left")
+    base["any_data"] = base["analysis_ready"].notna().astype(int)
+
+    labels = {
+        "svi_10pct": "SVI overall rank, per 0.10 increase",
+        "nonmetro": "Nonmetro county (RUCC 4-9) vs metro (1-3)",
+        "log10_population": "County population, per 10-fold increase",
+    }
+    specs = [
+        ("ready_among_monitored", "analysis_ready", base[base["any_data"].eq(1)]),
+        ("any_data_all_counties", "any_data", base),
+    ]
+    rows = []
+    for outcome, ycol, d in specs:
+        d = d.dropna(subset=[ycol]).copy()
+        if len(d) < 100 or d[ycol].nunique() < 2:
+            continue
+        for model_name, terms in [("unadjusted", ["svi_10pct"]),
+                                  ("adjusted", ["svi_10pct", "nonmetro", "log10_population"])]:
+            try:
+                X = sm.add_constant(d[terms].astype(float), has_constant="add")
+                m = sm.GLM(d[ycol].astype(int), X, family=sm.families.Binomial()).fit()
+            except Exception as exc:
+                rows.append({"outcome": outcome, "model": model_name,
+                             "note": f"not estimable: {type(exc).__name__}: {exc}"})
+                continue
+            for t in terms:
+                b, se = float(m.params[t]), float(m.bse[t])
+                rows.append({
+                    "outcome": outcome,
+                    "model": model_name,
+                    "term": t,
+                    "term_label": labels[t],
+                    "n_counties": int(len(d)),
+                    "n_events": int(d[ycol].sum()),
+                    "odds_ratio": float(np.exp(b)),
+                    "or_95ci_low": float(np.exp(b - 1.96 * se)),
+                    "or_95ci_high": float(np.exp(b + 1.96 * se)),
+                    "p_value": float(m.pvalues[t]),
+                    "aic": float(m.aic),
+                    "note": "Exploratory ecological association; not causal.",
+                })
+    out = pd.DataFrame(rows)
+    if not out.empty and "term" in out.columns:
+        for r in out[out["term"].eq("svi_10pct")].itertuples():
+            print(f"[EQUITY-ADJ] {r.outcome} {r.model}: SVI OR {r.odds_ratio:.3f} "
+                  f"(95% CI {r.or_95ci_low:.3f}-{r.or_95ci_high:.3f}), p={r.p_value:.3g}, "
+                  f"n={r.n_counties}, events={r.n_events}")
+    return out
+
+
 def coverage_equity(coverage):
     overall = (
         coverage.groupby("county_fips")
@@ -8340,6 +8429,14 @@ def main():
         record_source("USDA ERS Rural-Urban Continuum Codes 2023", "EMPTY",
                       f"no urbanicity file at {RUCC_PATH.name}; the layer is skipped",
                       RUCC_SOURCE_URL)
+
+    # Population- and rurality-adjusted equity models. Optional: never fails the run.
+    try:
+        equity_adjusted = coverage_equity_adjusted(coverage, svi, rucc)
+        if not equity_adjusted.empty:
+            save_df(equity_adjusted, TABLE_DIR / "Table06i_Coverage_Equity_GLM_Adjusted.csv")
+    except Exception as exc:
+        print(f"[WARN] adjusted equity models skipped: {type(exc).__name__}: {exc}")
 
     # Monitoring status by county: what a visitor looking up their own county
     # is told. Optional in the same way as the layers above - a missing input
