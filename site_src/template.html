@@ -1268,6 +1268,31 @@ const UBAND=c=>c<=3?0:c<=5?1:2;
 const UCOL=[['#14213a','#8fa0bd'],['#1d4f91','#a9c2e0'],['#c49a4a','#ecd9ae']];
 const UBAND_LABEL=['Metro','Nonmetro, urban 20,000+','Nonmetro, urban under 20,000'];
 
+function adjPanel(){
+  const A=D.equity_adjusted;
+  const head=`<header><h2>Adjusted for population and rurality</h2><span class="small muted">binomial GLMs, recomputed each run</span></header>`;
+  if(!A||!A.length)
+    return `<article class="panel c12">${head}${notLoaded('Adjusted equity models','USDA Rural-Urban Continuum Codes 2023 (rurality and 2020 county population) joined to the CDC/ATSDR SVI 2022 county file and the surveillance roster','Without these inputs the adjusted odds ratios are not estimated. They are left blank rather than estimated from partial data.')}</article>`;
+  const OUT=[['ready_among_monitored','Is a monitored county analysis-ready?','Counties with any wastewater data'],
+             ['any_data_all_counties','Does a county have any wastewater data?','All counties, 50 states and DC']];
+  const row=(r)=>`<tr><td>${r.term_label}</td><td class="n">${fmt(+r.odds_ratio,3)}</td><td class="n">${fmt(+r.or_95ci_low,3)}–${fmt(+r.or_95ci_high,3)}</td><td class="n">${pFmt(+r.p_value)}</td></tr>`;
+  const sviLine=(r)=>{if(!r)return '';const s=+r.p_value<.05;
+    return !s?'no clear difference by social vulnerability':(+r.odds_ratio<1?'more vulnerable counties have lower odds':'more vulnerable counties have higher odds')};
+  const blocks=OUT.map(([k,q,u])=>{
+    const rows=A.filter(r=>r.outcome===k); if(!rows.length) return '';
+    const un=rows.find(r=>r.model==='unadjusted'&&r.term==='svi_10pct');
+    const ad=rows.filter(r=>r.model==='adjusted');
+    const adS=ad.find(r=>r.term==='svi_10pct');
+    const n=rows[0]; 
+    return `<h3 style="margin:18px 0 4px">${q}</h3>
+      <p class="small muted">${u}: ${(+n.n_counties).toLocaleString()} counties, ${(+n.n_events).toLocaleString()} with the outcome.</p>
+      <p>SVI alone: ${sviLine(un)} (OR ${fmt(+un.odds_ratio,3)}). After adjusting for population and rurality: ${sviLine(adS)} (OR ${fmt(+adS.odds_ratio,3)}).</p>
+      <div class="tbl"><table><tr><th>Adjusted model term</th><th class="n">Odds ratio</th><th class="n">95% CI</th><th class="n">p</th></tr>${ad.map(row).join('')}</table></div>`}).join('');
+  return `<article class="panel c12">${head}${blocks}
+    <p class="note"><b>Why two questions.</b> The quartile chart and model above only include counties that already report wastewater data, so they cannot say whether vulnerable counties are monitored at all. The second model puts every county in the denominator.</p>
+    <p class="note"><b>How to read it.</b> Odds ratios below 1 mean lower odds. SVI is per 0.10 increase in the overall rank; population is per 10-fold increase (2020 census); rurality is nonmetro (USDA RUCC 4&ndash;9) against metro (1&ndash;3). Population and rurality overlap heavily, so their separate effects should be read with care. These are county-level associations, not causes.</p></article>`;
+}
+
 function urbanicityPanel(){
   const cite=`<p class="note"><b>Definition.</b> Each county carries one USDA Economic Research Service <a href="https://www.ers.usda.gov/data-products/rural-urban-continuum-codes" target="_blank" rel="noopener">Rural-Urban Continuum Code</a> (2023 vintage). Codes 1&ndash;3 are metropolitan, graded by the size of the metro area; codes 4&ndash;9 are nonmetropolitan, graded by urban population and by whether the county adjoins a metro area. Adjacency is kept rather than collapsed because a county that adjoins a metro area can be reached by a treatment plant that serves one. The denominator is the 3,144 counties and county-equivalents of the 50 states and the District of Columbia; territories are excluded so that the comparison below is against the same population.</p>
   <p class="note"><b>Why this sits beside the vulnerability model.</b> Social vulnerability and urbanicity are different questions with different mechanisms. A rural county is largely unobservable because its households are on septic systems rather than sewers, which is a ceiling on what wastewater surveillance can ever see rather than a funding decision. Reporting only the vulnerability model would leave that ceiling out of the account.</p>`;
@@ -2255,7 +2280,7 @@ equity(){
   const g=D.equity[0];const sig=g.glm_p_value<.05;
   const line=sig?(g.glm_odds_ratio<1?'More socially vulnerable counties are less likely to have analysis-ready wastewater surveillance.':'More socially vulnerable counties are more likely to have analysis-ready surveillance.'):'No clear difference by social vulnerability.';
   el.innerHTML=`<div class="head"><h1>Coverage & equity</h1><p class="muted">Who the wastewater system reaches, measured on two axes: the CDC/ATSDR Social Vulnerability Index and USDA rural-urban classification.</p></div>
-  <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2></header><div class="chart" id="e-bars"></div>
+  <div class="grid"><article class="panel c12"><header><h2>Analysis-ready by SVI quartile</h2><span class="small muted">among counties with any wastewater data</span></header><div class="chart" id="e-bars"></div>
     <div class="tbl"><table><tr><th>Quartile</th><th class="n">Counties</th><th class="n">Ready</th><th class="n">Median weeks</th></tr>${D.equity.map(q=>`<tr><td>${q.svi_quartile}</td><td class="n">${q.counties}</td><td class="n">${fmt(q.pct_analysis_ready,1)}%</td><td class="n">${q.median_surveillance_weeks}</td></tr>`).join('')}</table></div></article>
   <article class="panel c12"><header><h2>Model result</h2><span class="small muted">binomial GLM, ${g.glm_n_counties.toLocaleString()} counties with surveillance</span></header>
     <p style="font-weight:600">${line}</p>
@@ -2263,6 +2288,7 @@ equity(){
     <div class="mapbox" id="e-map"></div>${legend([['var(--accent)','Analysis-ready'],['var(--lo)','Observed, not ready'],['var(--nodata)','No surveillance']])}
     <p class="note">Analysis-ready = at least 52 qualifying weeks and at least 70% completeness across the active span. Association, not cause.</p>
     <p class="note"><b>A closely related analysis is already published, and this model is presented against it.</b> <a href="https://doi.org/10.1016/j.focus.2025.100434" target="_blank" rel="noopener">Alkhouri NB, Fisher V, Abuelezam NN, <i>AJPM Focus</i> 2025;5(1):100434</a> examined NWSS coverage across 859 of 3,143 U.S. counties (about 106 million people) using generalized linear mixed models with state as a random effect and American Community Survey measures, and reported county percent White positively associated with having surveillance in the fully adjusted model (OR 1.36, 95% CI 1.10&ndash;1.69), with state accounting for 22.3% of the variance. <b>The design here is related but not identical:</b> the outcome is <i>analysis-ready</i> coverage rather than presence of any surveillance, and the predictor is the composite CDC/ATSDR SVI rather than individual ACS measures. The contribution here is not the finding but the frame: the model is refitted on every county in the weekly run, the inputs are published as analysis-ready tables, and the result is recomputed and re-versioned each week rather than fixed at one point in time. The two measures below, representativeness and attrition, are the parts of this page with no published equivalent.</p></article></div>
+  <div class="grid">${adjPanel()}</div>
   ${urbanicityPanel()}
   ${repPanel()}
   ${attritionPanel()}`;

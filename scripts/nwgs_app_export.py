@@ -377,6 +377,13 @@ def main(table_dir, out_dir, allow_mixed=False):
         eq[f"glm_{k}"] = m[k]
     ents["EquitySummary"] = eq
 
+    # EquityAdjusted (Table06i): population- and rurality-adjusted GLMs; optional
+    t06i = find(table_dir, "Table06i_Coverage_Equity_GLM_Adjusted", required=False)
+    if t06i is not None and len(t06i) and "term" in t06i.columns:
+        ents["EquityAdjusted"] = t06i[[c for c in [
+            "outcome", "model", "term", "term_label", "n_counties", "n_events",
+            "odds_ratio", "or_95ci_low", "or_95ci_high", "p_value"] if c in t06i.columns]]
+
     # UrbanicityCoverage (Table06d, v5.24+; optional so older runs still export)
     t06d = find(table_dir, "Table06d_RUCC_County_Coverage", required=False)
     if t06d is not None and len(t06d):

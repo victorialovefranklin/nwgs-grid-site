@@ -211,6 +211,7 @@ def main(export_dir, site_dir):
         "state_monitored_svi", "svi_gap", "representativeness", "representativeness_tier"])
     D["rep_national"] = opt("RepresentativenessNational", how="first")
     D["assay_targets"] = opt("AssayTarget")
+    D["equity_adjusted"] = opt("EquityAdjusted")
     # Monitoring status, packed as {fips: [status, sites, sewered_pop,
     # sewer_share, sewered_svi]} so the county lookup can answer instantly
     # without shipping a second copy of the county roster.
