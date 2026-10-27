@@ -1,0 +1,9 @@
+[EQUITY-ADJ] ready_among_monitored unadjusted: SVI OR 0.900 (95% CI 0.849-0.953), p=0.000353, n=1081, events=889
+[EQUITY-ADJ] ready_among_monitored adjusted: SVI OR 0.877 (95% CI 0.826-0.932), p=2.01e-05, n=1081, events=889
+[EQUITY-ADJ] any_data_all_counties unadjusted: SVI OR 1.001 (95% CI 0.976-1.027), p=0.933, n=3144, events=1081
+[EQUITY-ADJ] any_data_all_counties adjusted: SVI OR 0.921 (95% CI 0.891-0.952), p=1.14e-06, n=3144, events=1081
+[17c/19] RESP-NET hospitalization alignment and nowcast validation...
+[RESP-NET] 5219 state-weeks kept, 13 states, 2022-10-01 to 2025-08-30; nowcast weeks dropped: {'COVID-NET': ['2025-09-06', '2025-09-13', '2025-09-20'], 'RSV-NET': ['2025-09-06', '2025-09-13', '2025-09-20']}
+[OK] source CDC RESP-NET hospitalization rates (archived 2025-10-02): OK - 5219 state-weeks, 13 states, 2022-10-01 to 2025-08-30
+[LAG CALENDAR] 36 of 157 state-pathogen series had missing weeks (307 gap weeks); 0 not on a weekly grid
+run 50 at 2026-10-27T01:30Z

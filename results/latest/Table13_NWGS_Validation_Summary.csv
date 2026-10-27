@@ -1,0 +1,31 @@
+component,status,detail
+SARS-CoV-2 recent activity,PASS,790 recent counties
+RSV recent activity,PASS,732 recent counties
+Influenza A recent activity,PASS,762 recent counties
+Influenza A(H5) detection parser,PASS,3038 positive / 122627 negative / 125665 known; 0 unknown
+Measles detection parser,PASS,704 positive / 79649 negative / 80353 known; 0 unknown
+Mpox detection parser,PASS,1421 positive / 310608 negative / 312029 known; 0 unknown
+Influenza A(H5) raw CDC detection-field audit,PASS,no:122627 | yes:3038
+Mpox raw CDC detection-field audit,PASS,no:310608 | yes:1421
+Measles raw CDC detection-field audit,PASS,no:79649 | yes:704
+Pathogen independence: SARS-CoV-2 vs RSV,PASS,0.14% identical activity among 732 common counties
+Pathogen independence: SARS-CoV-2 vs Influenza A,PASS,0.00% identical activity among 762 common counties
+Pathogen independence: RSV vs Influenza A,PASS,6.94% identical activity among 720 common counties
+Tennessee recent wastewater coverage,WARNING_SPARSE_COVERAGE,7/95 unique counties across recent respiratory activity table
+KNN spatial analysis,PASS,2227 county-pathogen LISA rows
+Spatial geography attrition audit,PASS,57 recent county-pathogen observations excluded from CONUS spatial analysis
+Wastewater-clinical lag analysis,PASS,151 jurisdiction-pathogen best-lag rows
+Seasonal peak implausible-lead audit,PASS,0 eligible season(s) flagged: none
+SVI surveillance readiness descriptive,PASS,4 SVI quartiles
+SVI surveillance readiness inferential model,PASS,OR=0.900 per 0.10 SVI increase; 95% CI 0.849-0.953; p=0.000353
+AMR/ARG module,PASS,11 ARG targets
+AMR/ARG classification audit (target mapping + Detect/outlier coding),PASS,"target mapping, Detect coding, and outlier coding look consistent"
+RCSB protein/structure visualization,PASS,6/6 protein PNGs rendered; 6/6 RCSB metadata queries passed; publication figure requires 6/6
+Urbanicity coverage (USDA RUCC 2023),WARNING_UNMATCHED_COUNTIES,metropolitan counties are 60.0% of the surveilled network but 37.7% of all counties; the network reaches 54.7% of metropolitan and 22.1% of nonmetropolitan counties; 12 county identifier(s) in the roster are not in the USDA county file and are absent from this axis (see Table06e)
+Monitoring status by county,WARNING_PARTIAL_VULNERABILITY,"3,144 counties: 1,081 with a site reporting, 1,603 with sewer service and no reporting site, 460 where few residents are on sewers; 71 counties have no vulnerability figure for their sewered residents and are reported as unscored"
+CDC PHIL pathogen reference imagery,WARNING_PARTIAL_IMAGES,0/6 pathogen reference images downloaded
+Manuscript figure layout: Figure 2 (Tennessee Surveillance Coverage),PASS,Page aspect 2674x3258px. Figure prepared for the manuscript at portrait aspect; not used on the website.
+Manuscript figure layout: Figure 5 (Tennessee SVI + Surveillance Readiness),WARNING_AUTOFIXED,Page aspect 3009x3310px (was 3009x2208px before padding). Figure prepared for the manuscript at portrait aspect; not used on the website.
+ML wastewater/clinical-lag collinearity audit,WARNING_HIGH_COLLINEARITY,Influenza A: wastewater_index vs clinical_lag1 r=0.76; Influenza A: ww_lag1 vs clinical_lag1 r=0.78; Influenza A: ww_lag2 vs clinical_lag1 r=0.73; Influenza A: ww_lag3 vs clinical_lag1 r=0.67; Influenza A: ww_lag4 vs clinical_lag1 r=0.58; RSV: wastewater_index vs clinical_lag1 r=0.67; RSV: ww_lag1 vs clinical_lag1 r=0.64; RSV: ww_lag2 vs clinical_lag1 r=0.57; RSV: ww_lag3 vs clinical_lag1 r=0.51; SARS-CoV-2: wastewater_index vs clinical_lag1 r=0.67; SARS-CoV-2: ww_lag1 vs clinical_lag1 r=0.68; SARS-CoV-2: ww_lag2 vs clinical_lag1 r=0.66; SARS-CoV-2: ww_lag3 vs clinical_lag1 r=0.60; SARS-CoV-2: ww_lag4 vs clinical_lag1 r=0.53
+ML standalone wastewater-only predictive value,PASS,Influenza A: wastewater-only R2=0.610 vs clinical-persistence R2=0.831; RSV: wastewater-only R2=0.310 vs clinical-persistence R2=0.925; SARS-CoV-2: wastewater-only R2=-0.584 vs clinical-persistence R2=0.912
+ML held-out prediction outlier audit,WARNING_OUTLIERS_FLAGGED,72 prediction(s) flagged; see Table12f_ML_Prediction_Outliers.csv
