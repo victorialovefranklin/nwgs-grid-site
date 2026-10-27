@@ -18,6 +18,7 @@ The large files are gzipped. Every byte of the original is preserved —
 | `EPA_Sewershed_Attributes.csv.gz` | [EPA National Sewershed Dataset v1.2](https://github.com/USEPA/Sewersheds), Sewersheds layer | 2026-10-16 | 17,079 rows | 0.7 MB |
 | `US_Wastewater_AMR_ARG_2024.csv` | [Kim et al. 2026](https://doi.org/10.1038/s41467-026-71195-4), CC BY 4.0, `Averaged` sheet of the published manuscript data | 2026-10-16 | 1,792 rows, 163 plants, 39 states | 0.3 MB |
 | `Kim_2025_ManuscriptData.xlsx` | The same study's full workbook, archived whole: `README`, `dPCR_Conc`, `Averaged`, `Aggregated`, `Determinants` | 2026-10-16 | 4,811 dPCR rows | 0.9 MB |
+| `RESPNET_Hospitalization_Rates_20251002.csv.gz` | [CDC RESP-NET rates](https://doi.org/10.3886/E238559V1-219009) (data.cdc.gov kvib-3txy), archived by ICPSR/DataLumos | 2025-10-02 | 50,703 rows × 12 cols, 6.6 MB | 0.5 MB |
 | `NWGS_ASSAY_TARGETS.template.csv` | Template for the optional curated assay-target panel | — | — | <0.1 MB |
 | `NWGS_FORECAST_LEDGER.csv` | Written back by the workflow after each run | — | grows weekly | — |
 
@@ -74,3 +75,14 @@ Download the new file, keep the same name, gzip it if the original exceeds about
 5 MB, and update the row count and download date in the table above. Then run the
 pipeline once and check the Audit log: every one of these files produces a source
 row there, and a layer that failed to load says so rather than disappearing.
+
+**The RESP-NET file is a frozen archive, not the live dataset.** It was accessed
+on 2025-10-02; CDC's live dataset (kvib-3txy) keeps revising and has since been
+renamed "RESP-NET Rates and Clinical Data". The pipeline keeps statewide,
+all-ages, unadjusted weekly rates for the 13 current sites, and drops the last
+three reported weeks of COVID-NET and RSV-NET (2025-09-06 to 2025-09-20)
+because they were nowcast estimates when the file was saved. FluSurv-NET is
+reported only during the influenza season. Cite as: U.S. Department of Health
+and Human Services, Centers for Disease Control and Prevention. Rates of
+Laboratory-Confirmed RSV, COVID-19, and Flu Hospitalizations from the RESP-NET
+Surveillance Systems. ICPSR, 2025-10-02. https://doi.org/10.3886/E238559V1-219009

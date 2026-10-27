@@ -2179,6 +2179,60 @@ def tennessee_seasonal_analysis(wastewater, multimodal):
     return out, county_season
 
 
+# ------------------------------------------------------------------
+# Calendar-week helpers (lag fix). Lags used to be taken with
+# Series.shift(k), which moves k ROWS. When a state skips a week, a
+# "1-week" lag then paired weeks that are really 2+ weeks apart. These
+# helpers put each series on a complete weekly calendar first, so a lag
+# of k always means k calendar weeks. Missing weeks become NaN and drop
+# out of the pairing instead of being silently skipped over.
+# ------------------------------------------------------------------
+LAG_CALENDAR_AUDIT = []
+
+
+def _calendar_weekly(g, cols, date_col="week_end"):
+    """Reindex one geography's weekly series onto a complete 7-day calendar.
+
+    Returns (frame, audit). If the dates are not on a regular 7-day grid
+    the frame is returned unchanged and the audit says so, rather than
+    guessing an alignment.
+    """
+    g = g.dropna(subset=[date_col]).copy()
+    g[date_col] = pd.to_datetime(g[date_col])
+    g = g.sort_values(date_col).drop_duplicates(date_col)
+    audit = {"observed_weeks": int(len(g)), "calendar_weeks": int(len(g)),
+             "gap_weeks": 0, "on_weekly_grid": True}
+    if g.empty:
+        return g, audit
+    offs = (g[date_col] - g[date_col].min()).dt.days
+    if not (offs % 7 == 0).all():
+        audit["on_weekly_grid"] = False
+        return g.reset_index(drop=True), audit
+    full = pd.date_range(g[date_col].min(), g[date_col].max(), freq="7D")
+    out = g.set_index(date_col)[list(cols)].reindex(full)
+    out.index.name = date_col
+    audit["calendar_weeks"] = int(len(full))
+    audit["gap_weeks"] = int(len(full) - len(g))
+    return out.reset_index(), audit
+
+
+def _add_calendar_lags(x, cols, lags, key="state_code", date_col="week_end"):
+    """Add lag features by calendar week: value at (key, week - k weeks).
+
+    cols maps source column -> output prefix, e.g. {"wastewater_index": "ww_lag"}
+    gives ww_lag1, ww_lag2, ... A missing prior week yields NaN.
+    """
+    x = x.copy()
+    x[date_col] = pd.to_datetime(x[date_col])
+    base = x[[key, date_col] + list(cols)].drop_duplicates([key, date_col])
+    for k in lags:
+        s = base.copy()
+        s[date_col] = s[date_col] + pd.Timedelta(weeks=k)
+        s = s.rename(columns={c: f"{pre}{k}" for c, pre in cols.items()})
+        x = x.merge(s, on=[key, date_col], how="left")
+    return x
+
+
 def lag_analysis(multimodal):
     all_rows = []
     best_rows = []
@@ -2187,6 +2241,9 @@ def lag_analysis(multimodal):
         g = g.sort_values("week_end").copy()
         if g["wastewater_index"].notna().sum() < MIN_PAIRED_WEEKS:
             continue
+        g, cal = _calendar_weekly(g, ["wastewater_index", "clinical_ed_pct"])
+        cal.update({"analysis": "lag_analysis", "pathogen": pathogen, "state_code": state})
+        LAG_CALENDAR_AUDIT.append(cal)
 
         local = []
         for lag in range(MAX_LAG_WEEKS + 1):
@@ -3985,9 +4042,8 @@ def exploratory_ml(multimodal):
 
     for pathogen, g in multimodal.groupby("pathogen"):
         x = g.sort_values(["state_code","week_end"]).copy()
-        for lag in [1,2,3,4]:
-            x[f"ww_lag{lag}"] = x.groupby("state_code")["wastewater_index"].shift(lag)
-            x[f"clinical_lag{lag}"] = x.groupby("state_code")["clinical_ed_pct"].shift(lag)
+        # Calendar-week lags (a missing prior week is NaN, not the row before).
+        x = _add_calendar_lags(x, {"wastewater_index": "ww_lag", "clinical_ed_pct": "clinical_lag"}, [1, 2, 3, 4])
 
         x = x.dropna(subset=["clinical_ed_pct","wastewater_index","ww_lag1","clinical_lag1"])
         if len(x) < 200:
@@ -4009,7 +4065,13 @@ def exploratory_ml(multimodal):
         # traced back to an exact source row (audit_ml_prediction_outliers()).
         ids = x[["state_code", "week_end"]].iloc[order].reset_index(drop=True)
 
-        cut = int(len(X)*0.80)
+        # Split on a week boundary: every row from the cut week onward is
+        # test, so no single week has some states in training and others
+        # in testing. Rows are already in chronological order.
+        wk_sorted = ids["week_end"].values
+        uniq_wk = np.unique(wk_sorted)
+        cut_week = uniq_wk[min(int(len(uniq_wk) * 0.80), len(uniq_wk) - 1)]
+        cut = int(np.searchsorted(wk_sorted, cut_week, side="left"))
         Xtr, Xte = X.iloc[:cut], X.iloc[cut:]
         ytr, yte = y.iloc[:cut], y.iloc[cut:]
         ids_test = ids.iloc[cut:].reset_index(drop=True)
@@ -7026,6 +7088,326 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
 # ============================================================
 # 21. APP EXPORTS
 # ============================================================
+# =====================================================================
+# RESP-NET hospitalization extension (future-work paper).
+#
+# Compares state-week wastewater with laboratory-confirmed hospitalization
+# rates from CDC RESP-NET (COVID-NET, RSV-NET, FluSurv-NET), and with NSSP
+# ED visits on the same states and weeks, then validates nowcast/forecast
+# models for both outcomes.
+#
+# Input is the archived RESP-NET file (accessed 2025-10-02, ICPSR DOI
+# 10.3886/E238559V1-219009) placed in static_inputs/. A frozen file is used
+# instead of the live API so results are reproducible; the live dataset
+# keeps revising. Nothing here can fail the weekly run.
+# =====================================================================
+RESPNET_PATH = Path(os.getenv(
+    "NWGS_RESPNET_PATH", str(STATIC_ROOT / "RESPNET_Hospitalization_Rates_20251002.csv.gz")))
+RESPNET_SNAPSHOT_DATE = pd.Timestamp(os.getenv("NWGS_RESPNET_SNAPSHOT_DATE", "2025-10-02"))
+RESPNET_NOWCAST_WEEKS = int(os.getenv("NWGS_RESPNET_NOWCAST_WEEKS", "3"))
+RESPNET_MAX_LAG = int(os.getenv("NWGS_RESPNET_MAX_LAG", "6"))
+RESPNET_HORIZONS = (0, 1, 2)
+# Current RESP-NET sites with data for all three networks in the study
+# window. Iowa and Ohio (former sites) and Washington (no rows in the
+# archived file) are excluded so every pathogen uses the same states.
+RESPNET_STATES = [s.strip() for s in os.getenv(
+    "NWGS_RESPNET_STATES", "CA,CO,CT,GA,MD,MI,MN,NM,NY,NC,OR,TN,UT").split(",") if s.strip()]
+RESPNET_BOOTSTRAP = int(os.getenv("NWGS_RESPNET_BOOTSTRAP", "500"))
+RESPNET_SOURCE_URL = "https://doi.org/10.3886/E238559V1-219009"
+# FluSurv-NET counts all influenza types; it is matched to the Influenza A
+# wastewater target because that is the influenza target NWGS harmonizes.
+RESPNET_NETWORK_PATHOGEN = {
+    "COVID-NET": "SARS-CoV-2",
+    "RSV-NET": "RSV",
+    "FluSurv-NET": "Influenza A",
+}
+_RESPNET_API_TO_DISPLAY = {
+    "surveillance_network": "Surveillance Network", "season": "Season",
+    "age_group": "Age group", "sex": "Sex", "race_ethnicity": "Race/Ethnicity",
+    "site": "Site", "weekly_rate": "Weekly Rate", "_weekenddate": "Week Ending Date",
+    "type": "Type",
+}
+
+
+def load_respnet(path=None):
+    """Statewide, all-ages, unadjusted weekly RESP-NET rates within the study window.
+
+    Returns (frame, info). Drops national 'Overall' rows, demographic strata
+    (state rows are Overall-only in the source), age-adjusted rates and the
+    'Combined' network. Drops the last RESPNET_NOWCAST_WEEKS weeks of any
+    network whose series runs up to the snapshot date, because CDC reports
+    the most recent weeks as nowcast estimates that are later revised.
+    """
+    path = Path(path or RESPNET_PATH)
+    info = {"path": str(path), "rows_raw": 0, "rows_kept": 0, "nowcast_weeks_dropped": {}}
+    if not path.exists():
+        print(f"[RESP-NET] no file at {path}; the hospitalization extension is skipped")
+        return pd.DataFrame(), info
+    raw = pd.read_csv(path, low_memory=False)
+    raw = raw.rename(columns={k: v for k, v in _RESPNET_API_TO_DISPLAY.items() if k in raw.columns})
+    need = {"Surveillance Network", "Age group", "Sex", "Race/Ethnicity", "Site",
+            "Weekly Rate", "Week Ending Date", "Type"}
+    missing = sorted(need - set(raw.columns))
+    if missing:
+        print(f"[RESP-NET] expected columns missing {missing}; found {list(raw.columns)}; skipped")
+        return pd.DataFrame(), info
+    info["rows_raw"] = int(len(raw))
+    d = raw[
+        raw["Surveillance Network"].isin(RESPNET_NETWORK_PATHOGEN)
+        & raw["Age group"].eq("Overall") & raw["Sex"].eq("Overall")
+        & raw["Race/Ethnicity"].eq("Overall") & raw["Type"].eq("Unadjusted Rate")
+        & ~raw["Site"].eq("Overall")
+    ].copy()
+    d["state_code"] = d["Site"].map(STATE_ABBR)
+    d["week_end"] = pd.to_datetime(d["Week Ending Date"], errors="coerce").dt.normalize()
+    d["hosp_rate"] = pd.to_numeric(d["Weekly Rate"], errors="coerce")
+    d["network"] = d["Surveillance Network"]
+    d["pathogen"] = d["network"].map(RESPNET_NETWORK_PATHOGEN)
+    d = d.dropna(subset=["state_code", "week_end", "hosp_rate"])
+    d = d[d["week_end"].between(STUDY_START, STUDY_END)]
+    if RESPNET_STATES:
+        info["states_excluded"] = sorted(set(d["state_code"]) - set(RESPNET_STATES))
+        d = d[d["state_code"].isin(RESPNET_STATES)]
+
+    keep = []
+    for net, g in d.groupby("network"):
+        weeks = np.sort(g["week_end"].unique())
+        last = pd.Timestamp(weeks[-1])
+        if RESPNET_NOWCAST_WEEKS > 0 and last >= RESPNET_SNAPSHOT_DATE - pd.Timedelta(days=28):
+            drop = set(weeks[-RESPNET_NOWCAST_WEEKS:])
+            info["nowcast_weeks_dropped"][net] = [str(pd.Timestamp(w).date()) for w in sorted(drop)]
+            g = g[~g["week_end"].isin(drop)]
+        keep.append(g)
+    d = pd.concat(keep, ignore_index=True) if keep else d.iloc[0:0]
+
+    cols = ["network", "pathogen", "state_code", "Season", "week_end", "hosp_rate"]
+    d = (d[[c for c in cols if c in d.columns]]
+         .rename(columns={"Season": "season"})
+         .drop_duplicates(["network", "state_code", "week_end"])
+         .sort_values(["network", "state_code", "week_end"])
+         .reset_index(drop=True))
+    info["rows_kept"] = int(len(d))
+    info["states"] = sorted(d["state_code"].unique().tolist())
+    info["first_week"] = str(d["week_end"].min().date()) if len(d) else None
+    info["last_week"] = str(d["week_end"].max().date()) if len(d) else None
+    try:
+        save_df(d, RAW_DIR / "CDC_RESPNET_STATE_WEEK_FROZEN.csv")
+    except Exception:
+        pass
+    print(f"[RESP-NET] {len(d)} state-weeks kept, {len(info['states'])} states, "
+          f"{info['first_week']} to {info['last_week']}; nowcast weeks dropped: {info['nowcast_weeks_dropped']}")
+    return d, info
+
+
+def _respnet_frame(multimodal, hosp, pathogen, state):
+    """One state's weekly wastewater, ED and hospitalization on a full calendar."""
+    m = multimodal[(multimodal["pathogen"] == pathogen) & (multimodal["state_code"] == state)]
+    m = m[["week_end", "wastewater_index", "clinical_ed_pct"]].copy()
+    m["week_end"] = pd.to_datetime(m["week_end"]).dt.normalize()
+    h = hosp[(hosp["pathogen"] == pathogen) & (hosp["state_code"] == state)][["week_end", "hosp_rate"]]
+    f = m.merge(h, on="week_end", how="outer")
+    f, cal = _calendar_weekly(f, ["wastewater_index", "clinical_ed_pct", "hosp_rate"])
+    # Compare ED and hospitalization on exactly the same weeks.
+    both = f["clinical_ed_pct"].notna() & f["hosp_rate"].notna()
+    f.loc[~both, ["clinical_ed_pct", "hosp_rate"]] = np.nan
+    return f, cal
+
+
+def respnet_alignment(multimodal, hosp, max_lag=None):
+    """Lagged Spearman correlations, both directions, for three pairings.
+
+    Positive lag k compares the first series at week t with the second at
+    t+k (first series earlier). Negative k means the second series is earlier.
+    P values are descriptive: the best lag is chosen from 2*max_lag+1
+    candidates and weekly series are autocorrelated.
+    """
+    max_lag = RESPNET_MAX_LAG if max_lag is None else max_lag
+    pairs = [
+        ("wastewater_vs_hospitalization", "wastewater_index", "hosp_rate"),
+        ("wastewater_vs_ED", "wastewater_index", "clinical_ed_pct"),
+        ("ED_vs_hospitalization", "clinical_ed_pct", "hosp_rate"),
+    ]
+    rows = []
+    for (pathogen, state), _ in hosp.groupby(["pathogen", "state_code"]):
+        if multimodal[(multimodal["pathogen"] == pathogen) & (multimodal["state_code"] == state)].empty:
+            continue
+        f, cal = _respnet_frame(multimodal, hosp, pathogen, state)
+        cal.update({"analysis": "respnet_alignment", "pathogen": pathogen, "state_code": state})
+        LAG_CALENDAR_AUDIT.append(cal)
+        for name, a, b in pairs:
+            for k in range(-max_lag, max_lag + 1):
+                q = pd.DataFrame({"a": f[a], "b": f[b].shift(-k)}).dropna()
+                if len(q) < MIN_PAIRED_WEEKS or q["a"].nunique() < 3 or q["b"].nunique() < 3:
+                    continue
+                r, p = stats.spearmanr(q["a"], q["b"])
+                rows.append({"pathogen": pathogen, "state_code": state, "comparison": name,
+                             "lag_weeks": k, "paired_weeks": len(q),
+                             "spearman_r": float(r), "spearman_p": float(p)})
+    all_df = pd.DataFrame(rows)
+    if all_df.empty:
+        return all_df, pd.DataFrame(), pd.DataFrame()
+    all_df["spearman_p_fdr"] = benjamini_hochberg(all_df["spearman_p"].values)
+
+    best = (all_df.assign(abs_lag=all_df["lag_weeks"].abs())
+                  .sort_values(["pathogen", "state_code", "comparison", "spearman_r", "abs_lag"],
+                               ascending=[True, True, True, False, True])
+                  .groupby(["pathogen", "state_code", "comparison"], as_index=False).head(1)
+                  .drop(columns="abs_lag").reset_index(drop=True))
+    first = best["comparison"].str.split("_vs_").str[0]
+    second = best["comparison"].str.split("_vs_").str[1]
+    best["relationship"] = np.where(best["lag_weeks"].eq(0), "Same week",
+                           np.where(best["lag_weeks"].gt(0), first + " earlier", second + " earlier"))
+    lag0 = all_df[all_df["lag_weeks"].eq(0)][["pathogen", "state_code", "comparison", "spearman_r"]]
+    best = best.merge(lag0.rename(columns={"spearman_r": "spearman_r_lag0"}),
+                      on=["pathogen", "state_code", "comparison"], how="left")
+    best["p_value_note"] = "Descriptive only: best lag selected from multiple candidates; series autocorrelated."
+
+    summ = (best.groupby(["pathogen", "comparison"])
+                .agg(states=("state_code", "nunique"),
+                     median_best_lag=("lag_weeks", "median"),
+                     n_first_earlier=("lag_weeks", lambda s: int((s > 0).sum())),
+                     n_same_week=("lag_weeks", lambda s: int((s == 0).sum())),
+                     n_second_earlier=("lag_weeks", lambda s: int((s < 0).sum())),
+                     median_r_best=("spearman_r", "median"),
+                     median_r_lag0=("spearman_r_lag0", "median"),
+                     median_paired_weeks=("paired_weeks", "median"))
+                .reset_index())
+    return all_df, best, summ
+
+
+def _respnet_model_frame(multimodal, hosp, pathogen, outcome_col):
+    """State-week rows for one pathogen with calendar-week features and targets."""
+    parts = []
+    for state in sorted(hosp.loc[hosp["pathogen"] == pathogen, "state_code"].unique()):
+        if multimodal[(multimodal["pathogen"] == pathogen) & (multimodal["state_code"] == state)].empty:
+            continue
+        f, _ = _respnet_frame(multimodal, hosp, pathogen, state)
+        f["state_code"] = state
+        parts.append(f)
+    if not parts:
+        return pd.DataFrame()
+    x = pd.concat(parts, ignore_index=True).rename(columns={outcome_col: "y"})
+    x = x[["state_code", "week_end", "wastewater_index", "y"]]
+    x = _add_calendar_lags(x, {"wastewater_index": "ww_lag", "y": "y_lag"}, [1, 2, 3])
+    for h in RESPNET_HORIZONS:
+        s = x[["state_code", "week_end", "y"]].copy()
+        s["week_end"] = s["week_end"] - pd.Timedelta(weeks=h)
+        x = x.merge(s.rename(columns={"y": f"target_h{h}"}), on=["state_code", "week_end"], how="left")
+    return x
+
+
+def _metrics(y, p):
+    y, p = np.asarray(y, float), np.asarray(p, float)
+    err = p - y
+    ss = float(((y - y.mean()) ** 2).sum())
+    return {"mae": float(np.abs(err).mean()), "rmse": float(np.sqrt((err ** 2).mean())),
+            "r2": float(1 - (err ** 2).sum() / ss) if ss > 0 else np.nan}
+
+
+def _bootstrap_mae_ci(test, pred_col, reps=None, seed=42):
+    """95% CI for MAE, resampling whole weeks (keeps same-week states together)."""
+    reps = RESPNET_BOOTSTRAP if reps is None else reps
+    e = (test[pred_col] - test["target"]).abs()
+    wk = e.groupby(test["week_end"]).agg(["sum", "count"])
+    if len(wk) < 5 or reps <= 0:
+        return np.nan, np.nan
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(wk), size=(reps, len(wk)))
+    s, c = wk["sum"].to_numpy()[idx].sum(axis=1), wk["count"].to_numpy()[idx].sum(axis=1)
+    vals = s / c
+    return float(np.percentile(vals, 2.5)), float(np.percentile(vals, 97.5))
+
+
+def nowcast_validation(multimodal, hosp):
+    """Out-of-sample nowcast (h=0) and 1-2 week forecasts for ED and hospitalization.
+
+    Same 13 states and same weeks for both outcomes. Features known at week t:
+    wastewater at t and t-1..t-3, outcome at t-1..t-3 (outcome at t is
+    treated as not yet reported). Models: persistence (outcome at t-1),
+    clinical-only, wastewater-only and full gradient boosting.
+    Schemes: 'temporal' trains on weeks before the cut (80% of weeks) and
+    tests after it; 'temporal_leave_state_out' additionally holds each
+    state out of training and tests only on it. The full model also gets
+    an 80% prediction interval (quantile boosting) and its coverage.
+    """
+    if not HAVE_SKLEARN or hosp is None or hosp.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    feats = {
+        "clinical_only": ["y_lag1", "y_lag2", "y_lag3"],
+        "wastewater_only": ["wastewater_index", "ww_lag1", "ww_lag2", "ww_lag3"],
+        "full": ["wastewater_index", "ww_lag1", "ww_lag2", "ww_lag3", "y_lag1", "y_lag2", "y_lag3"],
+    }
+    rows, pred_rows = [], []
+    for pathogen in sorted(hosp["pathogen"].unique()):
+        for outcome, col in [("hospitalization", "hosp_rate"), ("ED", "clinical_ed_pct")]:
+            base = _respnet_model_frame(multimodal, hosp, pathogen, col)
+            if base.empty:
+                continue
+            for h in RESPNET_HORIZONS:
+                x = base.dropna(subset=[f"target_h{h}", "y_lag1", "wastewater_index"]).copy()
+                x["target"] = x[f"target_h{h}"]
+                if len(x) < 200 or x["state_code"].nunique() < 3:
+                    continue
+                weeks = np.sort(x["week_end"].unique())
+                cut_week = weeks[min(int(len(weeks) * 0.80), len(weeks) - 1)]
+                folds = {"temporal": [(x["week_end"] < cut_week, x["week_end"] >= cut_week)]}
+                folds["temporal_leave_state_out"] = [
+                    ((x["week_end"] < cut_week) & (x["state_code"] != s),
+                     (x["week_end"] >= cut_week) & (x["state_code"] == s))
+                    for s in sorted(x["state_code"].unique())]
+                for scheme, splits in folds.items():
+                    preds = []
+                    for tr_mask, te_mask in splits:
+                        tr, te = x[tr_mask], x[te_mask].copy()
+                        if len(tr) < 100 or len(te) == 0:
+                            continue
+                        te["pred_persistence"] = te["y_lag1"]
+                        for mname, fcols in feats.items():
+                            mdl = HistGradientBoostingRegressor(random_state=42, max_iter=200)
+                            mdl.fit(tr[fcols], tr["target"])
+                            te[f"pred_{mname}"] = mdl.predict(te[fcols])
+                        lo = HistGradientBoostingRegressor(loss="quantile", quantile=0.10, random_state=42, max_iter=200)
+                        hi = HistGradientBoostingRegressor(loss="quantile", quantile=0.90, random_state=42, max_iter=200)
+                        lo.fit(tr[feats["full"]], tr["target"]); hi.fit(tr[feats["full"]], tr["target"])
+                        te["pi80_low"] = lo.predict(te[feats["full"]])
+                        te["pi80_high"] = hi.predict(te[feats["full"]])
+                        te["n_train"] = len(tr)
+                        preds.append(te)
+                    if not preds:
+                        continue
+                    te = pd.concat(preds, ignore_index=True)
+                    mae_persist = _metrics(te["target"], te["pred_persistence"])["mae"]
+                    for mname in ["persistence"] + list(feats):
+                        m = _metrics(te["target"], te[f"pred_{mname}"])
+                        lo_ci, hi_ci = _bootstrap_mae_ci(te, f"pred_{mname}")
+                        row = {"pathogen": pathogen, "outcome": outcome, "horizon_weeks": h,
+                               "scheme": scheme, "model": mname,
+                               "n_train": int(te["n_train"].max()), "n_test": int(len(te)),
+                               "test_states": int(te["state_code"].nunique()),
+                               "test_start": str(pd.Timestamp(cut_week).date()),
+                               **m, "mae_95ci_low": lo_ci, "mae_95ci_high": hi_ci,
+                               "mae_ratio_vs_persistence": m["mae"] / mae_persist if mae_persist else np.nan}
+                        if mname == "full":
+                            inside = (te["target"] >= te["pi80_low"]) & (te["target"] <= te["pi80_high"])
+                            row["pi80_coverage"] = float(inside.mean())
+                            row["pi80_mean_width"] = float((te["pi80_high"] - te["pi80_low"]).mean())
+                        rows.append(row)
+                    if scheme == "temporal":
+                        keep = te[["state_code", "week_end", "target", "pred_persistence", "pred_clinical_only",
+                                   "pred_wastewater_only", "pred_full", "pi80_low", "pi80_high"]].copy()
+                        keep.insert(0, "horizon_weeks", h)
+                        keep.insert(0, "outcome", outcome)
+                        keep.insert(0, "pathogen", pathogen)
+                        pred_rows.append(keep)
+    val = pd.DataFrame(rows)
+    preds = pd.concat(pred_rows, ignore_index=True) if pred_rows else pd.DataFrame()
+    if not val.empty:
+        val["note"] = ("Nowcast (h=0) / forecast (h>0) of the same 13 states and weeks for both outcomes; "
+                       "features exclude the outcome at week t.")
+    return val, preds
+
+
+
 def export_app_json(summary, activity, best_lag, global_moran, amr_target=None, amr_state=None, genomics=None, pdb_map=None):
     payload = {
         "generated_utc": utc_now(),
@@ -8697,6 +9079,44 @@ def main():
         save_df(genomics.drop(columns=["raw_json"], errors="ignore"), APP_DIR / "genomic_context.csv")
     if not pdb_map.empty:
         save_df(pdb_map, APP_DIR / "pdb_mappings.csv")
+    # ------------------------------------------------------------
+    # [17c/19] RESP-NET hospitalization extension (future-work paper).
+    # Optional: a missing file or any error is logged and skipped.
+    # ------------------------------------------------------------
+    print("\n[17c/19] RESP-NET hospitalization alignment and nowcast validation...")
+    try:
+        hosp, hosp_info = load_respnet()
+        if not hosp.empty:
+            save_df(hosp, TABLE_DIR / "Table27_RESPNET_State_Week.csv")
+            rn_all, rn_best, rn_sum = respnet_alignment(multimodal, hosp)
+            if not rn_all.empty:
+                save_df(rn_all, TABLE_DIR / "Table27b_RESPNET_Lag_All.csv")
+                save_df(rn_best, TABLE_DIR / "Table27c_RESPNET_Lag_Best.csv")
+                save_df(rn_sum, TABLE_DIR / "Table27d_RESPNET_Lag_Summary.csv")
+                print(rn_sum.to_string(index=False))
+            rn_val, rn_pred = nowcast_validation(multimodal, hosp)
+            if not rn_val.empty:
+                save_df(rn_val, TABLE_DIR / "Table28_Nowcast_Validation.csv")
+                save_df(rn_pred, TABLE_DIR / "Table28b_Nowcast_Predictions.csv")
+                show = rn_val[rn_val["horizon_weeks"].eq(0)][
+                    ["pathogen", "outcome", "scheme", "model", "n_test", "mae", "rmse", "r2"]]
+                print(show.round(3).to_string(index=False))
+            record_source("CDC RESP-NET hospitalization rates (archived 2025-10-02)", "OK",
+                          f"{hosp_info.get('rows_kept')} state-weeks, {len(hosp_info.get('states', []))} states, "
+                          f"{hosp_info.get('first_week')} to {hosp_info.get('last_week')}", RESPNET_SOURCE_URL)
+        else:
+            record_source("CDC RESP-NET hospitalization rates (archived 2025-10-02)", "EMPTY",
+                          f"no usable file at {RESPNET_PATH.name}", RESPNET_SOURCE_URL)
+    except Exception as exc:
+        print(f"[WARN] RESP-NET extension skipped: {type(exc).__name__}: {exc}")
+    if LAG_CALENDAR_AUDIT:
+        cal_audit = pd.DataFrame(LAG_CALENDAR_AUDIT)
+        save_df(cal_audit, TABLE_DIR / "Table04f_Lag_Calendar_Gap_Audit.csv")
+        la = cal_audit[cal_audit["analysis"].eq("lag_analysis")]
+        print(f"[LAG CALENDAR] {int((la['gap_weeks'] > 0).sum())} of {len(la)} state-pathogen series had "
+              f"missing weeks ({int(la['gap_weeks'].sum())} gap weeks); "
+              f"{int((~la['on_weekly_grid']).sum())} not on a weekly grid")
+
     export_app_json(pathogen_summary, activity, best_lag, global_moran, amr_target, amr_state, genomics, pdb_map)
 
     # v5.18 addition: export the figure-generation-time portrait self-check

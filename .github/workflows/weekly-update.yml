@@ -116,6 +116,32 @@ jobs:
           git push origin "HEAD:${GITHUB_REF_NAME}"
           echo "Ledger rows now committed: $(($(wc -l < static_inputs/NWGS_FORECAST_LEDGER.csv) - 1))"
 
+      # Research tables for the RESP-NET / validation paper. Small CSVs are
+      # committed to results/latest/ so they can be reviewed from the repository
+      # without downloading the run's artifacts. Never fails the run.
+      - name: Persist research result tables
+        if: success()
+        continue-on-error: true
+        run: |
+          OUT=results/latest
+          mkdir -p "$OUT"
+          for f in Table04_Best_Lag_Results Table04f_Lag_Calendar_Gap_Audit Table06b_Coverage_Equity_GLM \
+                   Table06i_Coverage_Equity_GLM_Adjusted Table12_Exploratory_ML_Benchmark \
+                   Table12d_Wastewater_Only_Benchmark Table13_NWGS_Validation_Summary \
+                   Table27_RESPNET_State_Week Table27b_RESPNET_Lag_All Table27c_RESPNET_Lag_Best \
+                   Table27d_RESPNET_Lag_Summary Table28_Nowcast_Validation Table28b_Nowcast_Predictions; do
+            [ -f "$TABLE_DIR/$f.csv" ] && cp "$TABLE_DIR/$f.csv" "$OUT/" || echo "not produced: $f"
+          done
+          grep -E "RESP-NET|LAG CALENDAR|\[17c/19\]|EQUITY-ADJ" pipeline_log.txt > "$OUT/run_notes.txt" || true
+          echo "run ${{ github.run_number }} at $(date -u +%Y-%m-%dT%H:%MZ)" >> "$OUT/run_notes.txt"
+          git add "$OUT"
+          if git diff --cached --quiet -- "$OUT"; then echo "Results unchanged."; exit 0; fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Record research tables for run ${{ github.run_number }} [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
       - name: Build site
         env:
           NWGS_STRUCTURE_DIR: /content/NWGS_GRID/outputs/pathogen_intelligence/protein_structures
