@@ -9,3 +9,4 @@ site/
 # Downloaded papers: linked in references/REFERENCES.md, not stored here.
 references/pdfs/*
 !references/pdfs/.gitkeep
+_preview/

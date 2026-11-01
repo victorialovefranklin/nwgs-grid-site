@@ -6169,6 +6169,69 @@ def attrition_by_vulnerability(site_attrition, svi_lookup):
 # ------------------------------------------------------------
 # 12c. ARCHIVED-FORECAST SCOREBOARD
 # ------------------------------------------------------------
+FORECAST_WIS_LEVELS = (0.5, 0.8, 0.95)
+
+
+def _wis_one(y, median, lo, hi, levels):
+    """Weighted interval score for a single observation.
+
+    With degenerate intervals this reduces exactly to |y - median|, so a point
+    forecast and an interval forecast are on the same scale and the point
+    forecast is not penalised for the mere absence of an interval.
+    """
+    if not np.isfinite(y) or not np.isfinite(median):
+        return np.nan
+    k = len(levels)
+    total = abs(y - median) / 2.0
+    for lv in levels:
+        a = 1.0 - lv
+        l, u = lo[lv], hi[lv]
+        if not (np.isfinite(l) and np.isfinite(u)):
+            return np.nan
+        iw = u - l
+        pen = (2.0 / a) * ((l - y) if y < l else 0.0) + (2.0 / a) * ((y - u) if y > u else 0.0)
+        total += (a / 2.0) * (iw + pen)
+    return total / (k + 0.5)
+
+
+def _horizon_error_quantiles(series, hz, levels):
+    """Empirical error quantiles for each method at one horizon.
+
+    Backtested over the history that exists AT FORECAST TIME, so no observation
+    from the target week informs its own interval. Returns None when the record
+    is too short to estimate a tail honestly.
+    """
+    y = np.asarray(series, dtype=float)
+    n = len(y)
+    if n < hz + 8:
+        return None
+    errs = {"persistence": [], "linear": []}
+    for t in range(4, n - hz):
+        anchor = y[t]
+        if not np.isfinite(anchor):
+            continue
+        tail = y[max(0, t - 3):t + 1]
+        if len(tail) >= 2 and np.isfinite(tail).all():
+            slope = float(np.polyfit(np.arange(len(tail), dtype=float), tail, 1)[0])
+        else:
+            slope = 0.0
+        truth = y[t + hz]
+        if not np.isfinite(truth):
+            continue
+        errs["persistence"].append(anchor - truth)
+        errs["linear"].append(anchor + slope * hz - truth)
+    out = {}
+    for m, e in errs.items():
+        e = np.asarray(e, dtype=float)
+        e = e[np.isfinite(e)]
+        if len(e) < 8:
+            return None
+        out[m] = {lv: (float(np.quantile(e, (1.0 - lv) / 2.0)),
+                       float(np.quantile(e, 1.0 - (1.0 - lv) / 2.0)))
+                  for lv in levels}
+    return out
+
+
 def record_forecasts(national_week, run_id, horizons=(1, 2, 3, 4)):
     """Append this run's forecasts to a persisted history, before any outcome is known.
 
@@ -6197,7 +6260,7 @@ def record_forecasts(national_week, run_id, horizons=(1, 2, 3, 4)):
         slope = float(np.polyfit(x, y, 1)[0]) if np.isfinite(y).all() and len(y) >= 2 else 0.0
         for hz in horizons:
             target = last_week + pd.Timedelta(weeks=hz)
-            rows.append({
+            row = {
                 "run_id": run_id,
                 "forecast_made_week": last_week.strftime("%Y-%m-%d"),
                 "pathogen": pathogen,
@@ -6207,7 +6270,22 @@ def record_forecasts(national_week, run_id, horizons=(1, 2, 3, 4)):
                 "pred_linear": round(last_val + slope * hz, 4),
                 "anchor_value": round(last_val, 4),
                 "trailing_slope": round(slope, 4),
-            })
+            }
+            # Predictive intervals are frozen WITH the forecast, from errors
+            # backtested on the history available now. Scoring a model that has
+            # intervals against a baseline that has none rewards the model for
+            # quantifying uncertainty at all rather than for doing it well, so
+            # both methods carry their own.
+            q = _horizon_error_quantiles(g["median_site_z"], hz, FORECAST_WIS_LEVELS)
+            if q is not None:
+                for mname, pred in (("persistence", last_val),
+                                    ("linear", last_val + slope * hz)):
+                    for lv in FORECAST_WIS_LEVELS:
+                        t = int(round(lv * 100))
+                        qlo, qhi = q[mname][lv]
+                        row[f"{mname}_lo{t}"] = round(pred - qhi, 4)
+                        row[f"{mname}_hi{t}"] = round(pred - qlo, 4)
+            rows.append(row)
     new = pd.DataFrame(rows)
     if new.empty:
         return new
@@ -6266,6 +6344,32 @@ def score_forecasts(history, national_week):
         row["skill_vs_persistence"] = (
             round(1.0 - row["mae_linear"] / row["mae_persistence"], 4)
             if row["mae_persistence"] else np.nan
+        )
+        # Weighted interval score, scored only on ledger rows that were frozen
+        # WITH intervals. Older rows predate the interval columns and are left
+        # unscored rather than back-filled, because a retrofitted interval
+        # would break the guarantee that a prediction is never rewritten.
+        lv = list(FORECAST_WIS_LEVELS)
+        have = all(f"{m}_lo{int(round(l * 100))}" in g.columns
+                   for m in ("persistence", "linear") for l in lv)
+        gi = g.dropna(subset=[f"{m}_lo{int(round(l * 100))}" for m in ("persistence", "linear")
+                              for l in lv]) if have else g.iloc[0:0]
+        row["n_scored_wis"] = int(len(gi))
+        for m in ("persistence", "linear"):
+            if len(gi):
+                vals = [
+                    _wis_one(float(r["observed"]), float(r[f"pred_{m}"]),
+                             {l: float(r[f"{m}_lo{int(round(l * 100))}"]) for l in lv},
+                             {l: float(r[f"{m}_hi{int(round(l * 100))}"]) for l in lv}, lv)
+                    for _, r in gi.iterrows()]
+                vals = [v for v in vals if np.isfinite(v)]
+                row[f"wis_{m}"] = round(float(np.mean(vals)), 4) if vals else np.nan
+            else:
+                row[f"wis_{m}"] = np.nan
+        row["wis_skill_vs_persistence"] = (
+            round(1.0 - row["wis_linear"] / row["wis_persistence"], 4)
+            if row.get("wis_persistence") and np.isfinite(row["wis_persistence"])
+            and row["wis_persistence"] else np.nan
         )
         rows.append(row)
     return scored, pd.DataFrame(rows).sort_values(["pathogen", "horizon_weeks"])

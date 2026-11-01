@@ -775,6 +775,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-audit" hidden></section>
     <section class="view" id="v-methods" hidden></section>
     <section class="view" id="v-glossary" hidden></section>
+    <section class="view" id="v-why" hidden></section>
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
       <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
@@ -998,7 +999,7 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['start','Start here'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['reports','Data & reports'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
+const VIEWS=[['start','Start here'],['why','Why NWGS Grid exists'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['reports','Data & reports'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
 const built={};
 let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
@@ -1013,7 +1014,7 @@ const GROUPS=[
   ['Coverage & equity',  ['monitoring','equity','global','tennessee']],
   ['Research & genomics',['genomics','structures']],
   ['Data & methods',     ['reports','audit','methods','glossary']],
-  ['About',              ['about']],
+  ['About',              ['why','about']],
 ];
 const LABEL=Object.fromEntries(VIEWS);
 // A view missing from every group would become unreachable from the menu.
@@ -1207,7 +1208,7 @@ function assayPanel(){
 
 /* ---------- forecast scoreboard ---------- */
 function forecastPanel(){
-  const defn=`<p class="note"><b>How this works, and what it is for.</b> Each weekly run writes its forecasts to a ledger keyed by run identifier <i>before</i> the outcome exists, and a later run scores them against what was actually observed. A prediction already on the ledger for a given run is never rewritten, so the scoreboard cannot be retrofitted after the fact.</p>
+  const defn=`<p class="note"><b>How this works, and what it is for.</b> Each weekly run writes its forecasts to a ledger keyed by run identifier <i>before</i> the outcome exists, and a later run scores them against what was actually observed. A prediction already on the ledger for a given run is never rewritten, so the scoreboard cannot be retrofitted after the fact. Each forecast is frozen together with predictive intervals derived from errors backtested on the history available at that moment, so an interval cannot be tuned once the outcome is known.</p>
   <p class="note"><b>The models here are deliberately plain:</b> a persistence baseline and a linear extrapolation of the trailing four weeks. The contribution is not the model but the ledger: the field has no public wastewater forecasting hub or standing benchmark, so there is nowhere to find out whether anyone's forecast actually worked. A stronger model can be added later and scored on the same ledger against the same frozen history. Negative skill is reported as readily as positive skill; a trend term that makes forecasts worse is a result, not a bug.</p>`;
   if(!D.forecast_board||!D.forecast_board.length)
     return `<article class="panel c12"><header><h2>Forecast scoreboard</h2></header>
@@ -1215,18 +1216,22 @@ function forecastPanel(){
   const b=D.forecast_board;
   const best=b.reduce((a,c)=>(c.skill_vs_persistence??-9)>(a.skill_vs_persistence??-9)?c:a,b[0]);
   const nScored=d3.sum(b,r=>r.n_scored||0);
+  const nWis=d3.sum(b,r=>r.n_scored_wis||0);
+  const hasWis=nWis>0;
   return `<article class="panel c12"><header><h2>Forecast scoreboard <button class="qmark" data-gloss="forecast-skill" aria-label="What does forecast skill mean?">?</button></h2><span class="small muted">frozen predictions, scored on arrival</span></header>
   <div class="statgrid">
     <div class="stat"><span class="label">Forecasts scored</span><span class="big">${nScored.toLocaleString()}</span></div>
     <div class="stat"><span class="label">Best skill vs persistence</span><span class="big" style="color:${(best.skill_vs_persistence??0)>0?'var(--accent)':'var(--hi)'}">${fmt(best.skill_vs_persistence,3)}</span><span class="small muted">${esc(best.pathogen)}, ${best.horizon_weeks} wk</span></div>
     <div class="stat"><span class="label">Horizons tracked</span><span class="big">${[...new Set(b.map(r=>r.horizon_weeks))].join(', ')}</span><span class="small muted">weeks ahead</span></div>
   </div>
-  <div class="tbl"><table><tr><th>Pathogen</th><th class="n">Horizon</th><th class="n">Scored</th><th class="n">MAE persistence</th><th class="n">MAE linear</th><th class="n">Bias linear</th><th class="n">Skill</th></tr>
+  <div class="tbl"><table><tr><th>Pathogen</th><th class="n">Horizon</th><th class="n">Scored</th><th class="n">MAE persistence</th><th class="n">MAE linear</th><th class="n">Bias linear</th><th class="n">Skill (MAE)</th>${hasWis?'<th class="n">WIS persistence</th><th class="n">WIS linear</th><th class="n">Skill (WIS)</th>':''}</tr>
     ${b.map(r=>`<tr><td>${esc(r.pathogen)}</td><td class="n">${r.horizon_weeks} wk</td><td class="n">${r.n_scored}</td>
       <td class="n">${fmt(r.mae_persistence,3)}</td><td class="n">${fmt(r.mae_linear,3)}</td>
       <td class="n">${r.bias_linear>0?'+':''}${fmt(r.bias_linear,3)}</td>
-      <td class="n" style="color:${(r.skill_vs_persistence??0)>0?'var(--accent)':'var(--hi)'}"><b>${fmt(r.skill_vs_persistence,3)}</b></td></tr>`).join('')}</table></div>
-  <p class="small muted">Skill is 1 − (MAE of the linear model ÷ MAE of persistence). Above zero the trend term helped; below zero it hurt. Units are site-standardized z, so errors are comparable across pathogens.</p>
+      <td class="n" style="color:${(r.skill_vs_persistence??0)>0?'var(--accent)':'var(--hi)'}"><b>${fmt(r.skill_vs_persistence,3)}</b></td>
+      ${hasWis?`<td class="n">${r.wis_persistence==null?'—':fmt(r.wis_persistence,3)}</td><td class="n">${r.wis_linear==null?'—':fmt(r.wis_linear,3)}</td><td class="n" style="color:${(r.wis_skill_vs_persistence??0)>0?'var(--accent)':'var(--hi)'}"><b>${r.wis_skill_vs_persistence==null?'—':fmt(r.wis_skill_vs_persistence,3)}</b></td>`:''}</tr>`).join('')}</table></div>
+  <p class="small muted">Skill (MAE) is 1 − (MAE of the linear model ÷ MAE of persistence). Above zero the trend term helped; below zero it hurt. Units are site-standardized z, so errors are comparable across pathogens.</p>
+  ${hasWis?`<p class="small muted"><b>Skill (WIS)</b> is the same ratio under the weighted interval score, which charges a forecast for the width of its interval as well as the position of its centre. Both methods carry predictive intervals frozen alongside the forecast, so neither is rewarded merely for having one. With degenerate intervals the score reduces exactly to absolute error, so the two skill columns are on a common scale. ${nWis.toLocaleString()} of ${nScored.toLocaleString()} scored forecasts carry intervals; rows frozen before intervals were recorded show — rather than being back-filled.</p>`:`<p class="small muted">Interval scoring begins once forecasts frozen with predictive intervals mature. Earlier rows are scored on absolute error only, and are never back-filled.</p>`}
   ${defn}</article>`;
 }
 
@@ -2105,7 +2110,7 @@ leadtime(){
 predictive(){
   const el=document.getElementById('v-predictive');
   const M=Object.fromEntries(D.models.map(m=>[m.pathogen,m]));
-  const interp=m=>{const w=m.wastewater_only_r2,g=m.gain_over_persistence;
+  const interp=m=>{const w=m.wastewater_only_r2,g=m.gain_over_clinical_only;
     const solo=w<=0?`On its own, wastewater did not predict ED visits in the test period (R² ${fmt(w,2)}).`
       :`On its own, wastewater explains about ${Math.round(w*100)}% of the week-to-week variation in ED visits (R² ${fmt(w,2)}).`;
     const add=g>=0.02?`Added to recent ED data, it raises R² by ${fmt(g,3)}.`
@@ -2114,10 +2119,10 @@ predictive(){
     return solo+' '+add};
   el.innerHTML=`<div class="head"><h1>Predictive models</h1><p class="muted">Does wastewater help predict emergency-department burden? Each model was trained on earlier weeks and tested on a later held-out period.</p></div>
   <article class="panel"><header><h2>Held-out accuracy (R²)</h2></header><div class="chart" id="p-bars"></div>
-  ${legend([['var(--muted)','Clinical history only (persistence)'],['var(--el)','Wastewater only'],['var(--accent)','Full multimodal model']])}</article>
+  ${legend([['var(--muted)','Clinical history only'],['var(--el)','Wastewater only'],['var(--accent)','Full multimodal model']])}</article>
   <div class="grid">${ROUTINE.map(p=>{const m=M[p];return `<article class="panel c4"><header><h2>${p}</h2><span class="small mono">${m.best_model}</span></header>
     <p style="font-weight:600">${esc(m.plain_language)}</p>
-    <div class="kv small"><div><span class="label">Full R²</span><b>${fmt(m.full_model_r2,3)}</b></div><div><span class="label">Clinical only</span><b>${fmt(m.clinical_persistence_r2,3)}</b></div><div><span class="label">Gain</span><b>${m.gain_over_persistence>0?'+':''}${fmt(m.gain_over_persistence,3)}</b></div></div>
+    <div class="kv small"><div><span class="label">Full R²</span><b>${fmt(m.full_model_r2,3)}</b></div><div><span class="label">Clinical only</span><b>${fmt(m.clinical_persistence_r2,3)}</b></div><div><span class="label">Gain over clinical-only</span><b>${m.gain_over_clinical_only>0?'+':''}${fmt(m.gain_over_clinical_only,3)}</b></div></div>
     <p class="small muted">${interp(m)}</p>
     <span class="label">Top predictors (mean |SHAP|)</span><div class="chart" id="p-shap-${p.replace(/\W/g,'')}"></div></article>`}).join('')}</div>
   <p class="note">Wastewater features (orange) are often strongly correlated with last week’s clinical value (r up to 0.77), so a small SHAP rank inside the full model can understate wastewater’s standalone signal. That is why the wastewater-only model is shown separately.</p>
@@ -2859,6 +2864,46 @@ audit(){
   <p class="note srcline"><b>Sources.</b> Checks are generated by the pipeline itself during the run (validation summary and per-table audits), together with export-time consistency checks that confirm every table in this build came from the same run. Nothing on this page is entered by hand. The run identifier and data-through date shown in the header identify the snapshot these results describe, and each week&rsquo;s log is archived with its tables and figures as a permanent release.</p>`;
 },
 
+why(){
+  const el=document.getElementById('v-why');
+  const gap=(t,b)=>`<p><b>${t}</b> ${b}</p>`;
+  el.innerHTML=`<div class="head"><h1>Why NWGS Grid exists</h1>
+    <p class="muted">Wastewater surveillance is widely described as an early warning system, but almost nothing in the public record lets anyone check whether it works. This system is built to make that checkable, weekly, in public.</p></div>
+
+  <article class="panel"><header><h2>The problem</h2></header>
+    <p class="small muted">Five gaps sit between what wastewater surveillance is said to do and what anyone can verify it does.</p>
+    ${gap('Nobody benchmarks against the forecast a health department already has.','Published evaluations compare wastewater models against other statistical models, not against the forecast made with no model at all — that next week resembles this week. Hospitalization rates are strongly autocorrelated, so that naive forecast is a demanding benchmark. A model that beats other models may still lose to it.')}
+    ${gap('Reported correlations mostly measure shared seasonality.','Raw Spearman correlations between wastewater and hospitalization run 0.68 to 0.80. After filtering both series through an autoregressive model fitted to the driver, the same medians fall to between 0.26 and 0.29. Roughly two-thirds of the headline association is serial dependence both series share.')}
+    ${gap('Lead time is reported as one number when it is three.','A signal can rise before clinical visits and still reach the public too late to act on, because the measurement itself takes time to become public. Shedding lead minus reporting lag is the warning actually available, and it is rarely reported. The lead is also unstable: bootstrapping the selection reproduces its direction in 66 to 79 percent of resamples but the specific lag in only 31 to 56 percent.')}
+    ${gap('There is no standing benchmark, so no claim can be checked later.','The field has no public wastewater forecasting hub. Forecasts are published as fixed points in time and never scored against what happened, which means a claim of early warning carries no cost if it turns out to be wrong.')}
+    ${gap('Coverage is uneven and the gaps are rarely measured.','NWSS is not a probability sample of U.S. counties. National figures describe the sewersheds that report, not the country. Which communities the system does not reach, and whether that tracks social vulnerability or rurality, is a question most surveillance reporting does not ask.')}
+  </article>
+
+  <article class="panel"><header><h2>What this is</h2></header>
+    <p>A weekly, reproducible surveillance system that publishes its own evidence and scores its own forecasts. It links CDC wastewater concentrations for six pathogens, emergency-department visits and RESP-NET hospitalization rates at the state-week level, and adds EPA sewershed boundaries, CDC/ATSDR social vulnerability and USDA rurality so coverage can be measured against the populations it does and does not reach.</p>
+    <p>The whole analysis is one self-contained file. Each run is identified and dated, every exported row carries that identifier, and a full snapshot is archived for citation. If a validation check fails, nothing is published and the previous week&rsquo;s results stay up.</p>
+  </article>
+
+  <article class="panel c12"><header><h2>How each gap is answered</h2></header>
+    <div class="tbl"><table><tr><th>Problem</th><th>What runs every week</th><th>Where</th></tr>
+      <tr><td class="lead">No naive benchmark</td><td class="small">Every model is scored against persistence with paired bootstrap intervals on the error ratio. Negative skill is reported as readily as positive skill.</td><td><a href="#predictive" data-go="predictive">Predictive models</a></td></tr>
+      <tr><td class="lead">Correlation mistaken for signal</td><td class="small">Cross-correlations recomputed after autoregressive prewhitening against a Bartlett band, and the lag-selection procedure bootstrapped so the reader sees how reproducible a reported lead is.</td><td><a href="#analytics" data-go="analytics">Trends &amp; timing</a></td></tr>
+      <tr><td class="lead">Lead time as one number</td><td class="small">Warning time decomposed into shedding lead, reporting lag and operational lead, separating biology from reporting delay.</td><td><a href="#leadtime" data-go="leadtime">Lead time</a></td></tr>
+      <tr><td class="lead">No standing benchmark</td><td class="small">Forecasts frozen to a ledger keyed by run identifier before the outcome exists, with predictive intervals derived from errors backtested on the history available then. A later run scores them; a prediction on the ledger is never rewritten.</td><td><a href="#predictive" data-go="predictive">Forecast scoreboard</a></td></tr>
+      <tr><td class="lead">Coverage gaps unmeasured</td><td class="small">County coverage, representativeness and attrition refitted weekly against social vulnerability and rurality, published as analysis-ready tables rather than a one-time figure.</td><td><a href="#equity" data-go="equity">Coverage &amp; equity</a></td></tr>
+    </table></div>
+    <p class="note"><b>The ledger is the part with no public equivalent.</b> Anyone can publish a forecast; almost nobody publishes one that can be checked against them later. Freezing the prediction with its interval before the outcome exists, and refusing to rewrite it afterwards, is what turns a claim into evidence. It also means this system can be wrong in public, which is the point.</p>
+    <p class="note"><b>The ablation is run and published.</b> Comparing a wastewater-informed model against a naive forecast measures the value of modelling, not the value of wastewater. The combined model is therefore also scored against a clinical-only model carrying identically specified intervals. That comparison is on the <a href="#predictive" data-go="predictive">Predictive models</a> page rather than omitted from it.</p>
+  </article>
+
+  <article class="panel"><header><h2>What this does not claim</h2></header>
+    <p class="small muted">A system built to make claims checkable has to be honest about its own.</p>
+    <p><b>Not that wastewater surveillance is unworthy of funding.</b> The current finding is that wastewater adds little <i>in the presence of functioning clinical surveillance</i>. Where clinical reporting is delayed, degraded or absent, the comparison would differ — and that is the condition under which wastewater was always expected to matter most.</p>
+    <p><b>Not national representativeness.</b> NWSS coverage is uneven and not a probability sample; RESP-NET covers fifteen jurisdictions, roughly twelve percent of the U.S. population. Figures describe reporting sewersheds, not the country.</p>
+    <p><b>Not real-time fidelity.</b> Models are scored against finalised surveillance values, not the data as it stood at forecast time. That flatters any model evaluated this way, so the null results here are, if anything, conservative. Retaining timestamped vintages is the next step and is not yet done.</p>
+    <p><b>Not that these models are good.</b> The forecasting models here are deliberately plain: persistence and a four-week linear extrapolation. The contribution is the ledger they are scored on. A stronger model can be added later and scored against the same frozen history, which is what a standing benchmark is for.</p>
+  </article>`;
+},
 glossary(){
   const el=document.getElementById('v-glossary');
   const G=[

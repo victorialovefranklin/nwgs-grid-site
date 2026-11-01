@@ -137,7 +137,7 @@ SPECIFIC = {
     "ModelPerformance.full_model_rmse": "Held-out root mean squared error of the full model.",
     "ModelPerformance.clinical_persistence_r2": "Held-out R-squared of a clinical-persistence baseline on the same weeks.",
     "ModelPerformance.wastewater_only_r2": "Held-out R-squared using wastewater alone.",
-    "ModelPerformance.gain_over_persistence": "Difference in R-squared between the full model and the persistence baseline.",
+    "ModelPerformance.gain_over_clinical_only": "Difference in R-squared between the full model and the clinical-only model. This is the contrast that isolates the contribution of wastewater; a comparison against a naive baseline would also credit the act of modelling.",
     "ModelPerformance.plain_language": "Plain-language reading of the model result, shown on the site.",
     "ShapFeature.mean_abs_shap": "Mean absolute SHAP value for the feature: its average contribution to a prediction, in the units of the target.",
     "ShapFeature.rank": "Rank of the feature by mean absolute SHAP value.",

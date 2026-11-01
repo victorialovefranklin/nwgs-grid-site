@@ -276,7 +276,7 @@ its fetch for the run.
 | `full_model_rmse` | number | no | `0.4397` | Held-out root mean squared error of the full model. |
 | `clinical_persistence_r2` | number | no | `0.8422` | Held-out R-squared of a clinical-persistence baseline on the same weeks. |
 | `wastewater_only_r2` | number | no | `0.5332` | Held-out R-squared using wastewater alone. |
-| `gain_over_persistence` | number | no | `0.0734` | Difference in R-squared between the full model and the persistence baseline. |
+| `gain_over_clinical_only` | number | no | `0.0734` | Difference in R-squared between the full model and the clinical-only model. This is the contrast that isolates the contribution of wastewater; a comparison against a naive baseline would also credit the act of modelling. |
 | `shap_rank_wastewater_index` | integer | no | `3` |  |
 | `n_train` | integer | no | `6724` |  |
 | `n_test` | integer | no | `1682` |  |

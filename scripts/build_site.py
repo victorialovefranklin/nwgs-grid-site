@@ -292,9 +292,14 @@ def main(export_dir, site_dir):
     D["alerts"] = recs(r("Alert")[["alert_type", "severity", "pathogen", "geography", "message", "evidence"]])
 
     data = json.dumps(D, separators=(",", ":"), allow_nan=False)
-    (out / "data.json").write_text(data)
-    html = TEMPLATE.read_text().replace("__DATA__", data.replace("</", "<\\/")).replace("__TOPO__", TOPO.read_text())
-    html = html.replace("__SUPA__", SUPA.read_text() if SUPA.exists() else "null")
+    # Encoding is explicit everywhere: Python defaults to the locale codec on
+    # Windows (cp1252), which cannot read a UTF-8 template, so a local build
+    # fails there while CI on Linux succeeds.
+    (out / "data.json").write_text(data, encoding="utf-8")
+    html = (TEMPLATE.read_text(encoding="utf-8")
+            .replace("__DATA__", data.replace("</", "<\\/"))
+            .replace("__TOPO__", TOPO.read_text(encoding="utf-8")))
+    html = html.replace("__SUPA__", SUPA.read_text(encoding="utf-8") if SUPA.exists() else "null")
     page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             '<link rel="icon" type="image/png" href="img/nwgs-favicon.png">'
@@ -306,7 +311,7 @@ def main(export_dir, site_dir):
             '<meta property="og:title" content="NWGS Grid™ — National Wastewater Genomics Smart Grid">'
             '<meta property="og:description" content="Weekly wastewater surveillance dashboard by Victoria Love Franklin, PhD Data Science Student · Peer-Reviewed Published Scientist · Developer.">'
             '<style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + html + "</body></html>")
-    (out / "index.html").write_text(page)
+    (out / "index.html").write_text(page, encoding="utf-8")
     copy_assets(out)
     print(f"Built {out/'index.html'} ({len(page)/1e6:.2f} MB), run {D['run']['run_id']}, data through {D['run']['data_as_of']}")
 

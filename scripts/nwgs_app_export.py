@@ -293,6 +293,11 @@ def main(table_dir, out_dir, allow_mixed=False):
     if t23b is not None and len(t23b):
         keep = ["run_id", "forecast_made_week", "pathogen", "horizon_weeks", "target_week",
                 "pred_persistence", "pred_linear", "observed", "err_persistence", "err_linear"]
+        # The intervals frozen with each forecast travel with the record, so a
+        # reader can check that the interval predates the outcome.
+        keep += [f"{m}_{b}{int(round(lv * 100))}"
+                 for m in ("persistence", "linear") for b in ("lo", "hi")
+                 for lv in (0.5, 0.8, 0.95)]
         ents["ForecastRecord"] = t23b[[c for c in keep if c in t23b.columns]]
 
     # Representativeness (Table24/24b) - the PHA4GE vacancy, defined
@@ -424,11 +429,14 @@ def main(table_dir, out_dir, allow_mixed=False):
         full = q[q["model"].isin(["RandomForest", "HistGradientBoosting"])].sort_values("R2").iloc[-1]
         dd = t12d[t12d["pathogen"].eq(p)].iloc[0]
         hh = t12h[t12h["pathogen"].eq(p)].iloc[0]
+        # Gain over the CLINICAL-ONLY model, not over persistence. Scoring a
+        # multimodal model against a naive baseline measures the value of
+        # modelling; only this contrast measures the value of wastewater.
         gain = full["R2"] - dd["clinical_persistence_R2"]
         rows.append({
             "pathogen": p, "best_model": full["model"], "full_model_r2": full["R2"], "full_model_rmse": full["RMSE"],
             "clinical_persistence_r2": dd["clinical_persistence_R2"], "wastewater_only_r2": dd["wastewater_only_R2"],
-            "gain_over_persistence": gain, "shap_rank_wastewater_index": hh["shap_rank_of_wastewater_index"],
+            "gain_over_clinical_only": gain, "shap_rank_wastewater_index": hh["shap_rank_of_wastewater_index"],
             "n_train": full["n_train"], "n_test": full["n_test"],
             "plain_language": ("Wastewater adds predictive value beyond recent clinical data."
                                if gain >= 0.02 else
