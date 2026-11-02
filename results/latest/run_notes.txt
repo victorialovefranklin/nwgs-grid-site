@@ -6,4 +6,4 @@
 [RESP-NET] 5219 state-weeks kept, 13 states, 2022-10-01 to 2025-08-30; nowcast weeks dropped: {'COVID-NET': ['2025-09-06', '2025-09-13', '2025-09-20'], 'RSV-NET': ['2025-09-06', '2025-09-13', '2025-09-20']}
 [OK] source CDC RESP-NET hospitalization rates (archived 2025-10-02): OK - 5219 state-weeks, 13 states, 2022-10-01 to 2025-08-30
 [LAG CALENDAR] 36 of 157 state-pathogen series had missing weeks (323 gap weeks); 0 not on a weekly grid
-run 52 at 2026-11-02T00:06Z
+run 53 at 2026-11-02T10:18Z
