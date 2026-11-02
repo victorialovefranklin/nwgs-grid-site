@@ -22,6 +22,10 @@ site from one snapshot. If any check fails, nothing is published and the previou
 [Wiley's Inspiring Black Scientists initiative](https://www.wiley.com/en-us/research/inspiring-black-scientists), 2026.
 
 - **Paper accepted:** *Decoding Tennessee Wastewater Surveillance: A Multimodal Geospatial Assessment of Infectious-Disease Signals, Surveillance Coverage, and Public-Health Equity*, ICEPTP 2027, London (proceedings indexed in Scopus).
+- **Submitted:** *Two Ceilings on Wastewater-Based Surveillance: Observable Population Worldwide and Operational Lead Time in the United States*, ICEPTP 2027.
+- **Submitted:** *Beyond Point Accuracy: Probabilistic Evaluation of Wastewater-Informed Respiratory Hospitalization Forecasts in Fifteen U.S. States*, ICEPTP 2027.
+- **Under review:** *NWGS Grid: A Multimodal Wastewater Genomic Surveillance Framework for Geospatial, Genomic, and Public Health Intelligence, United States, October 2022-September 2026*.
+- **Under review:** *From Wastewater Signals to Clinical Burden: A Multimodal Machine-Learning and Geospatial Evaluation of Respiratory Virus Surveillance Across United States Jurisdictions*.
 - **Presented:** *Using GIS and Metagenomics to Enhance Wastewater Surveillance*, poster at the 2025 Wastewater Disease Surveillance Summit (Los Angeles, June 3–4; WEF with CDC), the work NWGS Grid™ grew from. 1st Place, Meharry 69th Annual Research Day. [Summit page](https://nwbe.org/?page_id=175#summit) · [Poster (PDF)](https://nwbe.org/wp-content/uploads/2025/06/Franklin-et-al-Using-GIS-and-metagenomics-to-enhance-wastewater-surveillance.pdf)
 
 ## The website
