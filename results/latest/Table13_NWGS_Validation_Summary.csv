@@ -1,23 +1,23 @@
 component,status,detail
-SARS-CoV-2 recent activity,PASS,791 recent counties
-RSV recent activity,PASS,738 recent counties
-Influenza A recent activity,PASS,771 recent counties
-Influenza A(H5) detection parser,PASS,3057 positive / 123662 negative / 126719 known; 0 unknown
-Measles detection parser,PASS,715 positive / 81015 negative / 81730 known; 0 unknown
-Mpox detection parser,PASS,1425 positive / 312293 negative / 313718 known; 0 unknown
-Influenza A(H5) raw CDC detection-field audit,PASS,no:123662 | yes:3057
-Mpox raw CDC detection-field audit,PASS,no:312293 | yes:1425
-Measles raw CDC detection-field audit,PASS,no:81015 | yes:715
-Pathogen independence: SARS-CoV-2 vs RSV,PASS,0.00% identical activity among 738 common counties
-Pathogen independence: SARS-CoV-2 vs Influenza A,PASS,0.00% identical activity among 771 common counties
-Pathogen independence: RSV vs Influenza A,PASS,5.42% identical activity among 738 common counties
+SARS-CoV-2 recent activity,PASS,793 recent counties
+RSV recent activity,PASS,747 recent counties
+Influenza A recent activity,PASS,773 recent counties
+Influenza A(H5) detection parser,PASS,3075 positive / 125143 negative / 128218 known; 0 unknown
+Measles detection parser,PASS,728 positive / 82397 negative / 83125 known; 0 unknown
+Mpox detection parser,PASS,1426 positive / 313884 negative / 315310 known; 0 unknown
+Influenza A(H5) raw CDC detection-field audit,PASS,no:125143 | yes:3075
+Mpox raw CDC detection-field audit,PASS,no:313884 | yes:1426
+Measles raw CDC detection-field audit,PASS,no:82397 | yes:728
+Pathogen independence: SARS-CoV-2 vs RSV,PASS,0.00% identical activity among 747 common counties
+Pathogen independence: SARS-CoV-2 vs Influenza A,PASS,0.00% identical activity among 773 common counties
+Pathogen independence: RSV vs Influenza A,PASS,4.58% identical activity among 743 common counties
 Tennessee recent wastewater coverage,WARNING_SPARSE_COVERAGE,9/95 unique counties across recent respiratory activity table
-KNN spatial analysis,PASS,2249 county-pathogen LISA rows
+KNN spatial analysis,PASS,2262 county-pathogen LISA rows
 Spatial geography attrition audit,PASS,51 recent county-pathogen observations excluded from CONUS spatial analysis
 Wastewater-clinical lag analysis,PASS,151 jurisdiction-pathogen best-lag rows
 Seasonal peak implausible-lead audit,PASS,0 eligible season(s) flagged: none
 SVI surveillance readiness descriptive,PASS,4 SVI quartiles
-SVI surveillance readiness inferential model,PASS,OR=0.890 per 0.10 SVI increase; 95% CI 0.840-0.944; p=9.44e-05
+SVI surveillance readiness inferential model,PASS,OR=0.889 per 0.10 SVI increase; 95% CI 0.839-0.943; p=9.08e-05
 AMR/ARG module,PASS,11 ARG targets
 AMR/ARG classification audit (target mapping + Detect/outlier coding),PASS,"target mapping, Detect coding, and outlier coding look consistent"
 RCSB protein/structure visualization,PASS,6/6 protein PNGs rendered; 6/6 RCSB metadata queries passed; publication figure requires 6/6
@@ -26,6 +26,6 @@ Monitoring status by county,WARNING_PARTIAL_VULNERABILITY,"3,144 counties: 1,084
 CDC PHIL pathogen reference imagery,WARNING_PARTIAL_IMAGES,0/6 pathogen reference images downloaded
 Manuscript figure layout: Figure 2 (Tennessee Surveillance Coverage),PASS,Page aspect 2692x3258px. Figure prepared for the manuscript at portrait aspect; not used on the website.
 Manuscript figure layout: Figure 5 (Tennessee SVI + Surveillance Readiness),WARNING_AUTOFIXED,Page aspect 3009x3310px (was 3009x2208px before padding). Figure prepared for the manuscript at portrait aspect; not used on the website.
-ML wastewater/clinical-lag collinearity audit,WARNING_HIGH_COLLINEARITY,Influenza A: wastewater_index vs clinical_lag1 r=0.76; Influenza A: ww_lag1 vs clinical_lag1 r=0.78; Influenza A: ww_lag2 vs clinical_lag1 r=0.73; Influenza A: ww_lag3 vs clinical_lag1 r=0.66; Influenza A: ww_lag4 vs clinical_lag1 r=0.57; RSV: wastewater_index vs clinical_lag1 r=0.67; RSV: ww_lag1 vs clinical_lag1 r=0.64; RSV: ww_lag2 vs clinical_lag1 r=0.57; RSV: ww_lag3 vs clinical_lag1 r=0.51; SARS-CoV-2: wastewater_index vs clinical_lag1 r=0.67; SARS-CoV-2: ww_lag1 vs clinical_lag1 r=0.68; SARS-CoV-2: ww_lag2 vs clinical_lag1 r=0.66; SARS-CoV-2: ww_lag3 vs clinical_lag1 r=0.60; SARS-CoV-2: ww_lag4 vs clinical_lag1 r=0.53
-ML standalone wastewater-only predictive value,PASS,Influenza A: wastewater-only R2=0.619 vs clinical-persistence R2=0.853; RSV: wastewater-only R2=0.324 vs clinical-persistence R2=0.927; SARS-CoV-2: wastewater-only R2=-0.767 vs clinical-persistence R2=0.923
-ML held-out prediction outlier audit,WARNING_OUTLIERS_FLAGGED,86 prediction(s) flagged; see Table12f_ML_Prediction_Outliers.csv
+ML wastewater/clinical-lag collinearity audit,WARNING_HIGH_COLLINEARITY,Influenza A: wastewater_index vs clinical_lag1 r=0.76; Influenza A: ww_lag1 vs clinical_lag1 r=0.77; Influenza A: ww_lag2 vs clinical_lag1 r=0.72; Influenza A: ww_lag3 vs clinical_lag1 r=0.64; Influenza A: ww_lag4 vs clinical_lag1 r=0.55; RSV: wastewater_index vs clinical_lag1 r=0.67; RSV: ww_lag1 vs clinical_lag1 r=0.64; RSV: ww_lag2 vs clinical_lag1 r=0.57; RSV: ww_lag3 vs clinical_lag1 r=0.51; SARS-CoV-2: wastewater_index vs clinical_lag1 r=0.67; SARS-CoV-2: ww_lag1 vs clinical_lag1 r=0.68; SARS-CoV-2: ww_lag2 vs clinical_lag1 r=0.66; SARS-CoV-2: ww_lag3 vs clinical_lag1 r=0.60; SARS-CoV-2: ww_lag4 vs clinical_lag1 r=0.53
+ML standalone wastewater-only predictive value,PASS,Influenza A: wastewater-only R2=0.519 vs clinical-persistence R2=0.848; RSV: wastewater-only R2=0.322 vs clinical-persistence R2=0.927; SARS-CoV-2: wastewater-only R2=-0.990 vs clinical-persistence R2=0.919
+ML held-out prediction outlier audit,WARNING_OUTLIERS_FLAGGED,74 prediction(s) flagged; see Table12f_ML_Prediction_Outliers.csv
