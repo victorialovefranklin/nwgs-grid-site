@@ -27,7 +27,7 @@
   --sp-1:8px; --sp-2:16px; --sp-3:24px; --sp-4:32px; --sp-5:48px;
   --card-pad:22px;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme:dark) and (max-width:0px){:root:not([data-theme="light"]){
   --bg:#0e1626; --surface:#17213a; --ink:#eef2f7; --muted:#eef2f7; --line:#2a3650;
   --accent:#ef91b3; --accent-ink:#1a2335; --accent-soft:#332130; --link:#f3a9c3;
   --rail-bg:#111a2c; --rail-ink:#eef2f7; --rail-muted:#eef2f7; --rail-hover:rgba(238,242,247,.07);
@@ -36,7 +36,7 @@
   --nodata:#2a3650; --typ:#8e95a3; --typ-line:#8e95a3; --hi-soft:#4d2a38;
   --vl:#5fb6b3; --lo:#91d5d3; --el:#ef91b3; --hi:#e36b96; --warn:#e3a14e; --ok:#5fbf86; color-scheme:dark}}
 :root[data-theme="dark"] .fulllogo{background:#fff;padding:8px}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fulllogo{background:#fff;padding:8px}}
+@media (prefers-color-scheme:dark) and (max-width:0px){:root:not([data-theme="light"]) .fulllogo{background:#fff;padding:8px}}
 :root[data-theme="dark"]{
   --bg:#0e1626; --surface:#17213a; --ink:#eef2f7; --muted:#eef2f7; --line:#2a3650;
   --accent:#ef91b3; --accent-ink:#1a2335; --accent-soft:#332130; --link:#f3a9c3;
@@ -192,7 +192,7 @@ details>summary.btn::-webkit-details-marker{display:none}
 .zkey{font-variant-numeric:tabular-nums}
 .zkey.z2{color:#9c4f10;font-weight:600}
 .zkey.z3{color:#8c1f1f;font-weight:700}
-@media (prefers-color-scheme:dark){
+@media (prefers-color-scheme:dark) and (max-width:0px){
   :root:not([data-theme="light"]) .clist li.z2 .cz,:root:not([data-theme="light"]) .zkey.z2{color:#e8b07a}
   :root:not([data-theme="light"]) .clist li.z3 .cz,:root:not([data-theme="light"]) .zkey.z3{color:#e8a0a0}
 }
@@ -413,7 +413,7 @@ p,li,dd,dt,td,th,figcaption,.detail,.arow,.amsg,.statecard,.stat{text-wrap:prett
 .origin h3{margin-top:22px}
 tr.unsup td{opacity:.62}
 :root{--hair:rgba(20,33,58,.08)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hair:rgba(247,241,232,.10)}}
+@media (prefers-color-scheme:dark) and (max-width:0px){:root:not([data-theme="light"]){--hair:rgba(247,241,232,.10)}}
 #al-sum .statgrid{grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr))}
 .natsig{display:flex;flex-direction:column;gap:8px}
 .methodsteps{margin:4px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:10px}
@@ -455,7 +455,7 @@ tr.unsup td{opacity:.62}
   --t-slate-bg:#f5f6f9;--t-slate-line:#e2e6ec;--t-slate-ico:#3b4760;
   --t-num-ink:#ffffff;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme:dark) and (max-width:0px){:root:not([data-theme="light"]){
   --t-info-bg:#15213a; --t-info-line:#28374f; --t-info-ico:#8fb6e8;
   --t-ok-bg:#12271d;   --t-ok-line:#1f3c2d;   --t-ok-ico:#5fbf86;
   --t-no-bg:#2a1518;   --t-no-line:#432127;   --t-no-ico:#e2525a;
@@ -736,6 +736,66 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   .status .acct{grid-column:1;justify-self:center}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== NWGS Grid(TM) light redesign 2026-11 =====
+   A Franklin HUB SMART Center research platform. Ink navy text, teal primary,
+   signal purple for the Franklin HUB link, colorblind-safe activity scale. */
+:root{
+  --navy:#0f1f33; --navy-2:#1b4a7a; --ink:#0f1f33; --muted:#3b4b60; --line:#e3e8ef;
+  --paper:#f6f8fb; --cream:#f6f8fb; --bg:#ffffff; --surface:#ffffff;
+  --teal-deep:#0e7c86; --teal:#7fd3dc; --signal:#6c2bd9;
+  --accent:#0e7c86; --accent-ink:#ffffff; --accent-soft:#e6f6f7; --link:#0e7c86; --brand-accent:#0e7c86;
+  --rose-deep:#0e7c86; --rose-soft:#e6f6f7;
+  --rail-bg:#ffffff; --rail-ink:#0f1f33; --rail-muted:#3b4b60; --rail-hover:#f6f8fb; --rail-active:#e6f6f7; --rail-line:#e3e8ef;
+  --count-ink:#ffffff; --count-bg:#c2410c; --gold:#b7791f;
+  --nodata:#f3f5f8; --typ:#e2e6ec; --typ-line:#c9d2de; --hi-soft:#fde4d6;
+  --vl:#2b6cb0; --lo:#86b8e0; --el:#f4a259; --hi:#c2410c; --warn:#b7791f; --ok:#1f7a3f;
+  --r:10px;
+}
+body{background:#fff}
+a{text-decoration-color:color-mix(in srgb,var(--teal-deep) 40%,transparent)}
+h1{font-weight:800;letter-spacing:-.035em}
+h2{font-weight:700;letter-spacing:-.02em}
+.topbar{box-shadow:none;border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1360px;padding:12px 28px}
+.markbadge{width:auto;height:46px;border-radius:0;background:none;box-shadow:none}
+.markbadge img{height:46px;width:auto}
+.brand b{font:800 1.3rem/1.05 var(--display);letter-spacing:-.025em;color:var(--ink)}
+.brand b span{color:var(--ink)}
+.brand small{font-weight:600;color:#5b6b80}
+.brand .endorse{display:block;font:700 .66rem/1.3 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--signal);margin-top:2px}
+.navtop{font-weight:600;color:var(--ink)}
+.navtop.here,.navtop[aria-current="page"]{color:var(--teal-deep);background:none;box-shadow:inset 0 -2px 0 var(--teal-deep);border-radius:0;font-weight:700}
+.navmenu button[aria-current="page"]{background:var(--accent-soft);color:var(--teal-deep)}
+.count{background:var(--count-bg)!important;color:#fff!important}
+.status{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 16px}
+.panel{border-color:var(--line)}
+.head h1{font-size:2.25rem}
+.trend-up{color:var(--hi)} .trend-down{color:var(--vl)}
+.notloaded{background:#fff8e6!important;border-color:#e7c27a!important;border-left-color:#b7791f!important}
+.notloaded a{color:var(--teal-deep)}
+.hero.solo{grid-template-columns:1fr}
+/* Home hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:center;padding:18px 0 6px}
+.hero .eb{font:800 .72rem/1 var(--body);letter-spacing:.16em;color:var(--signal);text-transform:uppercase}
+.hero h1{font:800 3.4rem/1.03 var(--display);letter-spacing:-.045em;margin:12px 0 14px}
+.hero h1 em{font-style:normal;color:var(--teal-deep)}
+.hero p.lead{font-size:1.12rem;line-height:1.6;color:var(--muted);max-width:560px}
+.hero .ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.hero .ctas button{all:unset;cursor:pointer;box-sizing:border-box;border:1px solid #c9d2de;border-radius:999px;padding:9px 15px;font:700 .86rem var(--body);color:var(--ink)}
+.hero .ctas button.pri{background:var(--ink);color:#fff;border-color:var(--ink);border-radius:10px;padding:12px 18px}
+.hero .ctas button:hover{border-color:var(--ink)}
+.hero .ctas button:focus-visible{outline:2px solid var(--teal-deep);outline-offset:2px}
+.hero .hstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 26px}
+.hero .hstats div{border-top:3px solid var(--ink);padding-top:10px}
+.hero .hstats b{display:block;font:800 2rem/1.1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.hero .hstats span{font-size:.9rem;color:var(--muted);line-height:1.4}
+@media (max-width:900px){.hero{grid-template-columns:1fr;gap:22px}.hero h1{font-size:2.4rem}.hero .hstats b{font-size:1.55rem}}
+@media (max-width:600px){.head h1{font-size:1.7rem;overflow-wrap:break-word}}
+@media (max-width:760px){.brand .endorse{display:none}.markbadge,.markbadge img{height:38px}}
+/* Footer endorsement */
+.sitefoot .fhsc{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--ink)}
+.sitefoot .fhsc img{width:22px;height:22px}
 </style>
 
 <div class="app">
@@ -743,8 +803,8 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
   <header class="topbar">
     <div class="topbar-in">
       <a class="brand" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid home">
-        <span class="markbadge"><img src="img/nwgs-mark.webp" alt="" width="320" height="426"></span>
-        <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomics Smart Grid</small></span></a>
+        <span class="markbadge"><img src="img/nwgs-mark.svg" alt="" width="37" height="46"></span>
+        <span class="wm"><b>NWGS <span>Grid</span><sup>™</sup></b><small>National Wastewater Genomics Smart Grid</small><span class="endorse">A Franklin HUB SMART Center research platform</span></span></a>
       <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="nav"><svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
       <nav class="nav" id="nav" aria-label="Sections"></nav>
     </div>
@@ -778,6 +838,7 @@ th .nocase{text-transform:none;letter-spacing:0;font-size:.8rem}
     <section class="view" id="v-why" hidden></section>
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
+      <span class="fhsc"><img src="img/fhsc-icon.png" alt="" width="22" height="22">A Franklin HUB SMART Center research platform</span>
       <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
       <span>PhD Data Science Student · Peer-Reviewed Published Scientist · Developer</span>
       <span class="footmail"></span>
@@ -999,7 +1060,7 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['start','Start here'],['why','Why NWGS Grid exists'],['dashboard','Dashboard'],['map','Surveillance map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['reports','Data & reports'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About the developer']];
+const VIEWS=[['start','Start here'],['why','Why NWGS Grid exists'],['dashboard','This week'],['map','County map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['reports','Data & reports'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About & how to cite']];
 const built={};
 let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
@@ -1009,12 +1070,12 @@ const highAlerts=D.alerts.filter(a=>a.severity==='high').length;
    VIEWS, so each route and hash the site has always used keeps working; the
    grouping only changes how they are presented. */
 const GROUPS=[
-  ['Overview',           ['start','dashboard']],
-  ['Surveillance',       ['map','analytics','leadtime','predictive','alerts','myalerts']],
-  ['Coverage & equity',  ['monitoring','equity','global','tennessee']],
-  ['Research & genomics',['genomics','structures']],
-  ['Data & methods',     ['reports','audit','methods','glossary']],
-  ['About',              ['why','about']],
+  ['Overview',             ['dashboard','start','why']],
+  ['Maps',                 ['map','alerts','myalerts']],
+  ['Trends & Forecasts',   ['analytics','leadtime','predictive']],
+  ['Coverage & Equity',    ['equity','monitoring','tennessee','global']],
+  ['Genomics & Emerging',  ['genomics','structures']],
+  ['Methods & Trust',      ['audit','methods','glossary','reports','about']],
 ];
 const LABEL=Object.fromEntries(VIEWS);
 // A view missing from every group would become unreachable from the menu.
@@ -1114,8 +1175,8 @@ const highCount = p => Object.values(D.activity[p]).filter(([z])=>z>1).length;
    Chosen to stay distinguishable from each other and from the activity ramp,
    and to remain legible for the common forms of colour blindness. A pathogen
    colour identifies the pathogen; it never signals severity. */
-const PCOL={'SARS-CoV-2':'#2c405e','Influenza A':'#b58a3a','RSV':'#b94d78',
-            'Influenza A(H5)':'#3f8d8b','Measles':'#6b4ea8','Mpox':'#702d43'};
+const PCOL={'SARS-CoV-2':'#0e9aa7','Influenza A':'#6c2bd9','RSV':'#ad4570',
+            'Influenza A(H5)':'#b7791f','Measles':'#3b6fb6','Mpox':'#4b7a3a'};
 const pcol = p => PCOL[p]||'var(--hi)';
 const zband = z => z>=3?'z3':z>=2?'z2':'z1';
 
@@ -1825,7 +1886,21 @@ dashboard(){
             ['Failed',Number(R.n_fail).toLocaleString(),Number(R.n_fail)?'publication blocked':'none']])}
      <p class="small muted">Run <span class="mono">${esc(R.run_id)}</span> · data through ${dateFmt(R.data_as_of)}. Each run is archived as a release so these numbers stay recoverable.</p>`);
 
-  el.innerHTML=`
+  const MN=D.monitoring_national||{};
+  const hs=[];
+  if(MN.counties_reporting!=null&&MN.counties_total!=null)hs.push([MN.counties_reporting.toLocaleString(),`of ${MN.counties_total.toLocaleString()} counties have wastewater tested`]);
+  if(MN.sewered_population_in_reporting_counties!=null)hs.push([`${Math.round(MN.sewered_population_in_reporting_counties/1e6)} million`,'people on sewers in tested counties']);
+  if(MN.counties_sewer_service_no_site!=null)hs.push([MN.counties_sewer_service_no_site.toLocaleString(),'counties with sewers but no site reporting']);
+  if(MN.sewered_population_without_site!=null)hs.push([`${Math.round(MN.sewered_population_without_site/1e6)} million`,'residents on sewers without a reporting site']);
+  const hero=`<section class="hero${hs.length?'':' solo'}" aria-label="NWGS Grid overview">
+    <div><div class="eb">National wastewater surveillance · rebuilt every week</div>
+      <h1>Reading the nation’s <em>wastewater.</em></h1>
+      <p class="lead">Wastewater shows what communities are carrying, often before clinics do. See where it is tested, what it shows this week, and who it reaches.</p>
+      <div class="ctas"><button class="pri" data-go="monitoring">Find your county →</button>
+        <button data-go="start">I live here →</button><button data-go="alerts">I work in public health →</button><button data-go="methods">I do research →</button></div></div>
+    ${hs.length?`<div class="hstats">${hs.map(([b,t])=>`<div><b>${b}</b><span>${t}</span></div>`).join('')}</div>`:''}
+  </section>`;
+  el.innerHTML=`${hero}
   <div class="head"><h1>Respiratory virus signals in U.S. wastewater</h1>
   <p class="muted">Site-standardized wastewater activity for the four weeks ending ${dateFmt(D.activity_end)}, with clinical alignment, spatial clustering and coverage equity from the same weekly run.</p></div>
 
