@@ -42,8 +42,8 @@ As an example, in the run described here SARS-CoV-2 sat at a median site z-score
 | Page | What it answers |
 |---|---|
 | Start here | What wastewater surveillance is, what it can and cannot tell you, and where to go next. |
-| Dashboard | The national picture for this week: each pathogen's level, its direction, and how many counties are high. |
-| Surveillance map | A county map you can click, plus spatial clusters and coverage. |
+| This week | The national picture for this week: each pathogen's level, its direction, and how many counties are high. |
+| County map | A county map you can click, plus spatial clusters and coverage. |
 | Trends & timing | Long-run trends, seasonal peaks, and how wastewater lines up with clinical data. |
 | Lead time | Whether the signal arrives early enough to act on, split into biology and reporting delay. |
 | Predictive models | How well models trained on earlier weeks did on weeks they had never seen. |
@@ -58,7 +58,8 @@ As an example, in the run described here SARS-CoV-2 sat at a median site z-score
 | Audit log | Every automated check from this run, and whether each source loaded. |
 | Methods & sources | How the numbers were produced, with the full dataset and reference list. |
 | Glossary | Plain-language definitions of every term used. |
-| About the developer | Authorship, citation and licensing. |
+| Why NWGS Grid exists | The five gaps between what wastewater surveillance is said to do and what anyone can check, and where each is answered. |
+| About & how to cite | Authorship, citation and licensing. |
 
 ---
 

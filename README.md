@@ -35,16 +35,19 @@ queried at page load: every figure is precomputed, so any page can be reproduced
 the archived release for its run. `scripts/build_site.py` substitutes one JSON payload into
 `site_src/template.html` and writes `site/index.html`.
 
-**Nineteen views, grouped into six sections in the header:**
+**A Franklin HUB SMART Center research platform.** Redesigned November 2026: light theme,
+refined water-drop mark, and a home page that opens with *Reading the nation's wastewater.*
+
+**Twenty views, grouped into six sections in the header:**
 
 | Section | Views |
 |---|---|
-| Overview | Start here · Dashboard |
-| Surveillance | Surveillance map · Trends & timing · Lead time · Predictive models · Alerts · My alerts |
-| Coverage & equity | Where monitoring happens · Coverage & equity · Global coverage · Tennessee |
-| Research & genomics | Genomics & AMR · Protein structures |
-| Data & methods | Data & reports · Audit log · Methods & sources · Glossary |
-| About | About the developer |
+| Overview | This week · Start here · Why NWGS Grid exists |
+| Maps | County map · Alerts · My alerts |
+| Trends & Forecasts | Trends & timing · Lead time · Predictive models |
+| Coverage & Equity | Coverage & equity · Where monitoring happens · Tennessee · Global coverage |
+| Genomics & Emerging | Genomics & AMR · Protein structures |
+| Methods & Trust | Audit log · Methods & sources · Glossary · Data & reports · About & how to cite |
 
 **Data & reports** lets a reader choose an area and pathogens and take away a written report —
 narrative, figures, maps and figure descriptions for that selection — rather than a bare table.
@@ -55,13 +58,17 @@ become one stacked list, so no view is more than one tap away.
 
 **Design rules the page keeps to:**
 
-- Navy carries the text, rose marks selected state and accents, teal pairs with rose on charts.
-  No text on the site is grey.
+- Light only. Ink navy (#0F1F33) carries the text, teal (#0E7C86) marks links and the
+  selected section, and signal purple (#6C2BD9) marks the Franklin HUB SMART Center endorsement.
+- Activity levels use a colorblind-safe scale, blue through grey to burnt orange, and every
+  colour is shown with its label (Very Low, Low, Typical, Elevated, High).
 - Three type sizes and no more: 32px page titles, 20px section headings, 16px for anything
   written to be read, plus 15px captions and 12px field labels. A component that sets its own
   size is a bug.
 - Each pathogen has one colour, defined once and used on its card, sparkline, trend line, map
-  and chips. A colour identifies the pathogen; it never signals severity.
+  and chips: SARS-CoV-2 teal, Influenza A purple, RSV rose, H5 amber, measles blue, mpox green,
+  checked together for colour-vision deficiency. A colour identifies the pathogen; it never
+  signals severity.
 - Panels size to their own content rather than stretching to the tallest card in the row.
 - An empty panel always says which source did not load and why, so a missing source can never
   be mistaken for a measurement of zero.
@@ -70,7 +77,7 @@ become one stacked list, so no view is more than one tap away.
 The front end reference documents the data object, the view functions, the chart helpers and
 the theme tokens in full.
 
-**Author:** Victoria Love Franklin · PhD Data Science Student · Peer-Reviewed Published Scientist · Developer
+**Author:** Victoria Love Franklin · PhD Data Science Student · Peer-Reviewed Author · Developer
 
 **Contact, license requests and beta feedback:** alerts@nwgsgrid.com
 

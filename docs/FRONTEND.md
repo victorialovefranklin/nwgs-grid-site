@@ -60,8 +60,8 @@ width.
 | Key | Label |
 |---|---|
 | `start` | Start here |
-| `dashboard` | Dashboard |
-| `map` | Surveillance map |
+| `dashboard` | This week |
+| `map` | County map |
 | `analytics` | Trends & timing |
 | `leadtime` | Lead time |
 | `predictive` | Predictive models |
@@ -77,7 +77,7 @@ width.
 | `audit` | Audit log |
 | `methods` | Methods & sources |
 | `glossary` | Glossary |
-| `about` | About the developer |
+| `about` | About & how to cite |
 
 **Adding a view** means four changes in `template.html`: an entry in `VIEWS`,
 a `<section class="view" id="v-yourkey" hidden>` container, a `yourkey()`
@@ -111,16 +111,17 @@ mean entirely different things to a reader.
 
 ## 5. Theme and colour
 
-Colours are CSS custom properties on `:root`, redefined for dark mode under
-both `@media (prefers-color-scheme: dark)` and `:root[data-theme="dark"]`.
-Charts read them through `css('--token')` at draw time rather than hardcoding
-hex values, which is why they stay legible when the theme changes.
+The site is light only: the November 2026 redesign switched off the dark
+colour scheme, so every reader sees the same page. Colours are CSS custom
+properties on `:root`; the redesign values sit in the block marked
+`NWGS Grid(TM) light redesign` at the end of the stylesheet. Charts read them
+through `css('--token')` at draw time rather than hardcoding hex values.
 
 | Tokens | Used for |
 |---|---|
-| `--navy`, `--rose`, `--rose-deep`, `--teal` | Brand palette: navy carries text, rose marks the selected state and accents, teal pairs with rose on charts. |
+| `--ink`, `--teal-deep`, `--signal`, `--accent` | Brand palette: ink navy (#0F1F33) carries text, teal (#0E7C86) marks links and the selected state, signal purple (#6C2BD9) marks the Franklin HUB SMART Center endorsement. |
 | `--ink`, `--muted`, `--line`, `--surface`, `--bg` | Text, rules and backgrounds. `--muted` matches `--ink`: no text on the site is grey. |
-| `--vl`, `--lo`, `--typ`, `--el`, `--hi` | Activity levels, Very Low through High, running teal to rose. |
+| `--vl`, `--lo`, `--typ`, `--el`, `--hi` | Activity levels, Very Low through High: a colorblind-safe diverging scale from blue (#2B6CB0) through grey (#E2E6EC) to burnt orange (#C2410C), always shown with its label. |
 | `--ok`, `--warn`, `--nodata` | Status colours. |
 | `--display`, `--body`, `--mono` | Inter for the interface, IBM Plex Mono for technical strings. |
 | `--sp-1` to `--sp-5`, `--card-pad` | The spacing scale cards and sections share. |
@@ -133,15 +134,22 @@ Each pathogen has one colour, defined once in `PCOL` and used on its card, its
 sparkline, its line on the national trend chart, its map and its chips. A
 colour identifies the pathogen; it never signals severity.
 
-A chart that hardcodes a hex value will be invisible on one of the two themes.
-This has happened and been fixed; prefer `css('--token')`.
+Pathogen colours in `PCOL` were checked together as one categorical palette
+for colour-vision deficiency: SARS-CoV-2 teal, Influenza A purple, RSV rose,
+H5 amber, measles blue, mpox green. Prefer `css('--token')` over a hardcoded
+hex value so a future palette change reaches every chart.
 
 ---
 
 ## 6. Layout
 
-A white header holds the wordmark and six navigation groups covering all the
-views above. The groups are presentation only: every view key, hash and route
+A white header holds the refined water-drop mark (`img/nwgs-mark.svg`), the
+wordmark, the line "A Franklin HUB SMART Center research platform", and six
+navigation groups covering all the views above: Overview, Maps, Trends &
+Forecasts, Coverage & Equity, Genomics & Emerging, Methods & Trust. The landing
+view opens with a hero ("Reading the nation's wastewater.") whose four figures
+come from `D.monitoring_national`; when that entity is missing the hero shows
+text only. The groups are presentation only: every view key, hash and route
 is unchanged by the grouping, and a view missing from every group is appended
 to a `More` group with a console warning rather than becoming unreachable.
 Below roughly 760px the header collapses to a menu button and the groups
@@ -185,7 +193,7 @@ Only charts, maps, sign-in and the 3D viewer would be affected.
 Build the page from a known export and open it. The checks worth running on
 anything that touches layout or rendering:
 
-- every view renders with no console errors, in light and dark, at desktop and
+- every view renders with no console errors, in the light theme, at desktop and
   phone widths
 - no `NaN`, `undefined` or `[object Object]` appears in any rendered view
 - no element overflows its container

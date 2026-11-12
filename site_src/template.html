@@ -427,7 +427,7 @@ tr.unsup td{opacity:.62}
 .plainlist li{margin:6px 0}
 /* Opening screen: a short hero, one primary action, then four indicators. */
 .hero{padding:var(--sp-3) 0 var(--sp-2);text-align:left}
-.hero h1{font-size:2rem;line-height:1.18;margin-bottom:12px;text-wrap:balance}
+.home-hero h1{font-size:2rem;line-height:1.18;margin-bottom:12px;text-wrap:balance}
 .hero-sub{font-size:1rem;line-height:1.6;margin-bottom:var(--sp-4);text-align:left}
 @media (max-width:899px){.hero-sub{text-wrap:balance}}
 .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--rose-deep);color:#fff;
@@ -774,28 +774,31 @@ h2{font-weight:700;letter-spacing:-.02em}
 .trend-up{color:var(--hi)} .trend-down{color:var(--vl)}
 .notloaded{background:#fff8e6!important;border-color:#e7c27a!important;border-left-color:#b7791f!important}
 .notloaded a{color:var(--teal-deep)}
-.hero.solo{grid-template-columns:1fr}
+.home-hero.solo{grid-template-columns:1fr}
 /* Home hero */
-.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:center;padding:18px 0 6px}
-.hero .eb{font:800 .72rem/1 var(--body);letter-spacing:.16em;color:var(--signal);text-transform:uppercase}
-.hero h1{font:800 3.4rem/1.03 var(--display);letter-spacing:-.045em;margin:12px 0 14px}
-.hero h1 em{font-style:normal;color:var(--teal-deep)}
+.home-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:center;padding:18px 0 6px}
+.home-hero .eb{font:800 .72rem/1 var(--body);letter-spacing:.16em;color:var(--signal);text-transform:uppercase}
+.home-hero h1{font:800 3.4rem/1.03 var(--display);letter-spacing:-.045em;margin:12px 0 14px}
+.home-hero h1 em{font-style:normal;color:var(--teal-deep)}
 .hero p.lead{font-size:1.12rem;line-height:1.6;color:var(--muted);max-width:560px}
-.hero .ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
-.hero .ctas button{all:unset;cursor:pointer;box-sizing:border-box;border:1px solid #c9d2de;border-radius:999px;padding:9px 15px;font:700 .86rem var(--body);color:var(--ink)}
-.hero .ctas button.pri{background:var(--ink);color:#fff;border-color:var(--ink);border-radius:10px;padding:12px 18px}
-.hero .ctas button:hover{border-color:var(--ink)}
-.hero .ctas button:focus-visible{outline:2px solid var(--teal-deep);outline-offset:2px}
-.hero .hstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 26px}
-.hero .hstats div{border-top:3px solid var(--ink);padding-top:10px}
-.hero .hstats b{display:block;font:800 2rem/1.1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.hero .hstats span{font-size:.9rem;color:var(--muted);line-height:1.4}
-@media (max-width:900px){.hero{grid-template-columns:1fr;gap:22px}.hero h1{font-size:2.4rem}.hero .hstats b{font-size:1.55rem}}
+.home-hero .ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.home-hero .ctas button{all:unset;cursor:pointer;box-sizing:border-box;border:1px solid #c9d2de;border-radius:999px;padding:9px 15px;font:700 .86rem var(--body);color:var(--ink)}
+.home-hero .ctas button.pri{background:var(--ink);color:#fff;border-color:var(--ink);border-radius:10px;padding:12px 18px}
+.home-hero .ctas button:hover{border-color:var(--ink)}
+.home-hero .ctas button:focus-visible{outline:2px solid var(--teal-deep);outline-offset:2px}
+.home-hero .hstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 26px}
+.home-hero .hstats div{border-top:3px solid var(--ink);padding-top:10px}
+.home-hero .hstats b{display:block;font:800 2rem/1.1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.home-hero .hstats span{font-size:.9rem;color:var(--muted);line-height:1.4}
+@media (max-width:900px){.home-hero{grid-template-columns:1fr;gap:22px}.home-hero h1{font-size:2.4rem}.home-hero .hstats b{font-size:1.55rem}}
 @media (max-width:600px){.head h1{font-size:1.7rem;overflow-wrap:break-word}}
 @media (max-width:760px){.brand .endorse{display:none}.markbadge,.markbadge img{height:38px}}
 /* Footer endorsement */
-.sitefoot .fhsc{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--ink)}
-.sitefoot .fhsc img{width:22px;height:22px}
+.sitefoot{align-items:center}
+.sitefoot .fhsc{flex-basis:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.sitefoot .fhsc img{height:28px;width:auto}
+.qacards{grid-template-columns:minmax(0,300px)!important}
+.sh-short{margin:6px 0 0 18px;padding:0;line-height:1.75}
 </style>
 
 <div class="app">
@@ -838,9 +841,8 @@ h2{font-weight:700;letter-spacing:-.02em}
     <section class="view" id="v-why" hidden></section>
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
-      <span class="fhsc"><img src="img/fhsc-icon.png" alt="" width="22" height="22">A Franklin HUB SMART Center research platform</span>
+      <span class="fhsc"><span>A research platform of</span><img src="img/fhsc-logo.png" alt="Franklin HUB SMART Center" width="150" height="29"></span>
       <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
-      <span>PhD Data Science Student · Peer-Reviewed Published Scientist · Developer</span>
       <span class="footmail"></span>
       <span>NWGS Grid™ · <a href="#about" data-go="about">About, contact &amp; how to cite</a></span>
     </footer>
@@ -1640,12 +1642,8 @@ start(){
       `<div class="gcard"><span class="label">${l}</span><b class="gval num">${v}</b><span class="meta">${n}</span></div>`).join('')}</section>`;
   })();
 
-  el.innerHTML=`<div class="hero">
-    <h1>National Wastewater Genomics Smart Grid</h1>
-    <p class="hero-sub">Explore wastewater pathogen activity, geographic coverage and public-health trends across the United States.</p>
-    <p><a class="btn-primary" href="#dashboard" data-go="dashboard">Explore the dashboard</a></p>
-  </div>
-  ${glance}
+  el.innerHTML=`<div class="head"><h1>Start here</h1>
+    <p>How wastewater surveillance works, what it can and cannot tell you, and where to go next.</p></div>
 
   <div class="grid">
   <article class="panel c5 sh-card t-info-card"><header class="sh-h">${ico(I.info,'t-info')}<h2>What this measures</h2></header>
@@ -1694,19 +1692,12 @@ start(){
   </article>
 
   <article class="panel c12 sh-card"><header class="sh-h">${ico(I.send,'t-info')}<h2>How to use this site</h2></header>
-    <p class="sh-sub">Each page answers a different question. If you are not sure where to begin, the first row below covers most visits.</p>
-    <div class="tbl"><table class="stack guidetbl"><tr><th>If you want to know…</th><th>Go to</th><th>What you will find</th></tr>
-      ${row('What is happening right now','dashboard','Dashboard','Current level for each respiratory virus nationally, the direction of travel, and how many counties are high.')}
-      ${row('What is happening where I live','map','Surveillance map','A county map you can click. Select a county to see its level, its history and how many sites report there.')}
-      ${row('Whether anywhere near me is being tested','monitoring','Where monitoring happens','Look up your county: whether wastewater here is tested, how many residents are on sewers, and what that depends on.')}
-      ${row('Whether my state has counties at a high level','alerts','Alerts','Every state with counties above the high threshold, listed county by county.')}
-      ${row('Whether wastewater gives advance warning','leadtime','Lead time','Warning time split into the part that is biology and the part that is reporting delay.')}
-      ${row('Who the system reaches, and who it misses','equity','Coverage &amp; equity','Coverage against social vulnerability, how representative each county\'s monitoring is, and which sites have stopped reporting.')}
-      ${row('How a term or number is defined','glossary','Glossary','Plain-language definitions of every term used here. The <span class="qmark-inline">?</span> marks across the site link straight to the right entry.')}
-      ${row('How the numbers were produced','methods','Methods &amp; sources','The pipeline step by step, every dataset used, and the full reference list.')}
-      ${row('Whether this week\'s run is trustworthy','audit','Audit log','Every automated check, whether each data source loaded, and any warning attached to this run.')}
-      ${row('To be emailed when something changes','myalerts','My alerts','Save a pathogen, a state and a level. You get an email when the weekly run matches it.')}
-    </table></div>
+    <ul class="sh-short">
+      <li><b>What is happening where I live:</b> <a href="#monitoring" data-go="monitoring">Find your county</a>, then the <a href="#map" data-go="map">County map</a>.</li>
+      <li><b>Whether my state has High counties:</b> <a href="#alerts" data-go="alerts">Alerts</a>; save one to be emailed in <a href="#myalerts" data-go="myalerts">My alerts</a>.</li>
+      <li><b>Whether this week can be trusted:</b> the <a href="#audit" data-go="audit">Audit log</a> and <a href="#methods" data-go="methods">Methods &amp; sources</a>.</li>
+      <li><b>What a term means:</b> the <a href="#glossary" data-go="glossary">Glossary</a>. Every <span class="qmark-inline">?</span> on the site links straight to its entry.</li>
+    </ul>
   </article>
 
   <div class="grid">
@@ -1892,7 +1883,7 @@ dashboard(){
   if(MN.sewered_population_in_reporting_counties!=null)hs.push([`${Math.round(MN.sewered_population_in_reporting_counties/1e6)} million`,'people on sewers in tested counties']);
   if(MN.counties_sewer_service_no_site!=null)hs.push([MN.counties_sewer_service_no_site.toLocaleString(),'counties with sewers but no site reporting']);
   if(MN.sewered_population_without_site!=null)hs.push([`${Math.round(MN.sewered_population_without_site/1e6)} million`,'residents on sewers without a reporting site']);
-  const hero=`<section class="hero${hs.length?'':' solo'}" aria-label="NWGS Grid overview">
+  const hero=`<section class="home-hero${hs.length?'':' solo'}" aria-label="NWGS Grid overview">
     <div><div class="eb">National wastewater surveillance · rebuilt every week</div>
       <h1>Reading the nation’s <em>wastewater.</em></h1>
       <p class="lead">Wastewater shows what communities are carrying, often before clinics do. See where it is tested, what it shows this week, and who it reaches.</p>
@@ -1946,13 +1937,8 @@ dashboard(){
 
     ${clinical}
 
-    <article class="panel c4 ov"><header class="ov-h"><h2>How to read the levels</h2>
-      <a href="#start" data-go="start" class="small">Start here →</a></header>
-      <p class="small">Levels compare each site with its own history (within-site log-concentration z-score), then take the county or national median. They describe relative change, not case counts.</p>
-      <div class="tbl"><table class="guidetbl lvltbl"><tr><th>Level</th><th>Median site z-score</th></tr>
-        ${LEVELS.map(l=>`<tr><td><span class="sh-dot" style="background:${lvColor(l)}"></span><b>${l}</b></td><td class="mono small">${LVRANGE[l]}</td></tr>`).join('')}
-      </table></div>
-      <p class="small muted">Two places at the same level are each unusual relative to themselves, not to each other.</p>
+    <article class="panel c4 ov"><header class="ov-h"><h2>Reading the levels</h2></header>
+      <p class="small">Levels compare each place with its own normal, from Very Low to High. They describe relative change, not case counts. <a href="#start" data-go="start">See the full scale on Start here →</a></p>
     </article>
   </div>
 
@@ -2725,19 +2711,16 @@ about(){
   <div class="head sub"><h2>The developer</h2></div>
   <div class="grid aboutgrid">
   <figure class="panel c4 portrait"><img src="img/vlf-portrait.jpg" alt="Portrait of Victoria Love Franklin" width="1080" height="1439" loading="lazy"></figure>
-  <article class="panel c8 bio"><h2>Victoria Love Franklin, PSM, CPT</h2>
-    <p class="role">PhD Data Science Student · Peer-Reviewed Published Scientist · Developer</p>
+  <article class="panel c8 bio"><h2>Victoria Love Franklin, PSM</h2>
+    <p class="role">PhD Data Science Student · Peer-Reviewed Author · Developer</p>
     <p class="honour"><span class="honour-k">Recognition</span> Featured as an Inspiring Black Scientist through <a href="https://www.wiley.com/en-us/research/inspiring-black-scientists" target="_blank" rel="noopener">Wiley’s Inspiring Black Scientists initiative</a>, 2026. <a href="https://www.instagram.com/p/DVRQ2Feka2z/" target="_blank" rel="noopener">Announcement</a></p>
-    <p class="honour"><span class="honour-k">Publication</span> <i>Decoding Tennessee Wastewater Surveillance: A Multimodal Geospatial Assessment of Infectious-Disease Signals, Surveillance Coverage, and Public-Health Equity</i>, accepted for presentation and publication at the 12th International Conference on Environmental Pollution, Treatment and Protection (ICEPTP 2027), London, April 8&ndash;10, 2027. Proceedings indexed in Scopus.</p>
-    <p class="honour"><span class="honour-k">Presented</span> <i>Using GIS and Metagenomics to Enhance Wastewater Surveillance</i> (Franklin, Gary, Sarker, Archer), poster at the <b>2025 Wastewater Disease Surveillance Summit</b>, June 3&ndash;4, 2025, Los Angeles, hosted by the Water Environment Federation in partnership with CDC, and archived by the Network of Wastewater-Based Epidemiology.<span style="display:block;margin-top:6px">Awarded <b>1st Place</b> at Meharry&rsquo;s 69th Annual Research Day.</span><span style="display:block;margin-top:6px"><a href="https://nwbe.org/?page_id=175#summit" target="_blank" rel="noopener">Summit page</a> &middot; <a href="https://nwbe.org/wp-content/uploads/2025/06/Franklin-et-al-Using-GIS-and-metagenomics-to-enhance-wastewater-surveillance.pdf" target="_blank" rel="noopener">View poster (PDF)</a></span></p>
         <figure class="honour quote"><span class="honour-k">Featured</span><blockquote>&ldquo;She also developed the NWGS Grid Platform, a real-time infectious disease surveillance and analytics system that fuses multiple data sources, wastewater genomic data, clinical results, and contextual population data into a unified &lsquo;smart grid&rsquo; that public health teams can use to detect and monitor disease trends as they emerge.&rdquo;</blockquote><figcaption>Kyler Moore, <i>Exploring Wastewater Monitoring Research at HBCUs: A Q&amp;A with a Doctoral Student</i>, <a href="https://www.wastewaterscan.org" target="_blank" rel="noopener">WastewaterSCAN</a> &mdash; the national wastewater monitoring program led by Stanford University and Emory University.</figcaption></figure>
         <figure class="qacards">
       <img src="img/wwscan-qa-1.webp" width="720" height="900" loading="lazy" alt="Q&amp;A card introducing Victoria Love Franklin, PhD in Data Science pre-candidate at Meharry Medical College, and listing her core research areas: wastewater genomic surveillance and bioinformatics of infectious diseases, cybersecurity infrastructure, environmental health, geospatial analysis, and electricity power outages and grid resilience.">
-      <img src="img/wwscan-qa-2.webp" width="720" height="900" loading="lazy" alt="Q&amp;A card. Asked which concept about wastewater monitoring she would make common knowledge, Victoria Love Franklin answers that reporting through the health system is not always as quick as wanted, while wastewater sampling gives real-time, fast-track detection that policymakers can use to direct resources and support a reduction in infectious-disease transmission.">
-      <figcaption>Published by <a href="https://www.instagram.com/wwscan/" target="_blank" rel="noopener">WastewaterSCAN</a> as part of the Q&amp;A above. Cards and artwork are theirs, reproduced with credit. <a href="https://www.instagram.com/p/DVRQ2Feka2z/" target="_blank" rel="noopener">View on Instagram</a></figcaption>
+      <figcaption>Published by <a href="https://www.instagram.com/wwscan/" target="_blank" rel="noopener">WastewaterSCAN</a> as part of the Q&amp;A above. Card and artwork are theirs, reproduced with permission. <a href="https://www.instagram.com/p/DVRQ2Feka2z/" target="_blank" rel="noopener">View on Instagram</a></figcaption>
     </figure>
     <p>Victoria Love Franklin is a data scientist, GIS scientist and web developer based in Nashville, Tennessee. She began her doctoral training at Meharry Medical College in <b>Biomedical Data Science</b> and broadened her studies into Data Science with a cybersecurity concentration. Her multidisciplinary research spans data science, geospatial intelligence, <b>metagenomics</b>, cybersecurity and public-sector technology.</p>
-    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance. Her professional and research experience includes work involving Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory, the U.S. Naval Research Laboratory and the U.S. Air Force School of Aerospace Medicine. She has also trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub and is a <b>certified phlebotomy technician</b>, and she teaches and mentors students in data science, GIS and artificial intelligence.</p>
+    <p>As an ORISE Genomic Epidemiology Fellow at the U.S. Air Force School of Aerospace Medicine, she integrated wastewater, genomic, epidemiological and clinical data for infectious-disease biosurveillance. She completed research internships at Idaho National Laboratory, Savannah River National Laboratory, Oak Ridge National Laboratory and the U.S. Naval Research Laboratory. She has also trained in metagenomic next-generation sequencing with the Chan Zuckerberg Biohub, and she teaches and mentors students in data science, GIS and artificial intelligence.</p>
     <p>Her work focuses on developing data-driven approaches and AI-enabled systems to address complex challenges in public health, critical infrastructure resilience and government operations. Through NWGS Grid™, she brings together wastewater surveillance data, geospatial analytics, genomic information and reference protein structures with curated functional regions to support a broader understanding of infectious-disease surveillance.</p>
     <div class="controls">
       <a class="btn primary" href="${mail('NWGS Grid inquiry')}">Email Victoria</a>
@@ -2747,11 +2730,10 @@ about(){
     </article>
   </div>
   <div class="grid">
-  <article class="panel c12 why"><img class="wlogo" src="img/nwgs-logo.webp" alt="NWGS Grid™ logo" width="1120" height="550" loading="lazy"><div class="why-body"><h2>Why I built NWGS Grid™</h2>
+  <article class="panel c12 why"><img class="wlogo" src="img/nwgs-lockup.png" alt="NWGS Grid™, National Wastewater Genomics Smart Grid, a Franklin HUB SMART Center research platform" width="1120" height="343" loading="lazy"><div class="why-body"><h2>Why I built NWGS Grid™</h2>
     <p class="whywords">Detect · Analyze · Predict · Inform · Protect</p>
-    <p class="lede">Wastewater carries an early, community-wide signal of infection that doesn’t depend on who gets tested or who goes to the doctor. But that signal is scattered across separate CDC datasets, clinical feeds and vulnerability indices, it changes every week, and it reaches some communities far better than others.</p>
+    <p class="small">The reasoning, gap by gap, is on <a href="#why" data-go="why">Why NWGS Grid exists</a>. This is the personal note.</p>
     <p>I have been building NWGS Grid™ since <b>Fall 2024</b> to bring those streams together in one validated pipeline that rebuilds itself every week, so public-health teams, researchers and residents can see where pathogens are rising, how closely wastewater tracks emergency-department visits, and which communities surveillance misses. <b>It is independent work</b>, built outside any employer, fellowship or sponsored program, using only public data.</p>
-    <p>Knowing which places are missed is not the same as knowing why, so the site measures that too. Of the counties where no site is reporting, most already have sewer systems &mdash; the limit is usually not the method.</p>
     <p>In Tennessee, where I live and study, ${tnNow} of 95 counties report wastewater data to CDC today.&nbsp;<span class="sig">— Victoria</span></p></div></article>
   <article class="panel c12"><h2>Credentials &amp; affiliations</h2>
     <h3>Education &amp; training</h3>
@@ -2763,26 +2745,19 @@ about(){
       <li><b>Professional Science Master’s</b>, Applied Geospatial Information Systems, Tennessee State University</li>
       <li><b>Student Ambassador</b>, School of Applied Computational Sciences (SACS) Student Ambassador Program, Meharry Medical College · selected by invitation</li>
     </ul>
-    <h3>Wastewater &amp; water-sector memberships</h3>
+    <h3>Memberships</h3>
     <ul class="creds">
       <li><b>Member, APHL <a href="https://aphl.org/focus-areas/environmental-health/environmental-health-resources/wastewater-surveillance" target="_blank" rel="noopener">Wastewater Surveillance Community of Practice</a></b> (2024–present) · Professional Member, Association of Public Health Laboratories</li>
       <li><b>Professional Member, Water Environment Federation</b> (WEF, 2024–present)</li>
-      <li><b>Student Member, Clean Water Professionals of Kentucky &amp; Tennessee</b> (2025–present)</li>
-      <li><b>Student Member, Alabama Water Environment Association</b> (2025–present)</li>
-      <li><b>Student Member, Mississippi Water Environment Association</b> (2025–present)</li>
-      <li><b>Student Member, Water Environment Association of South Carolina</b> (2025–present)</li>
-      <li><b>Professional Member, HBCU Environmental Justice Technical Collaborative</b> (2024–present)</li>
+      <li>Full profile, memberships and other research areas on the <a href="https://victorialovefranklin.github.io/victoria-franklin-site/" target="_blank" rel="noopener">personal website</a>.</li>
     </ul>
     <h3>Selected wastewater work</h3>
     <ul class="creds">
-      <li>APHL ID Lab Con 2027: three NWGS Grid abstracts submitted (one oral, two posters) · <b>pending review and selection</b></li>
       <li><b>Paper accepted</b>, <b>ICEPTP 2027</b>, London, April 8&ndash;10, 2027: &ldquo;Decoding Tennessee Wastewater Surveillance: A Multimodal Geospatial Assessment of Infectious-Disease Signals, Surveillance Coverage, and Public-Health Equity.&rdquo; Proceedings indexed in Scopus.</li>
       <li><b>Submitted</b>, <b>ICEPTP 2027</b>: &ldquo;Two Ceilings on Wastewater-Based Surveillance: Observable Population Worldwide and Operational Lead Time in the United States.&rdquo;</li>
       <li><b>Submitted</b>, <b>ICEPTP 2027</b>: &ldquo;Beyond Point Accuracy: Probabilistic Evaluation of Wastewater-Informed Respiratory Hospitalization Forecasts in Fifteen U.S. States.&rdquo;</li>
       <li><b>Under review</b>: &ldquo;NWGS Grid: A Multimodal Wastewater Genomic Surveillance Framework for Geospatial, Genomic, and Public Health Intelligence, United States, October 2022&ndash;September 2026.&rdquo;</li>
       <li><b>Under review</b>: &ldquo;From Wastewater Signals to Clinical Burden: A Multimodal Machine-Learning and Geospatial Evaluation of Respiratory Virus Surveillance Across United States Jurisdictions.&rdquo;</li>
-      <li><b>Poster presenter</b>, <b>2025 Wastewater Disease Surveillance Summit</b>, June 3&ndash;4, 2025, Los Angeles (in person and online), hosted by the Water Environment Federation in partnership with CDC. Franklin et al., &ldquo;Using GIS and Metagenomics to Enhance Wastewater Surveillance.&rdquo; <a href="https://nwbe.org/?page_id=175#summit" target="_blank" rel="noopener">Summit page</a> &middot; <a href="https://nwbe.org/wp-content/uploads/2025/06/Franklin-et-al-Using-GIS-and-metagenomics-to-enhance-wastewater-surveillance.pdf" target="_blank" rel="noopener">Poster (PDF)</a>, archived by the Network of Wastewater-Based Epidemiology (NWBE)</li>
-      <li><b>First Place</b>, School of Applied Computational Sciences, <b>69th Annual Research Day</b>, Meharry Medical College (2025), for the poster above.</li>
     </ul></article>
   </div>
   <article class="panel c12 origin"><h2>Where this came from</h2>
@@ -2802,10 +2777,6 @@ about(){
           <td data-l="Today" class="small">Local spatial clustering is computed each week and correlated against clinical emergency-department data and social vulnerability. <a href="#equity" data-go="equity">Coverage &amp; equity</a></td></tr>
     </table></div>
     <p class="note">The poster’s stated limitation, missing sewer-access location data for the study site, is the same problem this project set out to solve at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is. Since October 2026 it is measured rather than approximated, from EPA’s national sewershed boundaries. The poster itself was collaborative work with the co-authors named above, while <b>NWGS Grid™ is independent work</b> that followed it.</p></article>
-  <article class="panel domains"><h2>Domains</h2>
-    <p class="small">Victoria’s work runs along one thread: the critical systems communities depend on, namely health, energy and environment, and the geospatial and AI methods that reveal where those systems are strong, where they fail and whom they reach. NWGS Grid™ is the public-health expression of that thread.</p>
-    <div class="tbl"><table class="stack dtable"><tr><th>Domain</th><th>Focus</th><th>Areas</th></tr><tr><td class="lead dname" data-l="Domain">Biosurveillance &amp; public health</td><td data-l="Focus" class="small">Turning environmental and clinical signals into early warning, and asking who the system reaches.</td><td data-l="Areas"><ul class="tags"><li>Wastewater biosurveillance</li><li>Genomic epidemiology</li><li>Spatial epidemiology</li><li>Metagenomics &amp; NGS</li><li>Structural biology</li><li>Health equity &amp; social vulnerability</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Critical infrastructure &amp; cybersecurity</td><td data-l="Focus" class="small">Protecting operational systems and modelling how they behave under stress.</td><td data-l="Areas"><ul class="tags"><li>Nuclear cybersecurity</li><li>ICS/OT security</li><li>Power grids &amp; smart grids</li><li>Grid resilience</li><li>Digital twins</li><li>Anomaly detection</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">Environment &amp; remote sensing</td><td data-l="Focus" class="small">Measuring land and climate pressure from satellite and sensor data.</td><td data-l="Areas"><ul class="tags"><li>GIS &amp; geospatial intelligence</li><li>Remote sensing</li><li>Forestry &amp; biomass</li><li>Carbon sequestration</li><li>Climate hazards &amp; wildfire risk</li></ul></td></tr><tr><td class="lead dname" data-l="Domain">AI &amp; application development</td><td data-l="Focus" class="small">Building the models, pipelines and interfaces that put the analysis in people’s hands.</td><td data-l="Areas"><ul class="tags"><li>App development, front end &amp; back end</li><li>Machine learning &amp; explainable AI</li><li>Retrieval-augmented generation (RAG)</li><li>Automated data pipelines</li><li>Dashboards &amp; public data portals</li></ul></td></tr></table></div>
-    <p class="small muted">Full project history on her <a href="https://victorialovefranklin.github.io/victoria-franklin-site/" target="_blank" rel="noopener">personal website</a>.</p></article>
   <div class="grid">
   <article class="panel c6"><h2>Work with NWGS Grid</h2>
     <div class="opt"><h3>License request</h3><p class="small muted">Use of the code, pipeline, figures or data products in research, a product or a service.</p>
