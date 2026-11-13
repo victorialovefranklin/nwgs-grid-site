@@ -197,6 +197,14 @@ def main(export_dir, site_dir):
         "operational_lead_weeks", "usable", "lead_supported", "interpretation",
         "spearman_r", "spearman_p_fdr", "paired_weeks", "last_sample_week", "dataset_updated"])
     D["leadtime_national"] = opt("LeadTimeNational")
+    # CDC WVAL benchmark, packed per pathogen as [[week, wval, n_sites], ...].
+    wv = opt("CdcWvalNational", ["pathogen", "week_end", "cdc_wval", "n_sites"])
+    D["cdc_wval"] = ({p: [[str(x["week_end"])[:10], R(x["cdc_wval"], 2), int(x["n_sites"] or 0)]
+                          for x in wv if x["pathogen"] == p and x["cdc_wval"] is not None]
+                      for p in sorted({x["pathogen"] for x in wv})} if wv else None)
+    D["cdc_wval_agree"] = opt("CdcWvalAgreement", [
+        "pathogen", "geography", "level", "paired_weeks", "spearman_r", "p_value_fdr",
+        "first_week", "last_week"])
     D["attrition_sites"] = opt("AttritionSite", [
         "site_id", "state_code", "county_fips", "county_name", "first_week", "last_week",
         "n_weeks", "population_served", "weeks_since_last", "status", "went_dormant_week",

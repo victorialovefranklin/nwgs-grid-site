@@ -1182,6 +1182,25 @@ const highCount = p => Object.values(D.activity[p]).filter(([z])=>z>1).length;
 const PCOL={'SARS-CoV-2':'#0e9aa7','Influenza A':'#6c2bd9','RSV':'#ad4570',
             'Influenza A(H5)':'#b7791f','Measles':'#3b6fb6','Mpox':'#4b7a3a'};
 const pcol = p => PCOL[p]||'var(--hi)';
+/* CDC's own Wastewater Viral Activity Level, shown beside the NWGS index as
+   an external check. Optional layer: older exports have no cdc_wval. */
+function cdcWvalPanel(){
+  if(!D.cdc_wval||!Object.keys(D.cdc_wval).length) return `<article class="panel"><header><h2>CDC's activity level, for comparison</h2></header>
+    <p class="note">CDC's Wastewater Viral Activity Level has not populated for this run yet. It appears after the next weekly update.</p></article>`;
+  const ps=ROUTINE.filter(p=>D.cdc_wval[p]);
+  return `<article class="panel"><header><h2>CDC's activity level, for comparison</h2><div class="seg" id="a-wvp">${ps.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div></header>
+    <div class="chart" id="a-wval"></div><p class="note" id="a-wvnote"></p></article>`;
+}
+function cdcWvalAgree(p){
+  const A=(D.cdc_wval_agree||[]).filter(r=>r.pathogen===p);
+  const nat=A.find(r=>r.level==='national'), st=A.filter(r=>r.level==='state');
+  const strong=st.filter(r=>r.spearman_r>=0.7).length;
+  const last=(D.cdc_wval[p]||[]).slice(-1)[0];
+  return `Median site WVAL across U.S. sites reporting to CDC (dataset <span class="mono">atcp-73re</span>)${last?`, ${fmt(last[1],1)} for the week ending ${dateFmt(last[0])} from ${last[2].toLocaleString()} sites`:''}. `+
+    (nat?`Week to week, the NWGS national index and CDC's level move together: Spearman <span class="nocase">ρ</span> = ${fmt(nat.spearman_r)} over ${nat.paired_weeks} weeks. `:'')+
+    (st.length?`By state, ${strong} of ${st.length} have <span class="nocase">ρ</span> ≥ 0.70. `:'')+
+    `The two use different baselines and site sets, so they are compared by rank, not by value. CDC's category cut points apply to single sites, not to this median.`;
+}
 const zband = z => z>=3?'z3':z>=2?'z2':'z1';
 
 /* ---------- widow control ----------
@@ -2073,6 +2092,7 @@ analytics(){
   el.innerHTML=`<div class="head"><h1>Trends & timing</h1><p class="muted">National wastewater activity, how closely it tracks emergency-department visits, and when seasons peak.</p></div>
   <article class="panel"><header><h2>National wastewater activity</h2><div class="seg" id="a-path">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div></header>
   <div class="chart" id="a-trend"></div>${legend([['var(--vl)','Very Low ≤ −1'],['var(--lo)','Low'],['var(--el)','Elevated'],['var(--hi)','High > 1']])}</article>
+  ${cdcWvalPanel()}
   <div class="grid">
   <article class="panel c12"><header><h2>Wastewater vs. emergency-department timing</h2></header>
     <div class="seg" id="a-lagp">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
@@ -2098,8 +2118,13 @@ analytics(){
       (st,name)=>{const r=by[st];return r?`<b>${esc(name)}</b><div>${r.relationship}${r.lag_weeks?` by ${r.lag_weeks} wk`:''}</div><div>ρ = ${fmt(r.spearman_r)} · ${r.paired_weeks} weeks</div>${r.significant_fdr?'':'<div>Not significant after FDR</div>'}`:`<b>${esc(name)}</b><div>No qualifying data</div>`})};
   const drawEm=p=>lineChart(document.getElementById('a-emc'),[{name:p,values:D.emerging[p].filter(d=>d[2]>=20).map(d=>[new Date(d[0]),d[1]]),color:pcol(p),area:true}],{ymin:0,ymax:Math.max(.01,d3.max(D.emerging[p].filter(d=>d[2]>=20),d=>d[1])*1.15),yfmt:d3.format('.0%'),tipfmt:v=>pct(v),w:440,h:260,left:40,xticks:4});
   const seg=(id,fn)=>el.querySelector(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll(id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.p)});
+  const drawWv=p=>{const box=document.getElementById('a-wval');if(!box||!D.cdc_wval||!D.cdc_wval[p])return;
+    lineChart(box,[{name:`${p} · CDC WVAL`,values:D.cdc_wval[p].map(d=>[new Date(d[0]),d[1]]),color:pcol(p),area:true}],{ymin:0,yfmt:d3.format('.0f'),w:900,h:220});
+    const n=document.getElementById('a-wvnote');if(n)n.innerHTML=cdcWvalAgree(p)};
   seg('#a-path',p=>{P=p;drawT()});seg('#a-lagp',drawLag);seg('#a-em',drawEm);
+  if(el.querySelector('#a-wvp'))seg('#a-wvp',drawWv);
   drawT();drawLag('SARS-CoV-2');drawEm('Influenza A(H5)');
+  if(D.cdc_wval){const f=ROUTINE.find(p=>D.cdc_wval[p]);if(f)drawWv(f)}
 },
 
 leadtime(){
@@ -3091,6 +3116,7 @@ methods(){
   <article class="panel"><header><h2>Data sources &amp; references</h2><span class="small muted">accessed ${acc}</span></header>
   <ol class="refs">
     ${D.sources.map(s=>`<li>Centers for Disease Control and Prevention. <i>${esc(s.dataset_name)}</i> [dataset <span class="mono">${s.dataset_id}</span>]. National Wastewater Surveillance System (NWSS). data.cdc.gov; updated ${dateFmt(String(s.updated_utc).slice(0,10))}; ${s.rows.toLocaleString()} rows. <a href="${s.source_url}" target="_blank" rel="noopener">${s.source_url.replace('https://','')}</a></li>`).join('')}
+    ${D.cdc_wval?`<li>Centers for Disease Control and Prevention. <i>CDC Wastewater Viral Activity Level for SARS-CoV-2, Influenza A and RSV</i> [dataset <span class="mono">atcp-73re</span>]. NWSS. data.cdc.gov. Used only as an external comparison for the NWGS index. <a href="https://data.cdc.gov/d/atcp-73re" target="_blank" rel="noopener">data.cdc.gov/d/atcp-73re</a></li>`:''}
     <li>Centers for Disease Control and Prevention. <i>NSSP Emergency Department Visit Trajectories by State and Sub State Regions: COVID-19, Flu, RSV, Combined</i> [dataset <span class="mono">rdmq-nq56</span>]. National Syndromic Surveillance Program. <a href="https://data.cdc.gov/d/rdmq-nq56" target="_blank" rel="noopener">data.cdc.gov/d/rdmq-nq56</a></li>
     <li>Centers for Disease Control and Prevention. <i>PLACES: Local Data for Better Health, County Data</i> [dataset <span class="mono">swc5-untb</span>]. County health context measures. <a href="https://data.cdc.gov/d/swc5-untb" target="_blank" rel="noopener">data.cdc.gov/d/swc5-untb</a></li>
     <li>Centers for Disease Control and Prevention / Agency for Toxic Substances and Disease Registry / Geospatial Research, Analysis, and Services Program. <i>CDC/ATSDR Social Vulnerability Index 2022 Database, US (county)</i>. <a href="https://www.atsdr.cdc.gov/place-health/php/svi/" target="_blank" rel="noopener">atsdr.cdc.gov/place-health/php/svi</a></li>

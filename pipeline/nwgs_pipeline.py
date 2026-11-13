@@ -673,6 +673,12 @@ CDC_DATASETS = {
 
 NSSP_ED_ID = "rdmq-nq56"
 PLACES_ID = "swc5-untb"
+# CDC's own weekly Wastewater Viral Activity Level (WVAL) for the three
+# routine respiratory targets. Used as an external benchmark for the NWGS
+# within-site z-score index, never as an input to it.
+CDC_WVAL_ID = os.getenv("NWGS_CDC_WVAL_ID", "atcp-73re")
+# Live CDC RESP-NET hospitalization rates (COVID-NET, RSV-NET, FluSurv-NET).
+RESPNET_LIVE_ID = os.getenv("NWGS_RESPNET_LIVE_ID", "kvib-3txy")
 # Supplemental genomic context. These are public NCBI taxonomic names; the
 # genomic outputs are kept separate from wastewater observations unless a
 # defensible accession/sample linkage exists.
@@ -1583,6 +1589,114 @@ STATE_ABBR = {
     "Washington":"WA","West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY",
     "Puerto Rico":"PR"
 }
+
+# ============================================================
+# 08b. CDC WASTEWATER VIRAL ACTIVITY LEVEL (WVAL) BENCHMARK
+# ============================================================
+# atcp-73re publishes one WVAL per site, pathogen and week. CDC's state and
+# national levels are the median across sites, so the same median is taken
+# here. Site IDs in this dataset ("ID:4") do not share a key with the
+# sample-level pathogen datasets, so the comparison with NWGS is made at the
+# state-week and national-week level only.
+WVAL_PATHOGEN = {"SARS-CoV-2": "SARS-CoV-2", "Influenza A virus": "Influenza A",
+                 "Influenza A": "Influenza A", "RSV": "RSV"}
+WVAL_CATEGORY_ORDER = ["Very Low", "Low", "Moderate", "High", "Very High"]
+WVAL_FIELDS = ["state_territory", "site", "source", "site_wval", "site_wval_category",
+               "week_end", "pathogen_target"]
+
+
+def load_cdc_wval():
+    meta, fields = validate_dataset(CDC_WVAL_ID)
+    missing = [f for f in WVAL_FIELDS if f not in fields]
+    if missing:
+        raise RuntimeError(f"WVAL schema changed; missing fields: {missing}")
+    where = f"week_end >= '{STUDY_START.date()}' AND week_end <= '{STUDY_END.date()}'"
+    raw = socrata_fetch(CDC_WVAL_ID, select=",".join(WVAL_FIELDS), where=where, order="week_end ASC")
+    save_df(raw, RAW_DIR / f"CDC_WVAL_{CDC_WVAL_ID}_FROZEN.csv")
+    return harmonize_wval(raw), meta
+
+
+def harmonize_wval(raw):
+    if raw is None or raw.empty:
+        return pd.DataFrame(columns=["pathogen", "state_code", "site", "week_end", "site_wval", "source"])
+    d = raw.copy()
+    d["pathogen"] = d["pathogen_target"].astype(str).str.strip().map(WVAL_PATHOGEN)
+    st = d["state_territory"].astype(str).str.strip()
+    d["state_code"] = st.map(STATE_ABBR).fillna(st.str.upper().where(st.str.len() == 2))
+    d["week_end"] = pd.to_datetime(d["week_end"], errors="coerce").dt.normalize()
+    d["site_wval"] = numeric(d["site_wval"])
+    d = d.dropna(subset=["pathogen", "state_code", "week_end", "site_wval"])
+    d = d[d["week_end"].between(STUDY_START, STUDY_END)]
+    keep = ["pathogen", "state_code", "site", "week_end", "site_wval", "site_wval_category", "source"]
+    return (d[[c for c in keep if c in d.columns]]
+            .drop_duplicates(["pathogen", "site", "week_end"])
+            .reset_index(drop=True))
+
+
+def wval_state_national(w):
+    """State-week and national-week median site WVAL, as CDC aggregates it."""
+    if w is None or w.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    state = (w.groupby(["pathogen", "state_code", "week_end"])
+              .agg(cdc_wval=("site_wval", "median"), n_sites=("site", "nunique"))
+              .reset_index())
+    nat = (w.groupby(["pathogen", "week_end"])
+            .agg(cdc_wval=("site_wval", "median"), n_sites=("site", "nunique"))
+            .reset_index())
+    # Number of reporting sites in each CDC category, for context on the site.
+    if "site_wval_category" in w.columns:
+        cat = (w.assign(c=w["site_wval_category"].astype(str).str.strip())
+                .pivot_table(index=["pathogen", "week_end"], columns="c", values="site",
+                             aggfunc="nunique", fill_value=0)
+                .reindex(columns=WVAL_CATEGORY_ORDER, fill_value=0))
+        cat.columns = ["sites_" + c.lower().replace(" ", "_") for c in cat.columns]
+        nat = nat.merge(cat.reset_index(), on=["pathogen", "week_end"], how="left")
+        sc = [c for c in nat.columns if c.startswith("sites_")]
+        nat[sc] = nat[sc].fillna(0).astype(int)
+    return (state.sort_values(["pathogen", "state_code", "week_end"]).reset_index(drop=True),
+            nat.sort_values(["pathogen", "week_end"]).reset_index(drop=True))
+
+
+def wval_agreement(state_wval, nat_wval, state_week, national_week, min_weeks=20):
+    """How closely the NWGS index tracks CDC's own WVAL.
+
+    Spearman rank correlation on the weeks both report, nationally and per
+    state. Both series are medians across overlapping but not identical site
+    sets, and both are smoothed the same way only by aggregation, so this is a
+    check that NWGS rises and falls when CDC does, not a test of equivalence.
+    """
+    rows = []
+    if nat_wval is not None and len(nat_wval) and national_week is not None and len(national_week):
+        n = national_week[["pathogen", "week_end", "median_site_z"]].copy()
+        n["week_end"] = pd.to_datetime(n["week_end"]).dt.normalize()
+        m = nat_wval.merge(n, on=["pathogen", "week_end"], how="inner").dropna(subset=["cdc_wval", "median_site_z"])
+        for p, g in m.groupby("pathogen"):
+            if len(g) < min_weeks:
+                continue
+            r, pv = stats.spearmanr(g["median_site_z"], g["cdc_wval"])
+            rows.append({"pathogen": p, "geography": "US", "level": "national", "paired_weeks": int(len(g)),
+                         "spearman_r": float(r), "p_value": float(pv),
+                         "first_week": str(g["week_end"].min().date()), "last_week": str(g["week_end"].max().date())})
+    if state_wval is not None and len(state_wval) and state_week is not None and len(state_week):
+        s = state_week[["pathogen", "state_code", "week_end", "wastewater_index"]].copy()
+        s["week_end"] = pd.to_datetime(s["week_end"]).dt.normalize()
+        m = state_wval.merge(s, on=["pathogen", "state_code", "week_end"], how="inner").dropna(
+            subset=["cdc_wval", "wastewater_index"])
+        for (p, st), g in m.groupby(["pathogen", "state_code"]):
+            if len(g) < min_weeks:
+                continue
+            r, pv = stats.spearmanr(g["wastewater_index"], g["cdc_wval"])
+            rows.append({"pathogen": p, "geography": st, "level": "state", "paired_weeks": int(len(g)),
+                         "spearman_r": float(r), "p_value": float(pv),
+                         "first_week": str(g["week_end"].min().date()), "last_week": str(g["week_end"].max().date())})
+    out = pd.DataFrame(rows)
+    if len(out):
+        st = out["level"].eq("state")
+        out["p_value_fdr"] = np.nan
+        if st.any():
+            out.loc[st, "p_value_fdr"] = benjamini_hochberg(out.loc[st, "p_value"].values)
+        out.loc[~st, "p_value_fdr"] = out.loc[~st, "p_value"]
+    return out
 
 # ============================================================
 # 09. STATE-WEEK MULTIMODAL + LAG ANALYSIS
@@ -7200,10 +7314,12 @@ def global_coverage_equity(jmp_path=JMP_PATH, amelag=None, jmp_df=None, income_d
 # ED visits on the same states and weeks, then validates nowcast/forecast
 # models for both outcomes.
 #
-# Input is the archived RESP-NET file (accessed 2025-10-02, ICPSR DOI
-# 10.3886/E238559V1-219009) placed in static_inputs/. A frozen file is used
-# instead of the live API so results are reproducible; the live dataset
-# keeps revising. Nothing here can fail the weekly run.
+# Input is the live CDC RESP-NET dataset (data.cdc.gov kvib-3txy), pulled
+# each run and saved with the run's raw snapshots so every release can be
+# reproduced from its own files. If the live pull fails or comes back empty,
+# the archived file (accessed 2025-10-02, ICPSR DOI 10.3886/E238559V1-219009)
+# in static_inputs/ is used instead. NWGS_RESPNET_SOURCE=archived forces the
+# archived file. Nothing here can fail the weekly run.
 # =====================================================================
 RESPNET_PATH = Path(os.getenv(
     "NWGS_RESPNET_PATH", str(STATIC_ROOT / "RESPNET_Hospitalization_Rates_20251002.csv.gz")))
@@ -7218,6 +7334,8 @@ RESPNET_STATES = [s.strip() for s in os.getenv(
     "NWGS_RESPNET_STATES", "CA,CO,CT,GA,MD,MI,MN,NM,NY,NC,OR,TN,UT").split(",") if s.strip()]
 RESPNET_BOOTSTRAP = int(os.getenv("NWGS_RESPNET_BOOTSTRAP", "500"))
 RESPNET_SOURCE_URL = "https://doi.org/10.3886/E238559V1-219009"
+RESPNET_SOURCE = os.getenv("NWGS_RESPNET_SOURCE", "live").strip().lower()
+RESPNET_LIVE_URL = f"https://data.cdc.gov/d/{RESPNET_LIVE_ID}"
 # FluSurv-NET counts all influenza types; it is matched to the Influenza A
 # wastewater target because that is the influenza target NWGS harmonizes.
 RESPNET_NETWORK_PATHOGEN = {
@@ -7233,7 +7351,51 @@ _RESPNET_API_TO_DISPLAY = {
 }
 
 
-def load_respnet(path=None):
+def fetch_respnet_live():
+    """Pull statewide, all-ages weekly observed rates from live RESP-NET and
+    return them in the archived file's layout, so load_respnet() treats both
+    sources identically. The live schema differs from the archive:
+
+        live column / value                archived equivalent
+        surveillance_network               Surveillance Network
+        state                              Site
+        age_category = Overall             Age group = Overall
+        sex = All, race = All              Sex / Race/Ethnicity = Overall
+        rate_type = Observed               Type = Unadjusted Rate
+        data_type = Weekly Rate, estimate  Weekly Rate
+        date (date_type=Week Ending Date)  Week Ending Date
+
+    rate_type 'Estimated' rows are CDC's adjusted estimates and are left out,
+    as the archived 'Adjusted' rows are.
+    """
+    meta, fields = validate_dataset(RESPNET_LIVE_ID)
+    need = ["surveillance_network", "season", "date_type", "date", "age_category", "race",
+            "sex", "state", "data_type", "rate_type", "estimate"]
+    missing = [f for f in need if f not in fields]
+    if missing:
+        raise RuntimeError(f"RESP-NET live schema changed; missing fields: {missing}")
+    where = ("date_type = 'Week Ending Date' AND data_type = 'Weekly Rate' "
+             "AND age_category = 'Overall' AND sex = 'All' AND race = 'All' "
+             "AND rate_type = 'Observed' AND state != 'Overall' "
+             f"AND date >= '{STUDY_START.date()}' AND date <= '{STUDY_END.date()}'")
+    raw = socrata_fetch(RESPNET_LIVE_ID, select=",".join(need), where=where, order="date ASC")
+    if raw.empty:
+        return raw, meta
+    out = pd.DataFrame({
+        "Surveillance Network": raw["surveillance_network"],
+        "Season": raw["season"],
+        "Age group": "Overall",
+        "Sex": "Overall",
+        "Race/Ethnicity": "Overall",
+        "Site": raw["state"],
+        "Weekly Rate": raw["estimate"],
+        "Week Ending Date": raw["date"],
+        "Type": "Unadjusted Rate",
+    })
+    return out, meta
+
+
+def load_respnet(path=None, snapshot_date=None):
     """Statewide, all-ages, unadjusted weekly RESP-NET rates within the study window.
 
     Returns (frame, info). Drops national 'Overall' rows, demographic strata
@@ -7243,7 +7405,9 @@ def load_respnet(path=None):
     the most recent weeks as nowcast estimates that are later revised.
     """
     path = Path(path or RESPNET_PATH)
-    info = {"path": str(path), "rows_raw": 0, "rows_kept": 0, "nowcast_weeks_dropped": {}}
+    snapshot = pd.Timestamp(snapshot_date) if snapshot_date is not None else RESPNET_SNAPSHOT_DATE
+    info = {"path": str(path), "rows_raw": 0, "rows_kept": 0, "nowcast_weeks_dropped": {},
+            "snapshot_date": str(snapshot.date())}
     if not path.exists():
         print(f"[RESP-NET] no file at {path}; the hospitalization extension is skipped")
         return pd.DataFrame(), info
@@ -7277,7 +7441,7 @@ def load_respnet(path=None):
     for net, g in d.groupby("network"):
         weeks = np.sort(g["week_end"].unique())
         last = pd.Timestamp(weeks[-1])
-        if RESPNET_NOWCAST_WEEKS > 0 and last >= RESPNET_SNAPSHOT_DATE - pd.Timedelta(days=28):
+        if RESPNET_NOWCAST_WEEKS > 0 and last >= snapshot - pd.Timedelta(days=28):
             drop = set(weeks[-RESPNET_NOWCAST_WEEKS:])
             info["nowcast_weeks_dropped"][net] = [str(pd.Timestamp(w).date()) for w in sorted(drop)]
             g = g[~g["week_end"].isin(drop)]
@@ -7301,6 +7465,31 @@ def load_respnet(path=None):
     print(f"[RESP-NET] {len(d)} state-weeks kept, {len(info['states'])} states, "
           f"{info['first_week']} to {info['last_week']}; nowcast weeks dropped: {info['nowcast_weeks_dropped']}")
     return d, info
+
+
+def load_respnet_any():
+    """Live RESP-NET when available, archived file otherwise. Returns
+    (frame, info, label, url) where label names the source actually used."""
+    if RESPNET_SOURCE != "archived":
+        try:
+            live, meta = fetch_respnet_live()
+            if not live.empty:
+                live_path = RAW_DIR / f"CDC_RESPNET_{RESPNET_LIVE_ID}_LIVE.csv"
+                save_df(live, live_path)
+                pulled = pd.Timestamp(datetime.now(timezone.utc).date())
+                hosp, info = load_respnet(live_path, snapshot_date=pulled)
+                if not hosp.empty:
+                    info["source"] = "live"
+                    info["dataset_updated"] = meta.get("rowsUpdatedAt")
+                    return hosp, info, f"CDC RESP-NET hospitalization rates (live {RESPNET_LIVE_ID}, pulled {pulled.date()})", RESPNET_LIVE_URL
+                print("[RESP-NET] live pull produced no usable state-weeks; using the archived file")
+            else:
+                print("[RESP-NET] live pull returned no rows; using the archived file")
+        except Exception as exc:
+            print(f"[RESP-NET] live pull failed ({type(exc).__name__}: {exc}); using the archived file")
+    hosp, info = load_respnet()
+    info["source"] = "archived"
+    return hosp, info, "CDC RESP-NET hospitalization rates (archived 2025-10-02)", RESPNET_SOURCE_URL
 
 
 def _respnet_frame(multimodal, hosp, pathogen, state):
@@ -8871,6 +9060,31 @@ def main():
     multimodal = merge_clinical(state_week, ed)
     save_df(multimodal, PROC_DIR / "NWGS_STATE_WEEK_MULTIMODAL.csv")
 
+    print("\n[6b/19] Pulling CDC Wastewater Viral Activity Level (WVAL) benchmark...")
+    # Optional benchmark: a failure is logged and recorded, never fatal.
+    try:
+        wval_sites, wval_meta = load_cdc_wval()
+        wval_state, wval_nat = wval_state_national(wval_sites)
+        wval_agree = wval_agreement(wval_state, wval_nat, state_week, national_week)
+        if len(wval_nat):
+            save_df(wval_state, TABLE_DIR / "Table29_CDC_WVAL_State_Week.csv")
+            save_df(wval_nat, TABLE_DIR / "Table29b_CDC_WVAL_National.csv")
+            save_df(wval_agree, TABLE_DIR / "Table29c_CDC_WVAL_Agreement.csv")
+            nat_rows = wval_agree[wval_agree["level"].eq("national")] if len(wval_agree) else wval_agree
+            if len(nat_rows):
+                print(nat_rows[["pathogen", "paired_weeks", "spearman_r"]].round(3).to_string(index=False))
+            record_source(f"CDC Wastewater Viral Activity Level ({CDC_WVAL_ID})", "OK",
+                          f"{len(wval_sites)} site-weeks, {wval_sites['site'].nunique()} sites, "
+                          f"{wval_nat['week_end'].min().date()} to {wval_nat['week_end'].max().date()}",
+                          f"{CDC_BASE}/d/{CDC_WVAL_ID}")
+        else:
+            record_source(f"CDC Wastewater Viral Activity Level ({CDC_WVAL_ID})", "EMPTY",
+                          "no rows in the study window", f"{CDC_BASE}/d/{CDC_WVAL_ID}")
+    except Exception as exc:
+        print(f"[WARN] CDC WVAL benchmark skipped: {type(exc).__name__}: {exc}")
+        record_source(f"CDC Wastewater Viral Activity Level ({CDC_WVAL_ID})", "FAILED",
+                      f"{type(exc).__name__}: {exc}", f"{CDC_BASE}/d/{CDC_WVAL_ID}")
+
     print("\n[7/19] Running wastewater-clinical lag analyses...")
     all_lag, best_lag = lag_analysis(multimodal)
     save_df(all_lag, TABLE_DIR / "Table04_All_Lag_Results.csv")
@@ -9189,7 +9403,7 @@ def main():
     # ------------------------------------------------------------
     print("\n[17c/19] RESP-NET hospitalization alignment and nowcast validation...")
     try:
-        hosp, hosp_info = load_respnet()
+        hosp, hosp_info, hosp_label, hosp_url = load_respnet_any()
         if not hosp.empty:
             save_df(hosp, TABLE_DIR / "Table27_RESPNET_State_Week.csv")
             rn_all, rn_best, rn_sum = respnet_alignment(multimodal, hosp)
@@ -9205,12 +9419,12 @@ def main():
                 show = rn_val[rn_val["horizon_weeks"].eq(0)][
                     ["pathogen", "outcome", "scheme", "model", "n_test", "mae", "rmse", "r2"]]
                 print(show.round(3).to_string(index=False))
-            record_source("CDC RESP-NET hospitalization rates (archived 2025-10-02)", "OK",
+            record_source(hosp_label, "OK",
                           f"{hosp_info.get('rows_kept')} state-weeks, {len(hosp_info.get('states', []))} states, "
-                          f"{hosp_info.get('first_week')} to {hosp_info.get('last_week')}", RESPNET_SOURCE_URL)
+                          f"{hosp_info.get('first_week')} to {hosp_info.get('last_week')}", hosp_url)
         else:
-            record_source("CDC RESP-NET hospitalization rates (archived 2025-10-02)", "EMPTY",
-                          f"no usable file at {RESPNET_PATH.name}", RESPNET_SOURCE_URL)
+            record_source(hosp_label, "EMPTY",
+                          "no usable live rows and no usable archived file", hosp_url)
     except Exception as exc:
         print(f"[WARN] RESP-NET extension skipped: {type(exc).__name__}: {exc}")
     if LAG_CALENDAR_AUDIT:

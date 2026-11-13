@@ -265,6 +265,15 @@ def main(table_dir, out_dir, allow_mixed=False):
     if t21b is not None and len(t21b):
         ents["LeadTimeNational"] = t21b
 
+    # CdcWval (Table29b/29c) - CDC's own WVAL, the external benchmark for the
+    # NWGS index. Optional, so runs from before this layer still export.
+    t29b = find(table_dir, "Table29b_CDC_WVAL_National", required=False)
+    if t29b is not None and len(t29b):
+        ents["CdcWvalNational"] = t29b
+    t29c = find(table_dir, "Table29c_CDC_WVAL_Agreement", required=False)
+    if t29c is not None and len(t29c):
+        ents["CdcWvalAgreement"] = t29c
+
     # Attrition (Table22/22b/22c) - which sites went dark, when, and where
     t22 = find(table_dir, "Table22_Coverage_Attrition_Sites", required=False)
     if t22 is not None and len(t22):
