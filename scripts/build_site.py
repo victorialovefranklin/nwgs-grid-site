@@ -11,6 +11,7 @@ EXPORT_DIR is the output of scripts/nwgs_app_export.py.
 Writes SITE_DIR/index.html (data and county map embedded) and SITE_DIR/data.json.
 """
 import json
+import re
 import os
 import sys
 from pathlib import Path
@@ -350,18 +351,76 @@ def main(export_dir, site_dir):
             .replace("__DATA__", data.replace("</", "<\\/"))
             .replace("__TOPO__", TOPO.read_text(encoding="utf-8")))
     html = html.replace("__SUPA__", SUPA.read_text(encoding="utf-8") if SUPA.exists() else "null")
-    page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-            '<link rel="icon" type="image/png" href="img/nwgs-favicon.png">'
-            '<link rel="apple-touch-icon" href="img/nwgs-touch-icon.png">'
-            '<meta name="theme-color" content="#14213a">'
-            '<meta name="author" content="Victoria Love Franklin">'
-            '<meta name="copyright" content="© 2026 Victoria Love Franklin. All rights reserved.">'
-            '<meta name="description" content="NWGS Grid™: weekly validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties. By Victoria Love Franklin.">'
-            '<meta property="og:title" content="NWGS Grid™ — National Wastewater Genomics Smart Grid">'
-            '<meta property="og:description" content="Weekly wastewater surveillance dashboard by Victoria Love Franklin, PhD Data Science Student · Peer-Reviewed Author · Developer.">'
-            '<style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + html + "</body></html>")
+    # Search and social-preview metadata. The share card (img/og-nwgs.png,
+    # 1200x630) carries no weekly figures, so it never goes stale between runs.
+    SITE = "https://nwgsgrid.com/"
+    OG_IMG = SITE + "img/og-nwgs.png"
+    TITLE = "NWGS Grid™ · National Wastewater Genomics Smart Grid"
+    DESC = ("NWGS Grid™: weekly validated wastewater surveillance of respiratory and emerging "
+            "pathogens across U.S. counties, with coverage, equity, lead time and genomics. "
+            "By Victoria Love Franklin, Franklin HUB SMART Center.")
+    ALT = ("NWGS Grid™, National Wastewater Genomics Smart Grid: reading the nation's wastewater, "
+           "rebuilt every week. nwgsgrid.com")
+    ld = {"@context": "https://schema.org", "@graph": [
+        {"@type": "WebSite", "@id": SITE + "#site", "name": "NWGS Grid™", "url": SITE,
+         "alternateName": "National Wastewater Genomics Smart Grid", "inLanguage": "en",
+         "publisher": {"@id": SITE + "#org"}},
+        {"@type": "Dataset", "name": "NWGS Grid™ weekly wastewater surveillance", "url": SITE,
+         "description": DESC, "image": OG_IMG, "isAccessibleForFree": True,
+         "spatialCoverage": "United States", "temporalCoverage": f"../{D['run']['data_as_of']}",
+         "creator": {"@type": "Person", "name": "Victoria Love Franklin"},
+         "publisher": {"@id": SITE + "#org"}},
+        {"@type": "Organization", "@id": SITE + "#org", "name": "Franklin HUB SMART Center",
+         "url": "https://franklinhubsmartcenter.com/"}]}
+    a = lambda t: t.replace("&", "&amp;").replace('"', "&quot;")
+    head = "".join([
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
+        f'<title>{TITLE}</title>',
+        '<link rel="icon" type="image/png" href="img/nwgs-favicon.png">',
+        '<link rel="apple-touch-icon" href="img/nwgs-touch-icon.png">',
+        '<meta name="theme-color" content="#14213a">',
+        '<meta name="author" content="Victoria Love Franklin">',
+        '<meta name="copyright" content="© 2026 Victoria Love Franklin. All rights reserved.">',
+        f'<meta name="description" content="{a(DESC)}">',
+        '<meta name="keywords" content="wastewater surveillance, NWSS, SARS-CoV-2, RSV, influenza, '
+        'H5N1, measles, mpox, public health, county map, environmental surveillance, genomics, '
+        'antimicrobial resistance, health equity, NWGS Grid, Franklin HUB SMART Center, Victoria Love Franklin">',
+        '<meta name="robots" content="index, follow, max-image-preview:large">',
+        f'<link rel="canonical" href="{SITE}">',
+        '<link rel="sitemap" type="application/xml" href="/sitemap.xml">',
+        '<meta property="og:type" content="website">',
+        '<meta property="og:locale" content="en_US">',
+        '<meta property="og:site_name" content="NWGS Grid™ · Franklin HUB SMART Center">',
+        f'<meta property="og:url" content="{SITE}">',
+        f'<meta property="og:title" content="{a(TITLE)}">',
+        f'<meta property="og:description" content="{a(DESC)}">',
+        f'<meta property="og:image" content="{OG_IMG}">',
+        f'<meta property="og:image:secure_url" content="{OG_IMG}">',
+        '<meta property="og:image:type" content="image/png">',
+        '<meta property="og:image:width" content="1200">',
+        '<meta property="og:image:height" content="630">',
+        f'<meta property="og:image:alt" content="{a(ALT)}">',
+        '<meta name="twitter:card" content="summary_large_image">',
+        f'<meta name="twitter:title" content="{a(TITLE)}">',
+        f'<meta name="twitter:description" content="{a(DESC)}">',
+        f'<meta name="twitter:image" content="{OG_IMG}">',
+        f'<meta name="twitter:image:alt" content="{a(ALT)}">',
+        '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=True).replace("</", "<\\/") + '</script>',
+        '<style>[hidden]{display:none!important}body{margin:0}</style></head><body>',
+    ])
+    # The template's own <title> would land in <body>; the head above carries it.
+    html = re.sub(r"\A\s*<title>.*?</title>\s*", "", html, count=1, flags=re.S)
+    page = head + html + "</body></html>"
     (out / "index.html").write_text(page, encoding="utf-8")
+    (out / "robots.txt").write_text(
+        "User-agent: *\nAllow: /\n\nSitemap: https://nwgsgrid.com/sitemap.xml\n", encoding="utf-8")
+    (out / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f'  <url><loc>https://nwgsgrid.com/</loc><lastmod>{D["run"]["data_as_of"]}</lastmod>'
+        '<changefreq>weekly</changefreq><priority>1.0</priority></url>\n'
+        '</urlset>\n', encoding="utf-8")
     copy_assets(out)
     print(f"Built {out/'index.html'} ({len(page)/1e6:.2f} MB), run {D['run']['run_id']}, data through {D['run']['data_as_of']}")
 
