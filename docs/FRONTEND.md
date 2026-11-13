@@ -143,9 +143,8 @@ hex value so a future palette change reaches every chart.
 
 ## 6. Layout
 
-A white header holds the refined water-drop mark (`img/nwgs-mark.svg`), the
-wordmark, the line "A Franklin HUB SMART Center research platform", and six
-navigation groups covering all the views above: Overview, Maps, Trends &
+A white header holds the full NWGS Grid™ logo (`img/nwgs-lockup.png`: drop, name and the line "A Franklin HUB SMART Center
+research platform" in one image) and six navigation groups covering all the views above: Overview, Maps, Trends &
 Forecasts, Coverage & Equity, Genomics & Emerging, Methods & Trust. The landing
 view opens with a hero ("Reading the nation's wastewater.") whose four figures
 come from `D.monitoring_national`; when that entity is missing the hero shows
