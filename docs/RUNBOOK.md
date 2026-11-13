@@ -85,6 +85,12 @@ Re-running the pipeline will **not** reproduce an old run, because it always
 pulls current data and CDC revises its datasets. The release is the
 reproducible artifact, not the code path.
 
+To check or re-derive a run from its inputs, download
+`<run_id>_source_snapshots.zip`: every dataset exactly as that run retrieved it,
+`SHA256SUMS.txt` (verify with `sha256sum -c SHA256SUMS.txt`) and the run's
+`DATA_PROVENANCE.csv`. Releases made before this archive was added do not have
+it.
+
 ---
 
 ## 6. Regenerate the documentation

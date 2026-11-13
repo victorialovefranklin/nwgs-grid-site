@@ -199,6 +199,16 @@ jobs:
           mkdir -p release
           (cd /content/NWGS_GRID/outputs && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_tables.zip" tables)
           (cd /content/NWGS_GRID/outputs && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_figures.zip" . -x 'tables/*' -x 'downloads/*')
+          # Every source exactly as this run retrieved it, with a SHA-256 for each
+          # file, so the inputs to this run can be recovered exactly later.
+          RAW=/content/NWGS_GRID/data/raw
+          if [ -d "$RAW" ] && [ -n "$(ls -A "$RAW")" ]; then
+            cp /content/NWGS_GRID/outputs/metadata/DATA_PROVENANCE.csv "$RAW/" 2>/dev/null || true
+            (cd "$RAW" && find . -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt \
+              && zip -q -9 -r "$GITHUB_WORKSPACE/release/${RUN_ID}_source_snapshots.zip" .)
+          else
+            echo "::warning::No source snapshots found in $RAW; this release will not include them."
+          fi
           if [ -d /content/NWGS_GRID/outputs/downloads ]; then
             (cd /content/NWGS_GRID/outputs/downloads && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_weekly_history.zip" .)
           fi
@@ -219,6 +229,8 @@ jobs:
             echo "- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             echo
             echo "Cite tables and figures from one release only; CDC data changes every week."
+            echo
+            echo "**Source snapshots:** \`${RUN_ID}_source_snapshots.zip\` holds every dataset exactly as this run retrieved it, with \`SHA256SUMS.txt\` and the run's provenance log, so the inputs to this run can be recovered exactly."
             echo
             echo "**Weekly history:** \`${RUN_ID}_weekly_history.zip\` holds every week CDC currently reports for every pathogen by county, state and nation (CSV and Parquet, with a data dictionary). County is the finest level; CDC site identifiers are not included."
             echo

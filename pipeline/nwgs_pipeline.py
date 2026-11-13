@@ -7581,6 +7581,8 @@ def fetch_respnet_live():
     raw = socrata_fetch(RESPNET_LIVE_ID, select=",".join(need), where=where, order="date ASC")
     if raw.empty:
         return raw, meta
+    # Kept exactly as retrieved, before the re-layout below, for the release archive.
+    save_df(raw, RAW_DIR / f"CDC_RESPNET_{RESPNET_LIVE_ID}_FROZEN.csv")
     out = pd.DataFrame({
         "Surveillance Network": raw["surveillance_network"],
         "Season": raw["season"],
@@ -7674,7 +7676,7 @@ def load_respnet_any():
         try:
             live, meta = fetch_respnet_live()
             if not live.empty:
-                live_path = RAW_DIR / f"CDC_RESPNET_{RESPNET_LIVE_ID}_LIVE.csv"
+                live_path = PROC_DIR / f"CDC_RESPNET_{RESPNET_LIVE_ID}_ARCHIVE_LAYOUT.csv"
                 save_df(live, live_path)
                 pulled = pd.Timestamp(datetime.now(timezone.utc).date())
                 hosp, info = load_respnet(live_path, snapshot_date=pulled)
