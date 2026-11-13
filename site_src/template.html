@@ -1,7 +1,7 @@
 <title>NWGS Grid™ · Victoria Love Franklin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: a public dashboard — white header with grouped navigation, a light
    workspace, and content cards in a 12-column grid. Navy carries the text,
@@ -824,14 +824,121 @@ h2{font-weight:700;letter-spacing:-.02em}
 @media(prefers-reduced-motion:no-preference){.tour .mapbox svg{animation:tourfade .35s ease}}
 @keyframes tourfade{from{opacity:.25}to{opacity:1}}
 .dl-runs summary{cursor:pointer;font-weight:600;margin:6px 0}.dl-runs .tbl{max-height:360px;overflow:auto}
+/* ===== Franklin HUB brand layer for NWGS Grid(TM) — 2026-11 =====
+   Matches franklinhubsmartcenter.com: Manrope headings, DM Sans body, black
+   hero band with lime accents and an aqua glow line, two-tone light headings,
+   hairline rows in place of boxed cards. Data, charts and scripts unchanged. */
+:root{
+  --display:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --fh-black:#0b0b0c; --fh-lime:#d7fb74; --fh-aqua:#9ff0e6; --fh-grey:#8a9099; --fh-cream:#f8f8f4;
+  --ink:#121417; --muted:#4a515b; --line:#e6e6e1; --paper:#f8f8f4; --cream:#f8f8f4;
+  --teal-deep:#0f7c74; --accent:#0f7c74; --link:#0f7c74; --brand-accent:#0f7c74; --rose-deep:#0f7c74;
+  --accent-soft:#e8f5f3; --rail-active:transparent; --rail-hover:#f3f3ee; --rail-line:#e6e6e1;
+}
+body{background:#fff;color:var(--ink)}
+h1,h2,h3{font-family:var(--display)}
+h1{font-weight:700;letter-spacing:-.035em}
+h2{font-weight:700;letter-spacing:-.02em}
+
+/* Header: centered brand lockup over centered text tabs */
+.topbar{background:rgba(255,255,255,.96);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--line)}
+.topbar-in{flex-direction:column;align-items:center;gap:8px;padding:14px 28px 0}
+.brand.fh{gap:16px;align-items:center}
+.brand.fh .fhlogo{height:30px;width:auto;display:block}
+.brand.fh .bdiv{width:1px;height:34px;background:var(--line)}
+.brand.fh .nmark{height:40px;width:auto;display:block}
+.brand.fh .wm b{font:800 1.28rem/1 var(--display);letter-spacing:-.03em;color:var(--ink)}
+.brand.fh .wm b sup{font:600 .55rem var(--body);color:var(--fh-grey);vertical-align:super}
+.brand.fh .wm small{display:block;font:600 .64rem/1.3 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--fh-grey);margin-top:3px}
+.nav{margin:0 auto;justify-content:center;gap:4px}
+.navtop{border-radius:0;padding:12px 12px 13px;font:600 .9rem var(--body);color:#2b3038;background:none}
+.navtop:hover{background:none;color:var(--ink);box-shadow:inset 0 -2px 0 #cfd2c8}
+.navtop.here,.navtop[aria-current="page"]{color:var(--ink);background:none;box-shadow:inset 0 -2px 0 var(--ink);font-weight:700}
+.navmenu{border-radius:6px;border-color:var(--line);box-shadow:0 14px 34px rgba(11,11,12,.10)}
+.navmenu button[aria-current="page"]{background:var(--fh-cream);color:var(--ink)}
+.count{background:var(--ink)!important;color:var(--fh-lime)!important}
+
+/* Status strip: cream band, no box */
+.status{margin-top:calc(-1 * var(--sp-3));background:var(--fh-cream);border:0;border-radius:0;border-bottom:1px solid var(--line);
+  box-shadow:0 0 0 100vmax var(--fh-cream);clip-path:inset(0 -100vmax);padding:10px 0}
+.pill{border-radius:999px;background:#fff}
+
+/* Hero: full-bleed black band */
+.home-hero{position:relative;background:var(--fh-black);color:#fff;box-shadow:0 0 0 100vmax var(--fh-black);
+  clip-path:inset(0 -100vmax);padding:64px 0 60px;margin-top:calc(-1 * var(--sp-3));gap:56px}
+.home-hero .eb{display:inline-flex;align-items:center;gap:10px;color:#e9ecef;font:700 .72rem/1 var(--body);letter-spacing:.16em}
+.home-hero .eb::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fh-lime);box-shadow:0 0 12px rgba(215,251,116,.8)}
+.home-hero h1{font:800 clamp(2.5rem,5.4vw,4.1rem)/1.02 var(--display);letter-spacing:-.045em;color:#fff;margin:18px 0 18px}
+.home-hero h1 em{display:block;font-style:normal;color:var(--fh-aqua);text-shadow:0 0 28px rgba(110,231,214,.55)}
+.home-hero .lead{color:#c9ced6;font-size:1.12rem}
+.home-hero .ctas button{border-color:rgba(255,255,255,.28);color:#fff;border-radius:999px}
+.home-hero .ctas button:hover{border-color:#fff;background:rgba(255,255,255,.06)}
+.home-hero .ctas button.pri{background:var(--fh-lime);border-color:var(--fh-lime);color:var(--fh-black);border-radius:999px;padding:12px 20px;font-weight:800}
+.home-hero .ctas button.pri:hover{background:#e4ff96}
+.home-hero .ctas button:focus-visible{outline-color:var(--fh-lime)}
+.home-hero .hstats{gap:0 32px}
+.home-hero .hstats div{border-top:1px solid rgba(255,255,255,.18);padding:16px 0 18px}
+.home-hero .hstats b{font:800 2.2rem/1.05 var(--display);color:#fff}
+.home-hero .hstats div:nth-child(odd) b{color:var(--fh-lime)}
+.home-hero .hstats span{display:block;color:#aab1bb;line-height:1.45;margin-top:4px}
+
+/* Section headings: eyebrow + two-tone light title */
+.head .eyebrow,.tour-text .eb{color:var(--teal-deep);letter-spacing:.14em}
+.head h1{font:600 clamp(1.8rem,3.2vw,2.5rem)/1.12 var(--display);letter-spacing:-.035em;color:var(--ink)}
+.head h1 .tone,.head h1 span.lt{color:var(--fh-grey)}
+.head p{color:var(--muted)}
+
+/* Panels: no card box — a top hairline and air */
+.panel{background:transparent;border:0;border-top:1px solid var(--ink);border-radius:0;padding:18px 0 6px;box-shadow:none}
+.panel.flat{border-top:0}
+.panel>h2,.panel>header>h2,.panel>.sh-h>h2,.panel>.ov-h>h2,.panel>.why-body>h2,.panel>header>.h2{color:var(--ink)}
+.grid{gap:28px 32px}
+.card-p .top{border-bottom:1px solid var(--line)}
+.pname{font:800 1.3rem var(--display)}
+.gcard{background:transparent!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important}
+.cite{background:var(--fh-cream);border:0;border-left:3px solid var(--ink);border-radius:0}
+.notloaded{border-radius:0!important}
+.pathset,.rpaths .pchk{border-radius:0}
+
+/* Controls: text tabs with an underline instead of filled pills */
+.seg{border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;gap:2px}
+.seg button{border-right:0;padding:7px 12px;color:#4a515b;font-weight:600}
+.seg button[aria-pressed="true"]{background:none;color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink);font-weight:700}
+.btn-primary{background:var(--fh-black);border-color:var(--fh-black);color:#fff}
+.btn-primary:hover{background:#26282c;border-color:#26282c}
+.tour-dots button[aria-selected="true"],.tour-nav button.pri{background:var(--fh-black);border-color:var(--fh-black);color:var(--fh-lime)}
+.tour-nav button{border-radius:999px}
+
+/* Footer: black band, mirrors the Franklin HUB site */
+.sitefoot{background:var(--fh-black);color:#aab1bb;border-top:0;box-shadow:0 0 0 100vmax var(--fh-black);clip-path:inset(0 -100vmax);
+  margin-top:48px;padding:36px 0 40px}
+.sitefoot a{color:var(--fh-lime)}
+.sitefoot .fhsc{color:#e9ecef}
+.sitefoot .fhsc img{height:30px;background:#fff;padding:5px 9px;border-radius:4px}
+
+@media (max-width:760px){
+  .topbar-in{flex-direction:row;flex-wrap:wrap;justify-content:space-between;padding:10px 16px}
+  .brand.fh{gap:10px}.brand.fh .fhlogo{height:22px}.brand.fh .nmark{height:30px}.brand.fh .bdiv{height:26px}
+  .brand.fh .wm small{display:none}.brand.fh .wm b{font-size:1.05rem}
+  .navtop{box-shadow:none!important}
+  .home-hero{padding:40px 0 36px;gap:26px}
+  .home-hero .hstats b{font-size:1.6rem}
+}
+@media (max-width:420px){.brand.fh .fhlogo,.brand.fh .bdiv{display:none}}
+@media print{.home-hero,.sitefoot,.status{background:none!important;color:#000!important;box-shadow:none!important;clip-path:none!important}
+  .home-hero h1,.home-hero h1 em,.home-hero .hstats b{color:#000!important;text-shadow:none!important}}
 </style>
 
 <div class="app">
   <a class="skiplink" href="#v-dashboard">Skip to content</a>
   <header class="topbar">
     <div class="topbar-in">
-      <a class="brand" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid home">
-        <img class="brandlogo" src="img/nwgs-lockup.png" alt="NWGS Grid™, National Wastewater Genomics Smart Grid, a Franklin HUB SMART Center research platform" width="1600" height="504"></a>
+      <a class="brand fh" href="#dashboard" data-go="dashboard" aria-label="NWGS Grid™ home, a Franklin HUB SMART Center research platform">
+        <img class="fhlogo" src="img/fhsc-logo.png" alt="Franklin HUB SMART Center" width="150" height="29">
+        <span class="bdiv" aria-hidden="true"></span>
+        <img class="nmark" src="img/nwgs-mark.png" alt="" width="136" height="200">
+        <span class="wm"><b>NWGS Grid<sup>™</sup></b><small>National Wastewater Genomics Smart Grid</small></span></a>
       <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="nav"><svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
       <nav class="nav" id="nav" aria-label="Sections"></nav>
     </div>
