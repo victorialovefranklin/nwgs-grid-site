@@ -75,9 +75,9 @@ def user_guide(E, run_id, as_of):
     known = {k for k, _ in read_views()}
     PAGES = [
         ("start", "Start here", "What wastewater surveillance is, what it can and cannot tell you, and where to go next."),
-        ("dashboard", "This week", "The national picture for this week: each pathogen's level, its direction, and how many counties are high."),
+        ("dashboard", "This week", "The national picture for this week: each pathogen's level, its direction, and how many counties are high, opening with a 5-step tour (monitoring, signals, coverage gaps, forecasts, equity)."),
         ("map", "County map", "A county map you can click, plus spatial clusters and coverage."),
-        ("analytics", "Trends & timing", "Long-run trends, seasonal peaks, and how wastewater lines up with clinical data."),
+        ("analytics", "Trends & timing", "Long-run trends, seasonal peaks, how wastewater lines up with clinical data, CDC's own activity level for comparison, and RESP-NET hospitalization rates."),
         ("leadtime", "Lead time", "Whether the signal arrives early enough to act on, split into biology and reporting delay."),
         ("predictive", "Predictive models", "How well models trained on earlier weeks did on weeks they had never seen."),
         ("monitoring", "Where monitoring happens",
@@ -91,7 +91,8 @@ def user_guide(E, run_id, as_of):
         ("alerts", "Alerts", "Every state with counties above the high threshold."),
         ("myalerts", "My alerts", "Save a pathogen, a state and a level, and get an email when a run matches."),
         ("audit", "Audit log", "Every automated check from this run, and whether each source loaded."),
-        ("methods", "Methods & sources", "How the numbers were produced, with the full dataset and reference list."),
+        ("methods", "Methods & sources", "How the numbers were produced, how often CDC updates each dataset, and the full dataset and reference list."),
+        ("reports", "Data & reports", "Download the weekly history for every pathogen by county, state and nation (CSV or Parquet), reach any past run, or build a written report for an area."),
         ("glossary", "Glossary", "Plain-language definitions of every term used."),
         ("why", "Why NWGS Grid exists", "The five gaps between what wastewater surveillance is said to do and what anyone can check, and where each is answered."),
         ("about", "About & how to cite", "Authorship, citation and licensing."),
@@ -788,6 +789,12 @@ Re-running the pipeline will **not** reproduce an old run, because it always
 pulls current data and CDC revises its datasets. The release is the
 reproducible artifact, not the code path.
 
+To check or re-derive a run from its inputs, download
+`<run_id>_source_snapshots.zip`: every dataset exactly as that run retrieved it,
+`SHA256SUMS.txt` (verify with `sha256sum -c SHA256SUMS.txt`) and the run's
+`DATA_PROVENANCE.csv`. Releases made before this archive was added do not have
+it.
+
 ---
 
 ## Regenerate the documentation
@@ -797,6 +804,10 @@ python3 scripts/build_audit_doc.py <export_dir> docs/DASHBOARD_AUDIT.md
 python3 scripts/build_docs.py      <export_dir>
 node scripts/md_to_docx.js docs/<NAME>.md docs/<NAME>.docx
 ```
+
+The weekly workflow does this automatically after every successful run and
+commits the refreshed documents, so they always describe the latest published
+run. Run it by hand only to check a change before pushing.
 
 `<export_dir>` is a run's app export: the folder holding `manifest.json` and
 the entity CSVs. The Word converter needs the `docx` package once:

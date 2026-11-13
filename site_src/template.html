@@ -1044,6 +1044,47 @@ function downloadsPanel(){
   return `<article class="panel c12" id="downloads"><header><h2>Download weekly data</h2><span class="small muted">every pathogen · county, state, nation</span></header>${latest}${runs}
     <p class="note">Cite the run ID and data-through date with any figure. CDC revises earlier weeks, so the same week can differ between runs. Rows from WastewaterSCAN carry its non-commercial license (CC BY-NC 4.0).</p></article>`;
 }
+
+/* RESP-NET hospitalizations (pipeline 17c). Optional: older exports have no D.respnet. */
+const RN_MODEL={persistence:'last week’s rate alone',clinical_only:'recent clinical data',wastewater_only:'wastewater alone',full:'clinical data plus wastewater'};
+function respnetPanel(){
+  const N=D.respnet;
+  if(!N||!N.series||!Object.keys(N.series).length) return `<article class="panel"><header><h2>Hospitalizations (RESP-NET)</h2></header>
+    <p class="note">CDC RESP-NET hospitalization rates have not populated for this run yet. They appear after the next weekly update.</p></article>`;
+  const ps=ROUTINE.filter(p=>N.series[p]);
+  const S=(N.summary||[]).filter(r=>r.comparison==='wastewater_vs_hospitalization');
+  return `<article class="panel" id="rn"><header><h2>Hospitalizations (RESP-NET)</h2>
+      <div class="seg" id="rn-p">${ps.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div></header>
+    <label class="rfield small">State <select id="rn-s"></select></label>
+    <div class="chart" id="rn-c"></div><p class="note" id="rn-note"></p><p class="small muted">Breaks in the line are weeks CDC did not report, such as flu surveillance outside the season, not zero.</p>
+    ${S.length?`<div class="tbl"><table class="tight"><tr><th>Pathogen</th><th class="n">States</th><th class="n">Same week</th><th class="n">Wastewater earlier</th><th class="n">Hospital earlier</th><th class="n">Median <span class="nocase">ρ</span></th></tr>
+      ${S.map(r=>`<tr><td class="nw">${esc(r.pathogen)}</td><td class="n">${r.states}</td><td class="n">${r.n_same_week}</td><td class="n">${r.n_first_earlier}</td><td class="n">${r.n_second_earlier}</td><td class="n">${fmt(r.median_r_best)}</td></tr>`).join('')}</table></div>
+      <p class="small">Wastewater compared with laboratory-confirmed hospitalization rates, state by state, at the lag (up to six weeks either way) where they agree best. Descriptive only: the best lag is chosen from several and weekly series are autocorrelated.</p>`:''}
+    <p class="note"><b>Source.</b> ${esc(N.source)} (<a href="${esc(N.source_url)}" target="_blank" rel="noopener">source</a>). RESP-NET covers selected counties in about a dozen states, not the whole country, so these rates describe those catchments. CDC’s three newest weeks are left out because CDC still revises them.</p></article>`;
+}
+function initRespnet(){
+  const N=D.respnet, root=document.getElementById('rn'); if(!root||!N) return;
+  let P=ROUTINE.find(p=>N.series[p]);
+  const sel=root.querySelector('#rn-s');
+  const fill=()=>{const sts=Object.keys(N.series[P]||{}).sort((a,b)=>(STATE_NAMES[a]||a).localeCompare(STATE_NAMES[b]||b));
+    const keep=sts.includes(sel.value)?sel.value:(sts.includes('TN')?'TN':sts[0]);
+    sel.innerHTML=sts.map(s=>`<option value="${s}"${s===keep?' selected':''}>${esc(STATE_NAMES[s]||s)}</option>`).join('')};
+  const draw=()=>{const st=sel.value, v=(N.series[P]||{})[st]||[];
+    // Weeks CDC does not report (e.g. FluSurv-NET off-season) are drawn as gaps, never as zero.
+    const pts=[];v.forEach((d,i)=>{const t=new Date(d[0]);if(i&&t-pts[pts.length-1][0]>8*864e5)pts.push([new Date(+pts[pts.length-1][0]+7*864e5),null]);pts.push([t,d[1]])});
+    if(v.length) lineChart(root.querySelector('#rn-c'),[{name:`${P} · ${st}`,values:pts,color:pcol(P),area:true}],{ymin:0,yfmt:d3.format('.1f'),w:900,h:220});
+    const b=(N.best||[]).find(r=>r.pathogen===P&&r.state_code===st&&r.comparison==='wastewater_vs_hospitalization');
+    const nc=(N.nowcast||[]).filter(r=>r.pathogen===P&&r.outcome==='hospitalization'&&r.horizon_weeks===0);
+    const best=nc.length?nc.reduce((a,c)=>c.mae<a.mae?c:a):null, full=nc.find(r=>r.model==='full');
+    const last=v[v.length-1];
+    root.querySelector('#rn-note').innerHTML=`Weekly hospitalizations per 100,000 people in ${esc(STATE_NAMES[st]||st)}'s RESP-NET catchment${last?`, ${fmt(last[1],1)} in the week ending ${dateFmt(last[0])}`:''}. `+
+      (b?`Wastewater and hospitalizations here: <b>${esc(String(b.relationship).toLowerCase())}</b>${b.lag_weeks?` (${Math.abs(b.lag_weeks)} wk)`:''}, <span class="nocase">ρ</span> = ${fmt(b.spearman_r)} over ${b.paired_weeks} weeks. `:'')+
+      (best?`Estimating this week’s rate across the RESP-NET states on weeks the models never saw, the most accurate method was <b>${RN_MODEL[best.model]||esc(best.model)}</b>${full&&best.model!=='full'?`; clinical data plus wastewater was ${fmt(full.mae_ratio_vs_persistence)}× the error of last week’s rate alone`:''}.`:'')};
+  fill();draw();
+  sel.onchange=draw;
+  root.querySelector('#rn-p').onclick=e=>{const btn=e.target.closest('button');if(!btn)return;P=btn.dataset.p;
+    root.querySelectorAll('#rn-p button').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));fill();draw()};
+}
 /* ---------- charts ---------- */
 function lineChart(el, series, o={}){
   el.innerHTML='';
@@ -1059,9 +1100,11 @@ function lineChart(el, series, o={}){
   svg.append('g').attr('class','axis').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x).ticks(Math.max(2,Math.min(o.xticks||6,Math.floor(W/110)))).tickSizeOuter(0));
   if(o.zero) svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',css('--muted')).attr('stroke-dasharray','2 3');
   series.forEach(s=>{
-    if(s.area){svg.append('path').datum(s.values).attr('fill',s.color).attr('opacity',.12).attr('d',d3.area().x(d=>x(d[0])).y0(y(Math.max(0,y.domain()[0]))).y1(d=>y(d[1])).curve(d3.curveMonotoneX))}
-    svg.append('path').datum(s.values).attr('fill','none').attr('stroke',s.color).attr('stroke-width',s.width||1.8).attr('d',d3.line().x(d=>x(d[0])).y(d=>y(d[1])).curve(d3.curveMonotoneX));
-    const last=s.values[s.values.length-1];svg.append('circle').attr('cx',x(last[0])).attr('cy',y(last[1])).attr('r',3.2).attr('fill',s.color);
+    // A null value is a gap (no data that week): the line breaks instead of bridging it.
+    const ok=d=>d[1]!=null;
+    if(s.area){svg.append('path').datum(s.values).attr('fill',s.color).attr('opacity',.12).attr('d',d3.area().defined(ok).x(d=>x(d[0])).y0(y(Math.max(0,y.domain()[0]))).y1(d=>y(d[1])).curve(d3.curveMonotoneX))}
+    svg.append('path').datum(s.values).attr('fill','none').attr('stroke',s.color).attr('stroke-width',s.width||1.8).attr('d',d3.line().defined(ok).x(d=>x(d[0])).y(d=>y(d[1])).curve(d3.curveMonotoneX));
+    const last=[...s.values].reverse().find(ok);if(last)svg.append('circle').attr('cx',x(last[0])).attr('cy',y(last[1])).attr('r',3.2).attr('fill',s.color);
   });
   // hover
   const bis=d3.bisector(d=>d[0]).center; const g=svg.append('g').style('display','none');
@@ -2221,6 +2264,7 @@ analytics(){
   <article class="panel"><header><h2>National wastewater activity</h2><div class="seg" id="a-path">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div></header>
   <div class="chart" id="a-trend"></div>${legend([['var(--vl)','Very Low ≤ −1'],['var(--lo)','Low'],['var(--el)','Elevated'],['var(--hi)','High > 1']])}</article>
   ${cdcWvalPanel()}
+  ${respnetPanel()}
   <div class="grid">
   <article class="panel c12"><header><h2>Wastewater vs. emergency-department timing</h2></header>
     <div class="seg" id="a-lagp">${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
@@ -2253,6 +2297,7 @@ analytics(){
   if(el.querySelector('#a-wvp'))seg('#a-wvp',drawWv);
   drawT();drawLag('SARS-CoV-2');drawEm('Influenza A(H5)');
   if(D.cdc_wval){const f=ROUTINE.find(p=>D.cdc_wval[p]);if(f)drawWv(f)}
+  initRespnet();
 },
 
 leadtime(){
@@ -3148,7 +3193,7 @@ glossary(){
     ['cdc-updated','CDC data updated','When CDC last refreshed its public wastewater datasets. NWGS Grid™ pulls them every Saturday morning (Central time) and rebuilds the site.'],
     ['update-schedule','Update schedule','How often CDC refreshes a dataset, as CDC itself states it. Most datasets used here are updated weekly on Fridays; PLACES is a yearly release. The table on Methods &amp; sources is read from CDC’s metadata every run.'],
     ['wval','CDC Wastewater Viral Activity Level (WVAL)','CDC’s own weekly activity measure for SARS-CoV-2, influenza A and RSV at each site, scaled against that site’s baseline. NWGS shows CDC’s national median beside its own index as an outside check. The two are compared by rank, not by value, because they use different baselines and site sets.'],
-    ['resp-net','RESP-NET','CDC’s hospitalization surveillance network (COVID-NET, RSV-NET and FluSurv-NET) reporting laboratory-confirmed hospitalization rates in selected states. NWGS pulls it live each week for its research tables and drops the three newest weeks, which CDC still revises.'],
+    ['resp-net','RESP-NET','CDC’s hospitalization surveillance network (COVID-NET, RSV-NET and FluSurv-NET) reporting laboratory-confirmed hospitalization rates in selected states. NWGS pulls it live each week, shows it on Trends &amp; timing beside wastewater, and drops the three newest weeks, which CDC still revises.'],
     ['weekly-history','Weekly history files','Downloadable tables with one row per place, pathogen and week: every county, every state and the nation, for every week CDC currently reports. CSV and Parquet, with a data dictionary. Only weeks with real samples have a row; CDC site identifiers are not included. The latest files are on Data &amp; reports, and every run keeps its own copy in its release.'],
     ['tour','5-step tour','The guided walk on the Overview page: Monitoring, Signals, Coverage gaps, Forecasts and Equity. Every number and map in it comes from the same weekly run as the rest of the site.'],
     ['validated','Validated (checks passed)',`Every weekly run passes through ${R.n_checks||(R.n_pass+R.n_warning+R.n_fail)} automated quality checks before anything is published: data parsing, county counts, pathogen independence, spatial and model audits, and cross-table consistency. “${R.n_pass} checks passed” means those checks found no problem. Warnings are listed on the Audit log with an explanation. If any check fails, the site keeps last week’s data instead of publishing.`],
@@ -3242,7 +3287,7 @@ methods(){
       <li><b>Quality control.</b> Inhibition and no-template-control flags are carried through rather than dropped, zero and negative concentrations are treated as missing before log transformation, and a sample never tested is recorded as untested rather than as a negative.</li>
       <li><b>Analysis.</b> Clinical alignment uses Spearman cross-correlation at lags of 0&ndash;6 weeks with Benjamini&ndash;Hochberg correction across all state&ndash;pathogen pairs. Spatial clustering uses global and local Moran's I on a six-nearest-neighbour graph in EPSG:5070 with permutation inference. Coverage models are binomial GLMs at county level. Forecast models are evaluated only on weeks they never saw.</li>
       <li><b>External check against CDC.</b> CDC publishes its own Wastewater Viral Activity Level (WVAL) for SARS-CoV-2, influenza A and RSV. NWGS takes the median site WVAL nationally and by state, the way CDC aggregates it, and reports how closely the NWGS index rises and falls with it (Spearman rank correlation on the weeks both report). The two use different baselines and site sets, so they are compared by rank, never by value, and WVAL is never an input to the NWGS index.</li>
-      <li><b>Hospitalization extension.</b> State-week wastewater is compared with laboratory-confirmed hospitalization rates from CDC RESP-NET (COVID-NET, RSV-NET, FluSurv-NET), pulled live each run. CDC's three most recent weeks are left out because CDC still revises them. If the live pull fails, the archived October 2, 2025 copy is used and the run log says so. These results feed the research tables in each release, not the site.</li>
+      <li><b>Hospitalization extension.</b> State-week wastewater is compared with laboratory-confirmed hospitalization rates from CDC RESP-NET (COVID-NET, RSV-NET, FluSurv-NET), pulled live each run. CDC's three most recent weeks are left out because CDC still revises them. If the live pull fails, the archived October 2, 2025 copy is used and the run log says so. Rates, lags and nowcast results are shown on <a href="#analytics" data-go="analytics">Trends &amp; timing</a> and kept in full in each release.</li>
       <li><b>Validation gate.</b> The run passes through automated checks covering parsing, county counts, pathogen independence, spatial and model audits and cross-table consistency. Warnings are published with an explanation attached. <b>If any check fails, nothing is published and the previous week's site is kept.</b></li>
       <li><b>Publication.</b> The site is one static page built from a single export, so every table and chart on it comes from the same run. The run identifier and data-through date are shown on every page, and each week's tables, figures and log are archived as a permanent release for citation.</li>
     </ol>

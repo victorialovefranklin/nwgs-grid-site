@@ -279,6 +279,15 @@ def main(table_dir, out_dir, allow_mixed=False):
     if t01c is not None and len(t01c):
         ents["CdcSchedule"] = t01c
 
+    # RESP-NET hospitalization (Table27/27c/27d/28). Optional.
+    for key, ent in [("Table27_RESPNET_State_Week", "RespnetStateWeek"),
+                     ("Table27c_RESPNET_Lag_Best", "RespnetLagBest"),
+                     ("Table27d_RESPNET_Lag_Summary", "RespnetLagSummary"),
+                     ("Table28_Nowcast_Validation", "RespnetNowcast")]:
+        t = find(table_dir, key, required=False)
+        if t is not None and len(t):
+            ents[ent] = t
+
     # Attrition (Table22/22b/22c) - which sites went dark, when, and where
     t22 = find(table_dir, "Table22_Coverage_Attrition_Sites", required=False)
     if t22 is not None and len(t22):

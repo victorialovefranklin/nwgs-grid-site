@@ -109,7 +109,7 @@ the specific entry rather than to this reference alone.
 | NWSS wastewater data, six pathogens | CDC | Every activity figure on the site | https://data.cdc.gov | Public domain |
 | NSSP emergency department visits | CDC | The clinical series the lead-time analysis compares against | https://data.cdc.gov | Public domain |
 | Wastewater Viral Activity Level (atcp-73re) | CDC | External comparison for the NWGS index (Trends view) | https://data.cdc.gov/d/atcp-73re | Public domain |
-| RESP-NET hospitalization rates (kvib-3txy), pulled live; archived 2025-10-02 copy as fallback | CDC | Hospitalization research tables | https://data.cdc.gov/d/kvib-3txy | Public domain |
+| RESP-NET hospitalization rates (kvib-3txy), pulled live; archived 2025-10-02 copy as fallback | CDC | Hospitalization panel on Trends & timing; research tables | https://data.cdc.gov/d/kvib-3txy | Public domain |
 | PLACES county health measures | CDC | County health context | https://data.cdc.gov | Public domain |
 | Social Vulnerability Index 2022, county and census tract | CDC/ATSDR | Coverage equity; vulnerability inside monitored sewersheds | https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html | Public domain |
 | Rural-Urban Continuum Codes, 2023 | USDA Economic Research Service | The urbanicity axis of coverage | https://www.ers.usda.gov/data-products/rural-urban-continuum-codes | Public domain |

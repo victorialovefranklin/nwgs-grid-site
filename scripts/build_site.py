@@ -208,6 +208,29 @@ def main(export_dir, site_dir):
     D["cdc_schedule"] = opt("CdcSchedule", [
         "dataset_id", "dataset_name", "role", "update_frequency", "cdc_schedule_text",
         "cdc_last_updated_utc", "source_url", "status"])
+    # RESP-NET hospitalization, packed as {pathogen: {state: [[week, rate], ...]}}.
+    rsw = opt("RespnetStateWeek", ["pathogen", "state_code", "week_end", "hosp_rate", "data_source", "source_url"])
+    if rsw:
+        pk = {}
+        for x in rsw:
+            if x["hosp_rate"] is None:
+                continue
+            pk.setdefault(x["pathogen"], {}).setdefault(x["state_code"], []).append([str(x["week_end"])[:10], R(x["hosp_rate"], 2)])
+        for p in pk.values():
+            for v in p.values():
+                v.sort()
+        D["respnet"] = {"series": pk,
+                        "source": next((x.get("data_source") for x in rsw if x.get("data_source")), "CDC RESP-NET hospitalization rates (archived 2025-10-02)"),
+                        "source_url": next((x.get("source_url") for x in rsw if x.get("source_url")), "https://doi.org/10.3886/E238559V1-219009"),
+                        "summary": opt("RespnetLagSummary"),
+                        "best": opt("RespnetLagBest", ["pathogen", "state_code", "comparison", "lag_weeks", "paired_weeks",
+                                                       "spearman_r", "spearman_p_fdr", "relationship"]),
+                        "nowcast": [x for x in (opt("RespnetNowcast", ["pathogen", "outcome", "horizon_weeks", "scheme", "model",
+                                                                       "n_test", "test_states", "test_start", "mae", "r2",
+                                                                       "mae_ratio_vs_persistence"]) or [])
+                                    if x.get("scheme") == "temporal"]}
+    else:
+        D["respnet"] = None
     D["attrition_sites"] = opt("AttritionSite", [
         "site_id", "state_code", "county_fips", "county_name", "first_week", "last_week",
         "n_weeks", "population_served", "weeks_since_last", "status", "went_dormant_week",

@@ -142,6 +142,29 @@ jobs:
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
+      # Regenerate the documentation from this run's export, so the data
+      # reference, user guide and audit always describe the latest published
+      # run and pick up any new tables. Never fails the run.
+      - name: Regenerate documentation
+        if: success()
+        continue-on-error: true
+        run: |
+          python scripts/build_audit_doc.py app_export docs/DASHBOARD_AUDIT.md
+          python scripts/build_docs.py app_export
+          npm install --no-save --prefix /tmp/docxdeps docx >/dev/null 2>&1
+          export NODE_PATH=/tmp/docxdeps/node_modules
+          for n in USER_GUIDE FRONTEND BACKEND DATA_REFERENCE RUNBOOK; do
+            node scripts/md_to_docx.js "docs/$n.md" "docs/NWGS_Grid_$n.docx" || echo "::warning::Word copy of $n not rebuilt"
+          done
+          node scripts/md_to_docx.js docs/DASHBOARD_AUDIT.md docs/NWGS_Grid_Dashboard_Audit.docx || echo "::warning::Word copy of the audit not rebuilt"
+          git add docs
+          if git diff --cached --quiet -- docs; then echo "Documentation unchanged."; exit 0; fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Regenerate documentation for run ${{ github.run_number }} [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
       # Every release on GitHub, newest first, with whether it carries the
       # weekly history files. The site lists them so any past run can be
       # downloaded. Never blocks the build.

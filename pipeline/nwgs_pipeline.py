@@ -1712,7 +1712,7 @@ def cdc_dataset_schedule():
     used = [(cfg["id"], f"Wastewater: {cfg['label']}") for cfg in CDC_DATASETS.values()]
     used += [(CDC_WVAL_ID, "Wastewater activity level (comparison)"),
              (NSSP_ED_ID, "Emergency-department visits"),
-             (RESPNET_LIVE_ID, "Hospitalization rates (research tables)"),
+             (RESPNET_LIVE_ID, "Hospitalization rates"),
              (PLACES_ID, "County health context")]
     rows = []
     for ds_id, role in used:
@@ -9609,6 +9609,8 @@ def main():
     try:
         hosp, hosp_info, hosp_label, hosp_url = load_respnet_any()
         if not hosp.empty:
+            hosp["data_source"] = hosp_label
+            hosp["source_url"] = hosp_url
             save_df(hosp, TABLE_DIR / "Table27_RESPNET_State_Week.csv")
             rn_all, rn_best, rn_sum = respnet_alignment(multimodal, hosp)
             if not rn_all.empty:
