@@ -1,2 +1,2 @@
 model,n_counties,predictor,beta,std_error,odds_ratio,or_95ci_low,or_95ci_high,p_value,interpretation_direction
-Binomial GLM: county analysis_ready ~ SVI,1084,"CDC/ATSDR SVI overall rank, per 0.10 increase",-0.11723893429372706,0.02995415913864213,0.8893726661445804,0.8386606816477278,0.9431510938739409,9.080028979184899e-05,Higher SVI associated with lower odds of analysis-readiness
+Binomial GLM: county analysis_ready ~ SVI,1086,"CDC/ATSDR SVI overall rank, per 0.10 increase",-0.11838656002280658,0.029704472143083988,0.888352584638022,0.8381088239437698,0.9416084070318782,6.734403708715057e-05,Higher SVI associated with lower odds of analysis-readiness

@@ -1,197 +1,197 @@
 observed_weeks,calendar_weeks,gap_weeks,on_weekly_grid,analysis,pathogen,state_code
-181,181,0,True,lag_analysis,Influenza A,AK
-215,215,0,True,lag_analysis,Influenza A,AL
-184,185,1,True,lag_analysis,Influenza A,AR
-159,161,2,True,lag_analysis,Influenza A,AZ
-214,214,0,True,lag_analysis,Influenza A,CA
+182,182,0,True,lag_analysis,Influenza A,AK
+216,216,0,True,lag_analysis,Influenza A,AL
+185,186,1,True,lag_analysis,Influenza A,AR
+160,162,2,True,lag_analysis,Influenza A,AZ
+215,215,0,True,lag_analysis,Influenza A,CA
 214,214,0,True,lag_analysis,Influenza A,CO
-158,158,0,True,lag_analysis,Influenza A,CT
-146,156,10,True,lag_analysis,Influenza A,DC
-196,196,0,True,lag_analysis,Influenza A,DE
-214,214,0,True,lag_analysis,Influenza A,FL
-214,214,0,True,lag_analysis,Influenza A,GA
+159,159,0,True,lag_analysis,Influenza A,CT
+147,157,10,True,lag_analysis,Influenza A,DC
+197,197,0,True,lag_analysis,Influenza A,DE
+215,215,0,True,lag_analysis,Influenza A,FL
+215,215,0,True,lag_analysis,Influenza A,GA
 83,86,3,True,lag_analysis,Influenza A,GU
-199,199,0,True,lag_analysis,Influenza A,HI
-204,204,0,True,lag_analysis,Influenza A,IA
-214,214,0,True,lag_analysis,Influenza A,ID
-214,214,0,True,lag_analysis,Influenza A,IL
-214,214,0,True,lag_analysis,Influenza A,IN
-214,214,0,True,lag_analysis,Influenza A,KS
+200,200,0,True,lag_analysis,Influenza A,HI
+205,205,0,True,lag_analysis,Influenza A,IA
+215,215,0,True,lag_analysis,Influenza A,ID
+215,215,0,True,lag_analysis,Influenza A,IL
+215,215,0,True,lag_analysis,Influenza A,IN
+215,215,0,True,lag_analysis,Influenza A,KS
 208,214,6,True,lag_analysis,Influenza A,KY
-154,154,0,True,lag_analysis,Influenza A,LA
-203,204,1,True,lag_analysis,Influenza A,MA
-204,204,0,True,lag_analysis,Influenza A,MD
-213,214,1,True,lag_analysis,Influenza A,ME
-214,214,0,True,lag_analysis,Influenza A,MI
-214,214,0,True,lag_analysis,Influenza A,MN
-155,213,58,True,lag_analysis,Influenza A,MO
-149,155,6,True,lag_analysis,Influenza A,MS
-85,99,14,True,lag_analysis,Influenza A,MT
-214,214,0,True,lag_analysis,Influenza A,NC
-171,171,0,True,lag_analysis,Influenza A,NE
-213,213,0,True,lag_analysis,Influenza A,NH
-214,214,0,True,lag_analysis,Influenza A,NJ
+155,155,0,True,lag_analysis,Influenza A,LA
+204,205,1,True,lag_analysis,Influenza A,MA
+205,205,0,True,lag_analysis,Influenza A,MD
+214,215,1,True,lag_analysis,Influenza A,ME
+215,215,0,True,lag_analysis,Influenza A,MI
+215,215,0,True,lag_analysis,Influenza A,MN
+156,214,58,True,lag_analysis,Influenza A,MO
+150,156,6,True,lag_analysis,Influenza A,MS
+86,100,14,True,lag_analysis,Influenza A,MT
+215,215,0,True,lag_analysis,Influenza A,NC
+172,172,0,True,lag_analysis,Influenza A,NE
+214,214,0,True,lag_analysis,Influenza A,NH
+215,215,0,True,lag_analysis,Influenza A,NJ
 147,154,7,True,lag_analysis,Influenza A,NM
-189,189,0,True,lag_analysis,Influenza A,NV
-170,171,1,True,lag_analysis,Influenza A,NY
-204,204,0,True,lag_analysis,Influenza A,OH
-208,211,3,True,lag_analysis,Influenza A,OK
-194,213,19,True,lag_analysis,Influenza A,OR
-215,215,0,True,lag_analysis,Influenza A,PA
-125,125,0,True,lag_analysis,Influenza A,RI
-149,149,0,True,lag_analysis,Influenza A,SC
-183,185,2,True,lag_analysis,Influenza A,SD
-178,178,0,True,lag_analysis,Influenza A,TN
-214,214,0,True,lag_analysis,Influenza A,TX
-214,214,0,True,lag_analysis,Influenza A,UT
-204,204,0,True,lag_analysis,Influenza A,VA
-39,42,3,True,lag_analysis,Influenza A,VI
-193,193,0,True,lag_analysis,Influenza A,VT
+190,190,0,True,lag_analysis,Influenza A,NV
+171,172,1,True,lag_analysis,Influenza A,NY
+205,205,0,True,lag_analysis,Influenza A,OH
+210,213,3,True,lag_analysis,Influenza A,OK
+195,214,19,True,lag_analysis,Influenza A,OR
+216,216,0,True,lag_analysis,Influenza A,PA
+126,126,0,True,lag_analysis,Influenza A,RI
+150,150,0,True,lag_analysis,Influenza A,SC
+184,186,2,True,lag_analysis,Influenza A,SD
+179,179,0,True,lag_analysis,Influenza A,TN
+215,215,0,True,lag_analysis,Influenza A,TX
+215,215,0,True,lag_analysis,Influenza A,UT
+205,205,0,True,lag_analysis,Influenza A,VA
+40,43,3,True,lag_analysis,Influenza A,VI
+194,194,0,True,lag_analysis,Influenza A,VT
 169,169,0,True,lag_analysis,Influenza A,WA
-214,214,0,True,lag_analysis,Influenza A,WI
-186,187,1,True,lag_analysis,Influenza A,WV
-170,170,0,True,lag_analysis,Influenza A,WY
-181,181,0,True,lag_analysis,RSV,AK
-215,215,0,True,lag_analysis,RSV,AL
-185,185,0,True,lag_analysis,RSV,AR
-159,161,2,True,lag_analysis,RSV,AZ
-214,214,0,True,lag_analysis,RSV,CA
+215,215,0,True,lag_analysis,Influenza A,WI
+187,188,1,True,lag_analysis,Influenza A,WV
+171,171,0,True,lag_analysis,Influenza A,WY
+182,182,0,True,lag_analysis,RSV,AK
+216,216,0,True,lag_analysis,RSV,AL
+186,186,0,True,lag_analysis,RSV,AR
+160,162,2,True,lag_analysis,RSV,AZ
+215,215,0,True,lag_analysis,RSV,CA
 213,214,1,True,lag_analysis,RSV,CO
-159,159,0,True,lag_analysis,RSV,CT
-146,156,10,True,lag_analysis,RSV,DC
-196,196,0,True,lag_analysis,RSV,DE
-214,214,0,True,lag_analysis,RSV,FL
-214,214,0,True,lag_analysis,RSV,GA
+160,160,0,True,lag_analysis,RSV,CT
+147,157,10,True,lag_analysis,RSV,DC
+197,197,0,True,lag_analysis,RSV,DE
+215,215,0,True,lag_analysis,RSV,FL
+215,215,0,True,lag_analysis,RSV,GA
 83,86,3,True,lag_analysis,RSV,GU
-180,183,3,True,lag_analysis,RSV,HI
-204,204,0,True,lag_analysis,RSV,IA
-214,214,0,True,lag_analysis,RSV,ID
-214,214,0,True,lag_analysis,RSV,IL
-214,214,0,True,lag_analysis,RSV,IN
-214,214,0,True,lag_analysis,RSV,KS
+181,184,3,True,lag_analysis,RSV,HI
+205,205,0,True,lag_analysis,RSV,IA
+215,215,0,True,lag_analysis,RSV,ID
+215,215,0,True,lag_analysis,RSV,IL
+215,215,0,True,lag_analysis,RSV,IN
+215,215,0,True,lag_analysis,RSV,KS
 209,214,5,True,lag_analysis,RSV,KY
-154,154,0,True,lag_analysis,RSV,LA
-204,204,0,True,lag_analysis,RSV,MA
-204,204,0,True,lag_analysis,RSV,MD
-213,214,1,True,lag_analysis,RSV,ME
-214,214,0,True,lag_analysis,RSV,MI
-214,214,0,True,lag_analysis,RSV,MN
-180,182,2,True,lag_analysis,RSV,MO
-149,155,6,True,lag_analysis,RSV,MS
-86,99,13,True,lag_analysis,RSV,MT
-214,214,0,True,lag_analysis,RSV,NC
-171,171,0,True,lag_analysis,RSV,NE
-213,213,0,True,lag_analysis,RSV,NH
-214,214,0,True,lag_analysis,RSV,NJ
+155,155,0,True,lag_analysis,RSV,LA
+205,205,0,True,lag_analysis,RSV,MA
+205,205,0,True,lag_analysis,RSV,MD
+214,215,1,True,lag_analysis,RSV,ME
+215,215,0,True,lag_analysis,RSV,MI
+215,215,0,True,lag_analysis,RSV,MN
+181,183,2,True,lag_analysis,RSV,MO
+150,156,6,True,lag_analysis,RSV,MS
+87,100,13,True,lag_analysis,RSV,MT
+215,215,0,True,lag_analysis,RSV,NC
+172,172,0,True,lag_analysis,RSV,NE
+214,214,0,True,lag_analysis,RSV,NH
+215,215,0,True,lag_analysis,RSV,NJ
 147,154,7,True,lag_analysis,RSV,NM
-189,189,0,True,lag_analysis,RSV,NV
-171,171,0,True,lag_analysis,RSV,NY
-204,204,0,True,lag_analysis,RSV,OH
-209,212,3,True,lag_analysis,RSV,OK
-192,213,21,True,lag_analysis,RSV,OR
-214,214,0,True,lag_analysis,RSV,PA
-125,125,0,True,lag_analysis,RSV,RI
-149,149,0,True,lag_analysis,RSV,SC
-185,185,0,True,lag_analysis,RSV,SD
-178,178,0,True,lag_analysis,RSV,TN
-214,214,0,True,lag_analysis,RSV,TX
-214,214,0,True,lag_analysis,RSV,UT
-204,204,0,True,lag_analysis,RSV,VA
-39,42,3,True,lag_analysis,RSV,VI
-193,193,0,True,lag_analysis,RSV,VT
+190,190,0,True,lag_analysis,RSV,NV
+172,172,0,True,lag_analysis,RSV,NY
+205,205,0,True,lag_analysis,RSV,OH
+210,213,3,True,lag_analysis,RSV,OK
+193,214,21,True,lag_analysis,RSV,OR
+215,215,0,True,lag_analysis,RSV,PA
+126,126,0,True,lag_analysis,RSV,RI
+150,150,0,True,lag_analysis,RSV,SC
+186,186,0,True,lag_analysis,RSV,SD
+179,179,0,True,lag_analysis,RSV,TN
+215,215,0,True,lag_analysis,RSV,TX
+215,215,0,True,lag_analysis,RSV,UT
+205,205,0,True,lag_analysis,RSV,VA
+40,43,3,True,lag_analysis,RSV,VI
+194,194,0,True,lag_analysis,RSV,VT
 169,169,0,True,lag_analysis,RSV,WA
-214,214,0,True,lag_analysis,RSV,WI
-187,187,0,True,lag_analysis,RSV,WV
-170,170,0,True,lag_analysis,RSV,WY
-214,214,0,True,lag_analysis,SARS-CoV-2,AK
-215,215,0,True,lag_analysis,SARS-CoV-2,AL
-214,214,0,True,lag_analysis,SARS-CoV-2,AR
-214,214,0,True,lag_analysis,SARS-CoV-2,AZ
-215,215,0,True,lag_analysis,SARS-CoV-2,CA
+215,215,0,True,lag_analysis,RSV,WI
+188,188,0,True,lag_analysis,RSV,WV
+171,171,0,True,lag_analysis,RSV,WY
+215,215,0,True,lag_analysis,SARS-CoV-2,AK
+216,216,0,True,lag_analysis,SARS-CoV-2,AL
+215,215,0,True,lag_analysis,SARS-CoV-2,AR
+215,215,0,True,lag_analysis,SARS-CoV-2,AZ
+216,216,0,True,lag_analysis,SARS-CoV-2,CA
 214,214,0,True,lag_analysis,SARS-CoV-2,CO
-215,215,0,True,lag_analysis,SARS-CoV-2,CT
-204,214,10,True,lag_analysis,SARS-CoV-2,DC
-214,214,0,True,lag_analysis,SARS-CoV-2,DE
-214,214,0,True,lag_analysis,SARS-CoV-2,FL
-214,214,0,True,lag_analysis,SARS-CoV-2,GA
+216,216,0,True,lag_analysis,SARS-CoV-2,CT
+205,215,10,True,lag_analysis,SARS-CoV-2,DC
+215,215,0,True,lag_analysis,SARS-CoV-2,DE
+215,215,0,True,lag_analysis,SARS-CoV-2,FL
+215,215,0,True,lag_analysis,SARS-CoV-2,GA
 127,205,78,True,lag_analysis,SARS-CoV-2,GU
-214,214,0,True,lag_analysis,SARS-CoV-2,HI
-214,214,0,True,lag_analysis,SARS-CoV-2,IA
-214,214,0,True,lag_analysis,SARS-CoV-2,ID
-214,214,0,True,lag_analysis,SARS-CoV-2,IL
-215,215,0,True,lag_analysis,SARS-CoV-2,IN
-214,214,0,True,lag_analysis,SARS-CoV-2,KS
+215,215,0,True,lag_analysis,SARS-CoV-2,HI
+215,215,0,True,lag_analysis,SARS-CoV-2,IA
+215,215,0,True,lag_analysis,SARS-CoV-2,ID
+215,215,0,True,lag_analysis,SARS-CoV-2,IL
+216,216,0,True,lag_analysis,SARS-CoV-2,IN
+215,215,0,True,lag_analysis,SARS-CoV-2,KS
 212,214,2,True,lag_analysis,SARS-CoV-2,KY
-205,214,9,True,lag_analysis,SARS-CoV-2,LA
-215,215,0,True,lag_analysis,SARS-CoV-2,MA
-214,214,0,True,lag_analysis,SARS-CoV-2,MD
-214,214,0,True,lag_analysis,SARS-CoV-2,ME
-214,214,0,True,lag_analysis,SARS-CoV-2,MI
-214,214,0,True,lag_analysis,SARS-CoV-2,MN
-213,213,0,True,lag_analysis,SARS-CoV-2,MO
-197,213,16,True,lag_analysis,SARS-CoV-2,MS
-213,213,0,True,lag_analysis,SARS-CoV-2,MT
-214,214,0,True,lag_analysis,SARS-CoV-2,NC
+206,215,9,True,lag_analysis,SARS-CoV-2,LA
+216,216,0,True,lag_analysis,SARS-CoV-2,MA
+215,215,0,True,lag_analysis,SARS-CoV-2,MD
+215,215,0,True,lag_analysis,SARS-CoV-2,ME
+215,215,0,True,lag_analysis,SARS-CoV-2,MI
+215,215,0,True,lag_analysis,SARS-CoV-2,MN
+214,214,0,True,lag_analysis,SARS-CoV-2,MO
+198,214,16,True,lag_analysis,SARS-CoV-2,MS
+214,214,0,True,lag_analysis,SARS-CoV-2,MT
+215,215,0,True,lag_analysis,SARS-CoV-2,NC
 50,50,0,True,lag_analysis,SARS-CoV-2,ND
-214,214,0,True,lag_analysis,SARS-CoV-2,NE
-214,214,0,True,lag_analysis,SARS-CoV-2,NH
-214,214,0,True,lag_analysis,SARS-CoV-2,NJ
+215,215,0,True,lag_analysis,SARS-CoV-2,NE
+215,215,0,True,lag_analysis,SARS-CoV-2,NH
+215,215,0,True,lag_analysis,SARS-CoV-2,NJ
 214,214,0,True,lag_analysis,SARS-CoV-2,NM
-215,215,0,True,lag_analysis,SARS-CoV-2,NV
-214,214,0,True,lag_analysis,SARS-CoV-2,NY
-214,214,0,True,lag_analysis,SARS-CoV-2,OH
-211,212,1,True,lag_analysis,SARS-CoV-2,OK
-213,213,0,True,lag_analysis,SARS-CoV-2,OR
-215,215,0,True,lag_analysis,SARS-CoV-2,PA
-213,213,0,True,lag_analysis,SARS-CoV-2,RI
-215,215,0,True,lag_analysis,SARS-CoV-2,SC
-214,214,0,True,lag_analysis,SARS-CoV-2,SD
-214,214,0,True,lag_analysis,SARS-CoV-2,TN
-214,214,0,True,lag_analysis,SARS-CoV-2,TX
-214,214,0,True,lag_analysis,SARS-CoV-2,UT
-214,214,0,True,lag_analysis,SARS-CoV-2,VA
-39,42,3,True,lag_analysis,SARS-CoV-2,VI
-214,214,0,True,lag_analysis,SARS-CoV-2,VT
+216,216,0,True,lag_analysis,SARS-CoV-2,NV
+215,215,0,True,lag_analysis,SARS-CoV-2,NY
+215,215,0,True,lag_analysis,SARS-CoV-2,OH
+212,213,1,True,lag_analysis,SARS-CoV-2,OK
+214,214,0,True,lag_analysis,SARS-CoV-2,OR
+216,216,0,True,lag_analysis,SARS-CoV-2,PA
+214,214,0,True,lag_analysis,SARS-CoV-2,RI
+216,216,0,True,lag_analysis,SARS-CoV-2,SC
+215,215,0,True,lag_analysis,SARS-CoV-2,SD
+215,215,0,True,lag_analysis,SARS-CoV-2,TN
+215,215,0,True,lag_analysis,SARS-CoV-2,TX
+215,215,0,True,lag_analysis,SARS-CoV-2,UT
+215,215,0,True,lag_analysis,SARS-CoV-2,VA
+40,43,3,True,lag_analysis,SARS-CoV-2,VI
+215,215,0,True,lag_analysis,SARS-CoV-2,VT
 214,214,0,True,lag_analysis,SARS-CoV-2,WA
-215,215,0,True,lag_analysis,SARS-CoV-2,WI
-215,215,0,True,lag_analysis,SARS-CoV-2,WV
-214,214,0,True,lag_analysis,SARS-CoV-2,WY
-214,214,0,True,respnet_alignment,Influenza A,CA
+216,216,0,True,lag_analysis,SARS-CoV-2,WI
+216,216,0,True,lag_analysis,SARS-CoV-2,WV
+215,215,0,True,lag_analysis,SARS-CoV-2,WY
+215,215,0,True,respnet_alignment,Influenza A,CA
 214,214,0,True,respnet_alignment,Influenza A,CO
-193,214,21,True,respnet_alignment,Influenza A,CT
-214,214,0,True,respnet_alignment,Influenza A,GA
-214,214,0,True,respnet_alignment,Influenza A,MD
-214,214,0,True,respnet_alignment,Influenza A,MI
-214,214,0,True,respnet_alignment,Influenza A,MN
-214,214,0,True,respnet_alignment,Influenza A,NC
+194,215,21,True,respnet_alignment,Influenza A,CT
+215,215,0,True,respnet_alignment,Influenza A,GA
+215,215,0,True,respnet_alignment,Influenza A,MD
+215,215,0,True,respnet_alignment,Influenza A,MI
+215,215,0,True,respnet_alignment,Influenza A,MN
+215,215,0,True,respnet_alignment,Influenza A,NC
 190,214,24,True,respnet_alignment,Influenza A,NM
-202,214,12,True,respnet_alignment,Influenza A,NY
-195,213,18,True,respnet_alignment,Influenza A,OR
-209,214,5,True,respnet_alignment,Influenza A,TN
-214,214,0,True,respnet_alignment,Influenza A,UT
-215,215,0,True,respnet_alignment,RSV,CA
+203,215,12,True,respnet_alignment,Influenza A,NY
+196,214,18,True,respnet_alignment,Influenza A,OR
+210,215,5,True,respnet_alignment,Influenza A,TN
+215,215,0,True,respnet_alignment,Influenza A,UT
+216,216,0,True,respnet_alignment,RSV,CA
 215,215,0,True,respnet_alignment,RSV,CO
-215,215,0,True,respnet_alignment,RSV,CT
-215,215,0,True,respnet_alignment,RSV,GA
-215,215,0,True,respnet_alignment,RSV,MD
-215,215,0,True,respnet_alignment,RSV,MI
-215,215,0,True,respnet_alignment,RSV,MN
-214,214,0,True,respnet_alignment,RSV,NC
+216,216,0,True,respnet_alignment,RSV,CT
+216,216,0,True,respnet_alignment,RSV,GA
+216,216,0,True,respnet_alignment,RSV,MD
+216,216,0,True,respnet_alignment,RSV,MI
+216,216,0,True,respnet_alignment,RSV,MN
+215,215,0,True,respnet_alignment,RSV,NC
 212,215,3,True,respnet_alignment,RSV,NM
-215,215,0,True,respnet_alignment,RSV,NY
-214,214,0,True,respnet_alignment,RSV,OR
-215,215,0,True,respnet_alignment,RSV,TN
-215,215,0,True,respnet_alignment,RSV,UT
-215,215,0,True,respnet_alignment,SARS-CoV-2,CA
+216,216,0,True,respnet_alignment,RSV,NY
+215,215,0,True,respnet_alignment,RSV,OR
+216,216,0,True,respnet_alignment,RSV,TN
+216,216,0,True,respnet_alignment,RSV,UT
+216,216,0,True,respnet_alignment,SARS-CoV-2,CA
 215,215,0,True,respnet_alignment,SARS-CoV-2,CO
-215,215,0,True,respnet_alignment,SARS-CoV-2,CT
-215,215,0,True,respnet_alignment,SARS-CoV-2,GA
-215,215,0,True,respnet_alignment,SARS-CoV-2,MD
-215,215,0,True,respnet_alignment,SARS-CoV-2,MI
-215,215,0,True,respnet_alignment,SARS-CoV-2,MN
-214,214,0,True,respnet_alignment,SARS-CoV-2,NC
+216,216,0,True,respnet_alignment,SARS-CoV-2,CT
+216,216,0,True,respnet_alignment,SARS-CoV-2,GA
+216,216,0,True,respnet_alignment,SARS-CoV-2,MD
+216,216,0,True,respnet_alignment,SARS-CoV-2,MI
+216,216,0,True,respnet_alignment,SARS-CoV-2,MN
+215,215,0,True,respnet_alignment,SARS-CoV-2,NC
 215,215,0,True,respnet_alignment,SARS-CoV-2,NM
-215,215,0,True,respnet_alignment,SARS-CoV-2,NY
-214,214,0,True,respnet_alignment,SARS-CoV-2,OR
-215,215,0,True,respnet_alignment,SARS-CoV-2,TN
-215,215,0,True,respnet_alignment,SARS-CoV-2,UT
+216,216,0,True,respnet_alignment,SARS-CoV-2,NY
+215,215,0,True,respnet_alignment,SARS-CoV-2,OR
+216,216,0,True,respnet_alignment,SARS-CoV-2,TN
+216,216,0,True,respnet_alignment,SARS-CoV-2,UT
