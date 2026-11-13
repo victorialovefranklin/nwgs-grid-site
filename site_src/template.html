@@ -928,6 +928,57 @@ h2{font-weight:700;letter-spacing:-.02em}
 @media (max-width:420px){.brand.fh .fhlogo,.brand.fh .bdiv{display:none}}
 @media print{.home-hero,.sitefoot,.status{background:none!important;color:#000!important;box-shadow:none!important;clip-path:none!important}
   .home-hero h1,.home-hero h1 em,.home-hero .hstats b{color:#000!important;text-shadow:none!important}}
+
+/* ---- Franklin HUB layer, part 2: inner pages ---- */
+.app{min-height:100vh}
+.main{min-height:calc(100vh - 110px)}
+.sitefoot{margin-top:auto}
+.view>.head.pagehead{position:relative;background:var(--fh-black);color:#fff;box-shadow:0 0 0 100vmax var(--fh-black);
+  clip-path:inset(0 -100vmax);padding:52px 0 46px;margin-top:calc(-1 * var(--sp-3));margin-bottom:12px;gap:14px}
+.head.pagehead .eb{display:inline-flex;align-items:center;gap:10px;font:700 .72rem/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:#e9ecef}
+.head.pagehead .eb::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fh-lime);box-shadow:0 0 12px rgba(215,251,116,.8)}
+.head.pagehead h1{font:800 clamp(2.1rem,4.4vw,3.3rem)/1.04 var(--display);letter-spacing:-.04em;color:#fff;max-width:20ch}
+.head.pagehead h1 em{font-style:normal;color:var(--fh-aqua);text-shadow:0 0 26px rgba(110,231,214,.5)}
+.head.pagehead p,.head.pagehead .muted{color:#c3c9d1!important;max-width:62rem;font-size:1.06rem}
+.head.pagehead a{color:var(--fh-lime)}
+.head.pagehead .qmark{border-color:rgba(255,255,255,.4);color:#fff;vertical-align:middle}
+.head.pagehead .seg{border-bottom-color:rgba(255,255,255,.2)}
+.head.pagehead .seg button{color:#c3c9d1}.head.pagehead .seg button[aria-pressed="true"]{color:#fff;box-shadow:inset 0 -2px 0 var(--fh-lime)}
+.head.pagehead select,.head.pagehead input{background:#17181b;color:#fff;border-color:rgba(255,255,255,.25)}
+.head.pagehead .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}
+
+/* Stat tiles become hairline figures */
+.stat{background:transparent;border:0;border-top:1px solid var(--ink);border-radius:0;padding:12px 2px 4px}
+.stat b,.stat .big{font-family:var(--display)}
+.sh-goal{border:0;border-top:1px solid var(--line);border-radius:0;padding:16px 0;background:transparent}
+.statecard{border-radius:0}
+
+/* Tables: open, ruled rows */
+table{border:0}
+th{border-right:0;border-bottom:1px solid var(--ink);color:#2b3038;background:transparent}
+td{border-right:0}
+tbody tr:hover td{background:#fafaf6}
+
+/* Notices, quotes and tags */
+.notloaded{background:var(--fh-cream)!important;border:0!important;border-left:3px solid #b7791f!important}
+.honour{background:var(--fh-cream);border-left:3px solid var(--ink);border-radius:0}
+.honour-k{color:var(--teal-deep)}
+.honour.quote{background:var(--fh-cream);border-left-color:var(--teal-deep)}
+.tapcue{background:var(--fh-black)!important;color:#fff!important;border-radius:999px!important;display:inline-flex!important;align-self:flex-start;padding:8px 16px!important}
+.tapcue .tapdot{background:var(--fh-lime)!important;box-shadow:0 0 10px rgba(215,251,116,.8)!important}
+.btn{border-radius:999px;border-color:#cfd2c8;font-weight:600}
+.btn:hover{border-color:var(--ink)}
+.banner,.msg,.cite{border-radius:0}
+.scard .sfig{border-radius:0}
+.posterfig img,.qacards img{border-radius:0}
+.rform .rfield select,.form input,.form select,.form textarea,.selectwrap select,.gsearch input{border-radius:6px;border-color:#d6d8d0}
+@media (max-width:760px){
+  .view>.head.pagehead{padding:36px 0 30px}
+  .head.pagehead h1{font-size:2rem}
+}
+@media print{.view>.head.pagehead{background:none;box-shadow:none;clip-path:none;color:#000}
+  .head.pagehead h1,.head.pagehead h1 em{color:#000;text-shadow:none}.head.pagehead p{color:#333!important}}
+.menubtn{border-radius:999px!important;border-color:#cfd2c8!important;font-family:var(--body)}
 </style>
 
 <div class="app">
@@ -1392,7 +1443,24 @@ function closeNav(){topbar.classList.remove('open');menubtn.setAttribute('aria-e
 menubtn.addEventListener('click',()=>{const o=topbar.classList.toggle('open');
   menubtn.setAttribute('aria-expanded',String(o));navscrim.hidden=!o;if(!o)closeMenus();});
 navscrim.addEventListener('click',()=>{closeMenus();closeNav();});
-let lastW=innerWidth,rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(Math.abs(innerWidth-lastW)<40)return;lastW=innerWidth;Object.keys(built).forEach(k=>delete built[k]);const v=location.hash.slice(1)||'dashboard';if(VIEWS.some(x=>x[0]===v)){RENDER[v]();built[v]=true}},200)});
+let lastW=innerWidth,rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(Math.abs(innerWidth-lastW)<40)return;lastW=innerWidth;Object.keys(built).forEach(k=>delete built[k]);const v=location.hash.slice(1)||'dashboard';if(VIEWS.some(x=>x[0]===v)){RENDER[v]();built[v]=true;try{brandHead(v)}catch(e){}}},200)});
+/* Franklin HUB page header: every view except the overview opens on a black
+   band with the section name as an eyebrow and the title's last word in the
+   aqua accent. Runs after each render and is safe to repeat. */
+function brandHead(v){
+  if(v==='dashboard')return;
+  const view=document.getElementById('v-'+v);if(!view)return;
+  const head=view.querySelector(':scope > .head')||view.querySelector('.head');if(!head||head.classList.contains('pagehead'))return;
+  head.classList.add('pagehead');
+  const grp=(GROUPS.find(([,ks])=>ks.includes(v))||['NWGS Grid™'])[0];
+  const eb=document.createElement('div');eb.className='eb';eb.textContent=grp;head.prepend(eb);
+  const h1=head.querySelector('h1');if(!h1||h1.querySelector('em'))return;
+  const texts=[...h1.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim());
+  const t=texts[texts.length-1];if(!t)return;
+  const m=t.textContent.match(/^([\s\S]*?)(\S+)(\s*)$/);if(!m)return;
+  const em=document.createElement('em');em.textContent=m[2];
+  t.textContent=m[1];t.after(em);if(m[3])em.after(document.createTextNode(m[3]));
+}
 function go(v,push=true){
   if(!VIEWS.some(x=>x[0]===v))v='dashboard';
   VIEWS.forEach(([k])=>{document.getElementById('v-'+k).hidden=k!==v});
@@ -1405,6 +1473,7 @@ function go(v,push=true){
   });
   if(!built[v]){RENDER[v]();built[v]=true}
   try{noWidows(document.getElementById('v-'+v))}catch(e){}
+  try{brandHead(v)}catch(e){}
   if(push&&location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(e){}}
   try{localStorage.setItem('nwgs_view',v);if(v!=='about')localStorage.setItem('nwgs_last',v)}catch(e){}
   closeNav();
