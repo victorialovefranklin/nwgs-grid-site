@@ -43,7 +43,7 @@ on your computer.
 
 | Symptom | Cause |
 |---|---|
-| `HTTP 403` creating the release | Repository workflow permissions set to read-only. Settings, Actions, General, Workflow permissions, Read and write. |
+| `HTTP 403` creating the release | Check workflow permissions and `NWGS_RELEASE_TOKEN`. If workflow files changed since the build commit, the release token needs Contents and Workflows read and write access to this repository; the built-in token cannot grant Workflows access. |
 | A source reported `FAILED` with a read timeout | Transient. The fetch retries, and the next run usually succeeds. |
 | A panel is empty on the site | A source did not load. The Audit log names which and why. |
 | Figures look right but a denominator is implausible | A parser selected the wrong column from a multi-column source. Check the candidate list in the log before trusting the gradient. |

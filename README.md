@@ -175,6 +175,10 @@ The site's sign-in, **My alerts**, feedback and license-request forms use a Supa
    - `SOCRATA_KEY_ID` and `SOCRATA_KEY_SECRET` (data.cdc.gov → Developer Settings → API Keys)
    - `SOCRATA_APP_TOKEN`, `NCBI_API_KEY` (optional, raise rate limits)
    - `SUPABASE_SECRET_KEY`, `SMTP_USER`, `SMTP_PASSWORD` (weekly alert email)
+   - `NWGS_RELEASE_TOKEN`: a fine-grained token restricted to this repository with
+     Contents and Workflows read and write permissions. This lets the release target
+     the original build commit even if workflow files change while the run is in
+     progress. Without it, the built-in token is used and such releases may fail.
 4. Custom domain. `site_src/CNAME` contains `nwgsgrid.com` and the build copies it into the
    published output, so the domain survives every deploy. To change or remove it, edit that
    file. Three things have to agree: that file, **Settings → Pages**, and four `A` records on

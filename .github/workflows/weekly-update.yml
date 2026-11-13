@@ -211,7 +211,7 @@ jobs:
       - name: Archive this run as a permanent GitHub Release
         if: success()
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.NWGS_RELEASE_TOKEN || github.token }}
           CREDIT_LINE: "Victoria Love Franklin — PhD Data Science Student · Published Research Scholar · Developer"
         shell: bash
         run: |
