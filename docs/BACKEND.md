@@ -35,9 +35,9 @@ and nothing compiled: every line below is read as it was written.
 
 | Language | Files | Lines | Used for |
 |---|---|---|---|
-| Python | 7 | 11,743 | Pipeline, export, validation, site build, alert email, documentation |
-| HTML, CSS, JavaScript | 2 | 6,206 | The published page: markup, styles and script in one file |
-| Markdown | 12 | 2,259 | Documentation sources |
+| Python | 7 | 11,802 | Pipeline, export, validation, site build, alert email, documentation |
+| HTML, CSS, JavaScript | 2 | 6,271 | The published page: markup, styles and script in one file |
+| Markdown | 12 | 2,657 | Documentation sources |
 | JavaScript (Node) | 1 | 329 | Markdown to Word conversion |
 | YAML | 1 | 270 | GitHub Actions workflow |
 | SQL (PostgreSQL) | 1 | 120 | Database tables and row-level security |
@@ -263,7 +263,7 @@ which is public by design.
 | `results/` | 14 files |  |
 | `sample_export/` | 29 files | A saved export kept as a fixture for testing scripts offline. It is not a build fallback; the workflow refuses to build without the real pipeline. |
 | `scripts/` | `build_audit_doc.py`, `build_docs.py`, `build_site.py`, `doc_columns.py`, `nwgs_app_export.py`, `send_alerts.py` | Build and delivery utilities run by the workflow. |
-| `site_src/` | 19 files | The site source: the page template, county geometry, images and the public Supabase configuration. |
+| `site_src/` | 20 files | The site source: the page template, county geometry, images and the public Supabase configuration. |
 | `snapshot/` | 1 file |  |
 | `static_inputs/` | 12 files | Inputs the pipeline cannot download for itself, plus the committed forecast ledger seed. |
 | `supabase/` | 1 file | The database schema: tables, row-level security and policies. The source of truth for the Supabase project. |

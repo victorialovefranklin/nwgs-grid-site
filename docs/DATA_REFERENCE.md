@@ -252,7 +252,7 @@ its fetch for the run.
 | `county_fips` | integer | no | `39057` | Five-digit FIPS code identifying the county. |
 | `activity_z` | number | no | `-0.7238` |  |
 | `local_morans_i` | number | no | `0.3656` | Local Moran's I for the county. |
-| `p_sim` | number | no | `0.092` | Pseudo p-value from permutation inference. |
+| `p_sim` | number | no | `0.079` | Pseudo p-value from permutation inference. |
 | `lisa_cluster` | text | no | `Not Significant` | Cluster type: High-High, Low-Low, High-Low, Low-High or Not Significant. |
 | `county_name` | text | no | `Greene County` | County name as published by CDC. |
 | `state_code` | text | no | `OH` | Two-letter US state or territory abbreviation. |
@@ -423,26 +423,26 @@ its fetch for the run.
 |---|---|---|---|---|
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
-| `pathogen` | text | no | `Measles` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
+| `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
 | `release_year` | integer | no | `2026` |  |
-| `records` | integer | no | `700` | Number of records retrieved. |
+| `records` | integer | no | `479` | Number of records retrieved. |
 
 ### 3.22 GenomicRecord
 
-3,540 rows, 12 columns.
+3,019 rows, 12 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
-| `pathogen` | text | no | `SARS-CoV-2` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
-| `accession` | text | no | `QX762927.1` |  |
-| `collection_date` | date | yes | `2023-04-16 00:00:00+00:00` |  |
-| `release_date` | date | no | `2026-10-10 00:00:00+00:00` |  |
+| `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
+| `accession` | text | no | `QS049819.1` |  |
+| `collection_date` | date | yes | `2026-10-20 00:00:00+00:00` |  |
+| `release_date` | date | no | `2026-05-16 00:00:00+00:00` |  |
 | `host` | text | yes | `Homo sapiens` | Host organism recorded for the sequence. |
-| `geographic_location` | text | yes | `Colombia: Narino, Pasto` | Collection location recorded for the sequence. |
-| `geographic_region` | text | yes | `South America` |  |
-| `usa_state` | text | yes | `MN` |  |
+| `geographic_location` | text | yes | `USA: Texas` | Collection location recorded for the sequence. |
+| `geographic_region` | text | yes | `North America` |  |
+| `usa_state` | text | yes | `TX` |  |
 | `completeness` | text | no | `PARTIAL` |  |
 | `complete_genome_flag` | boolean | no | `False` |  |
 
@@ -454,10 +454,10 @@ its fetch for the run.
 |---|---|---|---|---|
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
-| `pathogen` | text | no | `Measles` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
-| `records` | integer | no | `700` | Number of records retrieved. |
-| `dated_collection` | integer | no | `420` | Records carrying a collection date. |
-| `complete_genome_records` | integer | no | `81` | Records flagged as complete genomes. |
+| `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
+| `records` | integer | no | `479` | Number of records retrieved. |
+| `dated_collection` | integer | no | `448` | Records carrying a collection date. |
+| `complete_genome_records` | integer | no | `0` | Records flagged as complete genomes. |
 
 ### 3.24 GlobalCoverage
 
@@ -676,7 +676,7 @@ its fetch for the run.
 | `rcsb_title` | text | no | `Prefusion 2019-nCoV spike glycoprotein w`… | Structure title as published by RCSB. |
 | `method` | text | no | `ELECTRON MICROSCOPY` | Experimental method used to determine the structure. |
 | `resolution_a` | number | no | `3.46` |  |
-| `ncbi_metadata_records` | number | yes | `1000` |  |
+| `ncbi_metadata_records` | number | yes | `936` |  |
 | `pdb_entry_url` | text | no | `https://www.rcsb.org/structure/6VSB` |  |
 | `pdb_cif_url` | text | no | `https://files.rcsb.org/download/6VSB.cif` |  |
 | `ca_atom_count` | integer | no | `2905` |  |
@@ -904,13 +904,13 @@ its fetch for the run.
 | `morans_i` | number | no | `0.2376` | Global Moran's I. Zero means activity is scattered at random across counties; positive means like sits next to like. |
 | `expected_i` | number | no | `-0.001302` | Value of Moran's I expected under spatial randomness, for comparison. |
 | `p_sim` | number | no | `0.001` |  |
-| `z_sim` | number | no | `12.19` |  |
+| `z_sim` | number | no | `12.72` |  |
 | `recent_activity_counties` | integer | no | `786` |  |
 | `total_excluded_from_spatial` | integer | no | `17` |  |
-| `high-high` | integer | no | `68` |  |
+| `high-high` | integer | no | `65` |  |
 | `high-low` | integer | no | `14` |  |
-| `low-high` | integer | no | `20` |  |
-| `low-low` | integer | no | `88` |  |
+| `low-high` | integer | no | `18` |  |
+| `low-low` | integer | no | `93` |  |
 | `not_significant` | integer | no | `579` |  |
 
 ### 3.47 StateLag
