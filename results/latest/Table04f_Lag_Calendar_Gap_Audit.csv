@@ -164,7 +164,7 @@ observed_weeks,calendar_weeks,gap_weeks,on_weekly_grid,analysis,pathogen,state_c
 214,214,0,True,respnet_alignment,Influenza A,MI
 214,214,0,True,respnet_alignment,Influenza A,MN
 214,214,0,True,respnet_alignment,Influenza A,NC
-186,214,28,True,respnet_alignment,Influenza A,NM
+190,214,24,True,respnet_alignment,Influenza A,NM
 202,214,12,True,respnet_alignment,Influenza A,NY
 195,213,18,True,respnet_alignment,Influenza A,OR
 209,214,5,True,respnet_alignment,Influenza A,TN
@@ -177,7 +177,7 @@ observed_weeks,calendar_weeks,gap_weeks,on_weekly_grid,analysis,pathogen,state_c
 215,215,0,True,respnet_alignment,RSV,MI
 215,215,0,True,respnet_alignment,RSV,MN
 214,214,0,True,respnet_alignment,RSV,NC
-208,215,7,True,respnet_alignment,RSV,NM
+212,215,3,True,respnet_alignment,RSV,NM
 215,215,0,True,respnet_alignment,RSV,NY
 214,214,0,True,respnet_alignment,RSV,OR
 215,215,0,True,respnet_alignment,RSV,TN
