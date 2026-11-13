@@ -142,12 +142,35 @@ jobs:
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
+      # Every release on GitHub, newest first, with whether it carries the
+      # weekly history files. The site lists them so any past run can be
+      # downloaded. Never blocks the build.
+      - name: List archived runs
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/releases" --paginate \
+            --jq '.[] | {tag: .tag_name, title: .name, published: .published_at, url: .html_url,
+                         history: ([.assets[].name | select(endswith("_weekly_history.zip"))] | first // null)}' \
+            | python -c "import sys,json; json.dump([json.loads(l) for l in sys.stdin if l.strip()], open('runs.json','w'))"
+          python -c "import json; print(len(json.load(open('runs.json'))), 'archived runs listed')"
+
       - name: Build site
         env:
           NWGS_STRUCTURE_DIR: /content/NWGS_GRID/outputs/pathogen_intelligence/protein_structures
+          NWGS_DOWNLOAD_DIR: /content/NWGS_GRID/outputs/downloads
+          NWGS_RUNS_JSON: runs.json
+          NWGS_RELEASE_TAG_SUFFIX: -r${{ github.run_number }}
         run: |
           python scripts/build_site.py app_export site
           cp site_src/CNAME site/ 2>/dev/null || true
+          # Latest weekly history files, served from the site itself.
+          if [ -d "$NWGS_DOWNLOAD_DIR" ]; then
+            mkdir -p site/data/latest
+            cp -r "$NWGS_DOWNLOAD_DIR"/. site/data/latest/
+            du -sh site/data/latest
+          fi
 
       - name: Keep this run's export (90 days)
         if: always()
@@ -175,7 +198,10 @@ jobs:
           TAG="${RUN_ID}-r${{ github.run_number }}"
           mkdir -p release
           (cd /content/NWGS_GRID/outputs && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_tables.zip" tables)
-          (cd /content/NWGS_GRID/outputs && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_figures.zip" . -x 'tables/*')
+          (cd /content/NWGS_GRID/outputs && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_figures.zip" . -x 'tables/*' -x 'downloads/*')
+          if [ -d /content/NWGS_GRID/outputs/downloads ]; then
+            (cd /content/NWGS_GRID/outputs/downloads && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_weekly_history.zip" .)
+          fi
           (cd app_export && zip -q -r "$GITHUB_WORKSPACE/release/${RUN_ID}_app_export.zip" .)
           cp app_export/manifest.json "release/${RUN_ID}_manifest.json"
           cp pipeline_log.txt "release/${RUN_ID}_pipeline_log.txt"
@@ -193,6 +219,8 @@ jobs:
             echo "- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             echo
             echo "Cite tables and figures from one release only; CDC data changes every week."
+            echo
+            echo "**Weekly history:** \`${RUN_ID}_weekly_history.zip\` holds every week CDC currently reports for every pathogen by county, state and nation (CSV and Parquet, with a data dictionary). County is the finest level; CDC site identifiers are not included."
             echo
             echo "**How to cite:** Franklin, V. L. (${AS_OF:0:4}). *NWGS Grid™: National Wastewater Genomics Smart Grid* (data through ${AS_OF}, release ${TAG}) [Software and dataset]. ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG}"
             echo

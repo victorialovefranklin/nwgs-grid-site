@@ -493,6 +493,8 @@ Methods & sources page.
 |---|---|
 | CDC National Wastewater Surveillance System | https://data.cdc.gov |
 | CDC National Syndromic Surveillance Program (ED visits) | https://data.cdc.gov/d/rdmq-nq56 |
+| CDC Wastewater Viral Activity Level | https://data.cdc.gov/d/atcp-73re |
+| CDC RESP-NET hospitalization rates | https://data.cdc.gov/d/kvib-3txy |
 | CDC PLACES | https://data.cdc.gov/d/swc5-untb |
 | CDC/ATSDR Social Vulnerability Index | https://www.atsdr.cdc.gov/place-health/php/svi/ |
 | U.S. Census Bureau TIGER/Line | https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html |

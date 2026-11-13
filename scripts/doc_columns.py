@@ -200,6 +200,29 @@ SPECIFIC = {
     "PipelineRun.n_fail": "Checks that failed. A failure blocks publication and the previous week stays live.",
     "PipelineRun.n_checks": "Total rows in AuditLog for this run: the number of checks a reader can see on the Audit log page.",
     "SourceStatus.url": "Address the source was retrieved from.",
+    # --- CDC WVAL comparison (Table29b/29c) ------------------------------------
+    "CdcWvalNational.cdc_wval": "Median across CDC's reporting sites of CDC's own Wastewater Viral Activity Level (dataset atcp-73re) for that week. An external comparison only; never an input to the NWGS index.",
+    "CdcWvalNational.n_sites": "Sites behind CDC's median activity level that week.",
+    "CdcWvalNational.sites_very_low": "Reporting sites CDC placed in its Very Low category that week.",
+    "CdcWvalNational.sites_low": "Reporting sites CDC placed in its Low category that week.",
+    "CdcWvalNational.sites_moderate": "Reporting sites CDC placed in its Moderate category that week.",
+    "CdcWvalNational.sites_high": "Reporting sites CDC placed in its High category that week.",
+    "CdcWvalNational.sites_very_high": "Reporting sites CDC placed in its Very High category that week.",
+    "CdcWvalAgreement.geography": "US for the national comparison, or the state code.",
+    "CdcWvalAgreement.level": "national or state.",
+    "CdcWvalAgreement.spearman_r": "Spearman rank correlation between the NWGS index and CDC's median activity level over the weeks both report. Compared by rank because the two use different baselines and site sets.",
+    "CdcWvalAgreement.p_value": "Unadjusted p-value of the rank correlation.",
+    "CdcWvalAgreement.p_value_fdr": "State rows: Benjamini-Hochberg adjusted across states. National rows: unadjusted.",
+    "CdcWvalAgreement.first_week": "First week both series report.",
+    "CdcWvalAgreement.last_week": "Last week both series report.",
+    # --- CDC update schedule (Table01c) ------------------------------------------
+    "CdcSchedule.dataset_id": "data.cdc.gov dataset identifier.",
+    "CdcSchedule.dataset_name": "Dataset name as published by CDC.",
+    "CdcSchedule.role": "What NWGS uses the dataset for.",
+    "CdcSchedule.update_frequency": "CDC's stated update frequency, read from the dataset's DCAT metadata this run (R/P1W shown as Weekly).",
+    "CdcSchedule.cdc_schedule_text": "The sentence in CDC's dataset description that states the schedule, quoted as CDC wrote it, when there is one.",
+    "CdcSchedule.cdc_last_updated_utc": "When CDC last updated the dataset's rows, from CDC's metadata.",
+    "CdcSchedule.source_url": "Dataset page on data.cdc.gov.",
 }
 
 

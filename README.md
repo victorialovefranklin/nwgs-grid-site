@@ -49,8 +49,19 @@ refined water-drop mark, and a home page that opens with *Reading the nation's w
 | Genomics & Emerging | Genomics & AMR · Protein structures |
 | Methods & Trust | Audit log · Methods & sources · Glossary · Data & reports · About & how to cite |
 
-**Data & reports** lets a reader choose an area and pathogens and take away a written report —
-narrative, figures, maps and figure descriptions for that selection — rather than a bare table.
+**Data & reports** lets a reader download the weekly history for every pathogen by county,
+state and nation (CSV and Parquet, with a data dictionary; county is the finest level and CDC
+site identifiers are not included), or choose an area and pathogens and take away a written
+report with narrative, figures and maps. The latest history files are served with the site
+under `data/latest/`; every run's copy is kept in its release as `<run_id>_weekly_history.zip`.
+
+**The 5-step tour** on the Overview page walks through Monitoring, Signals, Coverage gaps,
+Forecasts and Equity, built from the same weekly run as the rest of the site. It replaces the
+static story map that used to sit on Franklin HUB's GeoHUB page.
+
+**Trends & timing** shows CDC's own Wastewater Viral Activity Level beside the NWGS index as an
+outside check, and **Methods & sources** lists how often CDC updates each dataset, read from
+CDC's metadata every run.
 
 The grouping is presentation only. Every view key and `#hash` route is unchanged, so existing
 links keep working. Below roughly 760px the header collapses to a menu button and the groups

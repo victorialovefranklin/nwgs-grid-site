@@ -1699,6 +1699,206 @@ def wval_agreement(state_wval, nat_wval, state_week, national_week, min_weeks=20
     return out
 
 # ============================================================
+# 08c. CDC UPDATE SCHEDULE OF EVERY DATASET USED
+# ============================================================
+# Read from CDC's own metadata each run (the DCAT "Update Frequency" field
+# and the sentence in the description that states the schedule), so the
+# Methods page never carries a hand-typed schedule that CDC later changes.
+_ISO_FREQ = {"R/P1D": "Daily", "R/P1W": "Weekly", "R/P2W": "Every two weeks", "R/P1M": "Monthly",
+             "R/P3M": "Quarterly", "R/P6M": "Twice a year", "R/P1Y": "Yearly"}
+
+
+def cdc_dataset_schedule():
+    used = [(cfg["id"], f"Wastewater: {cfg['label']}") for cfg in CDC_DATASETS.values()]
+    used += [(CDC_WVAL_ID, "Wastewater activity level (comparison)"),
+             (NSSP_ED_ID, "Emergency-department visits"),
+             (RESPNET_LIVE_ID, "Hospitalization rates (research tables)"),
+             (PLACES_ID, "County health context")]
+    rows = []
+    for ds_id, role in used:
+        row = {"dataset_id": ds_id, "role": role, "source_url": f"{CDC_BASE}/d/{ds_id}"}
+        try:
+            meta = cdc_metadata(ds_id)
+            cf = (meta.get("metadata") or {}).get("custom_fields") or {}
+            code = next((v.get("Update Frequency") for v in cf.values()
+                         if isinstance(v, dict) and v.get("Update Frequency")), None)
+            sentence = next((m.strip() for m in re.findall(r"[^.\n]*\bupdated?\b[^.\n]*\.", meta.get("description") or "", re.I)
+                             if re.search(r"week|day|month|year|friday|monday|tuesday|wednesday|thursday", m, re.I)), None)
+            ts = meta.get("rowsUpdatedAt")
+            row.update({
+                "dataset_name": meta.get("name"),
+                "update_frequency": _ISO_FREQ.get(str(code), code) if code else None,
+                "cdc_schedule_text": sentence,
+                "cdc_last_updated_utc": (datetime.fromtimestamp(int(ts), timezone.utc).strftime("%Y-%m-%d %H:%M")
+                                         if ts else None),
+                "status": "OK",
+            })
+        except Exception as exc:
+            row.update({"status": f"FAILED: {type(exc).__name__}"})
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+# ============================================================
+# 08d. DOWNLOADABLE WEEKLY HISTORY (county, state, national)
+# ============================================================
+# One row per place, pathogen and week, for every week CDC currently
+# reports. Only weeks with real samples get a row: nothing is imputed,
+# interpolated or smoothed. CDC site identifiers are not included; the finest
+# level is the county. Each run carries the full history as CDC reports it
+# that week, because CDC revises earlier weeks.
+DOWNLOAD_DIR = OUT_DIR / "downloads"
+
+
+def _weekly_level(z):
+    return pd.cut(z, [-np.inf, -1, -0.25, 0.25, 1, np.inf],
+                  labels=["Very Low", "Low", "Typical", "Elevated", "High"]).astype("string")
+
+
+def _emerging_site_week(h, by):
+    e = h[h["pathogen_group"].eq("emerging")].copy()
+    if e.empty:
+        return pd.DataFrame()
+    if "emerging_detection_positive" not in e.columns:
+        e = add_emerging_detection_flags(e)
+    e = e[e["emerging_detection_known"].fillna(False)].dropna(subset=by + ["week_end", "site_id"])
+    if e.empty:
+        return pd.DataFrame()
+    sw = (e.groupby(["pathogen"] + by + ["site_id", "week_end"])
+           .agg(detected=("emerging_detection_positive", "max")).reset_index())
+    sw["detected"] = sw["detected"].fillna(0).astype(float)
+    out = (sw.groupby(["pathogen"] + by + ["week_end"])
+             .agg(n_sites=("site_id", "nunique"), n_sites_detected=("detected", "sum")).reset_index())
+    out["n_sites_detected"] = out["n_sites_detected"].astype(int)
+    out["detection_rate"] = out["n_sites_detected"] / out["n_sites"]
+    return out
+
+
+def build_history_tables(wastewater, multimodal, national_week, emerging_week,
+                         wval_state=None, wval_nat=None, hosp=None):
+    h = wastewater.dropna(subset=["week_end"]).copy()
+    group = h.drop_duplicates("pathogen").set_index("pathogen")["pathogen_group"].to_dict()
+
+    # ---- county-week: same county mapping as the maps (a multi-county
+    # sewershed counts toward each county it serves) ----
+    routine = explode_multicounty_for_coverage(h[h["pathogen_group"].eq("routine_respiratory")])
+    routine = routine.dropna(subset=["county_fips", "site_z"])
+    cw = (routine.groupby(["pathogen", "county_fips", "site_id", "week_end"])
+                 .agg(site_z=("site_z", "median")).reset_index()
+                 .groupby(["pathogen", "county_fips", "week_end"])
+                 .agg(median_site_z=("site_z", "median"), n_sites=("site_id", "nunique")).reset_index())
+    ce = _emerging_site_week(explode_multicounty_for_coverage(h), ["county_fips"])
+    county = pd.concat([cw, ce], ignore_index=True)
+    county["county_fips"] = county["county_fips"].astype(str).str.zfill(5)
+    state_of = (explode_multicounty_for_coverage(h).dropna(subset=["county_fips", "state_code"])
+                .assign(county_fips=lambda d: d["county_fips"].astype(str).str.zfill(5))
+                .groupby("county_fips")["state_code"].agg(lambda s: s.mode().iat[0]))
+    county.insert(1, "state_code", county["county_fips"].map(state_of))
+
+    # ---- state-week ----
+    sw = multimodal.rename(columns={"wastewater_index": "median_site_z",
+                                    "clinical_ed_pct": "nssp_ed_visit_pct"}).copy()
+    se = _emerging_site_week(h, ["state_code"])
+    state = pd.concat([sw, se], ignore_index=True)
+    state["week_end"] = pd.to_datetime(state["week_end"]).dt.normalize()
+    if wval_state is not None and len(wval_state):
+        state = state.merge(wval_state.rename(columns={"cdc_wval": "cdc_wval_median", "n_sites": "cdc_wval_sites"}),
+                            on=["pathogen", "state_code", "week_end"], how="left")
+    if hosp is not None and len(hosp):
+        hh = hosp[["pathogen", "state_code", "week_end", "hosp_rate"]].rename(
+            columns={"hosp_rate": "respnet_hosp_rate_per_100k"})
+        hh["week_end"] = pd.to_datetime(hh["week_end"]).dt.normalize()
+        state = state.merge(hh, on=["pathogen", "state_code", "week_end"], how="left")
+
+    # ---- national-week ----
+    nat = pd.concat([national_week[["pathogen", "week_end", "median_site_z", "n_sites"]],
+                     emerging_week.rename(columns={"n_sites_tested": "n_sites"})[
+                         ["pathogen", "week_end", "detection_rate", "n_sites"]] if len(emerging_week) else None],
+                    ignore_index=True)
+    nat["week_end"] = pd.to_datetime(nat["week_end"]).dt.normalize()
+    if wval_nat is not None and len(wval_nat):
+        nat = nat.merge(wval_nat[["pathogen", "week_end", "cdc_wval", "n_sites"]].rename(
+            columns={"cdc_wval": "cdc_wval_median", "n_sites": "cdc_wval_sites"}), on=["pathogen", "week_end"], how="left")
+
+    out = {}
+    for name, df, keys in [("county", county, ["county_fips"]), ("state", state, ["state_code"]),
+                           ("national", nat, [])]:
+        df = df.copy()
+        df["week_end"] = pd.to_datetime(df["week_end"]).dt.strftime("%Y-%m-%d")
+        df.insert(df.columns.get_loc("pathogen") + 1, "pathogen_group", df["pathogen"].map(group))
+        if "median_site_z" in df:
+            df["weekly_level"] = _weekly_level(df["median_site_z"])
+        lead = (["county_fips", "state_code"] if name == "county" else keys) + ["pathogen", "pathogen_group", "week_end", "n_sites"]
+        rest = [c for c in ["median_site_z", "weekly_level", "n_sites_detected", "detection_rate",
+                            "nssp_ed_visit_pct", "cdc_wval_median", "cdc_wval_sites",
+                            "respnet_hosp_rate_per_100k"] if c in df.columns]
+        df = (df[[c for c in lead + rest if c in df.columns]]
+              .dropna(subset=["n_sites"])
+              .sort_values([c for c in lead[:-1] if c in df.columns]).reset_index(drop=True))
+        df["n_sites"] = df["n_sites"].astype(int)
+        out[name] = df
+    return out
+
+
+HISTORY_DICTIONARY = """# NWGS Grid(TM) weekly history files
+
+One row per place, pathogen and week, for every week CDC currently reports.
+Only weeks with real wastewater samples have a row. Nothing is imputed,
+interpolated or smoothed. CDC site identifiers are not included.
+
+Each weekly run rebuilds the full history from CDC's data as published that
+week. CDC revises earlier weeks, so values for the same week can differ
+between runs. Cite the run ID and data-through date of the files you use.
+
+Files: nwgs_county_week, nwgs_state_week, nwgs_national_week (.csv.gz and
+.parquet), and counties_by_state/<ST>.csv (county rows for one state).
+
+| Column | Meaning |
+|---|---|
+| county_fips | 5-digit county FIPS. A sewershed serving several counties counts toward each of them. |
+| state_code | 2-letter state or territory code |
+| pathogen | SARS-CoV-2, Influenza A, RSV, Influenza A(H5), Measles or Mpox |
+| pathogen_group | routine_respiratory or emerging |
+| week_end | Saturday ending the sample week (YYYY-MM-DD) |
+| n_sites | Wastewater sites with a usable sample that week |
+| median_site_z | Routine pathogens: median across sites of each site's log concentration standardized against that site's own history |
+| weekly_level | median_site_z as a level: Very Low (<= -1), Low (<= -0.25), Typical (<= 0.25), Elevated (<= 1), High (> 1). The site's maps use a four-week window; this is one week. |
+| n_sites_detected | Emerging pathogens: sites with a detection that week |
+| detection_rate | Emerging pathogens: n_sites_detected / n_sites |
+| nssp_ed_visit_pct | State only: CDC NSSP percent of emergency-department visits for this pathogen |
+| cdc_wval_median | State and national: CDC's own Wastewater Viral Activity Level, median across CDC's reporting sites (atcp-73re) |
+| cdc_wval_sites | Sites behind cdc_wval_median |
+| respnet_hosp_rate_per_100k | State only: CDC RESP-NET weekly hospitalization rate per 100,000 (latest 3 weeks omitted while CDC revises them) |
+
+Sources: CDC NWSS (data.cdc.gov j9g8-acpt, ymmh-divb, 45cq-cw4i, mtpu-urpp,
+xpxn-rzgz, akvg-8vrb, atcp-73re), CDC NSSP (rdmq-nq56), CDC RESP-NET
+(kvib-3txy). Rows from the WastewaterSCAN source are subject to its
+CC BY-NC 4.0 license: contact the WastewaterSCAN team before research or
+commercial use. Copyright (c) 2026 Victoria Love Franklin; see LICENSE.
+"""
+
+
+def write_history_downloads(tables, data_as_of):
+    if DOWNLOAD_DIR.exists():
+        shutil.rmtree(DOWNLOAD_DIR)
+    (DOWNLOAD_DIR / "counties_by_state").mkdir(parents=True, exist_ok=True)
+    manifest = {"data_as_of": str(pd.Timestamp(data_as_of).date()), "generated_utc": utc_now(), "files": {}}
+    for name, df in tables.items():
+        stem = f"nwgs_{name}_week"
+        df.to_csv(DOWNLOAD_DIR / f"{stem}.csv.gz", index=False, compression="gzip")
+        df.to_parquet(DOWNLOAD_DIR / f"{stem}.parquet", index=False)
+        manifest["files"][stem] = {"rows": int(len(df)), "weeks": int(df["week_end"].nunique()),
+                                   "first_week": df["week_end"].min(), "last_week": df["week_end"].max()}
+    c = tables["county"]
+    for st, g in c.dropna(subset=["state_code"]).groupby("state_code"):
+        g.to_csv(DOWNLOAD_DIR / "counties_by_state" / f"{st}.csv", index=False)
+    manifest["states"] = sorted(c["state_code"].dropna().unique().tolist())
+    (DOWNLOAD_DIR / "DATA_DICTIONARY.md").write_text(HISTORY_DICTIONARY, encoding="utf-8")
+    (DOWNLOAD_DIR / "downloads_manifest.json").write_text(json.dumps(manifest, indent=2, default=str), encoding="utf-8")
+    return manifest
+
+
+# ============================================================
 # 09. STATE-WEEK MULTIMODAL + LAG ANALYSIS
 # ============================================================
 def benjamini_hochberg(pvals):
@@ -9062,6 +9262,7 @@ def main():
 
     print("\n[6b/19] Pulling CDC Wastewater Viral Activity Level (WVAL) benchmark...")
     # Optional benchmark: a failure is logged and recorded, never fatal.
+    wval_state = wval_nat = pd.DataFrame()
     try:
         wval_sites, wval_meta = load_cdc_wval()
         wval_state, wval_nat = wval_state_national(wval_sites)
@@ -9402,6 +9603,7 @@ def main():
     # Optional: a missing file or any error is logged and skipped.
     # ------------------------------------------------------------
     print("\n[17c/19] RESP-NET hospitalization alignment and nowcast validation...")
+    hosp = pd.DataFrame()
     try:
         hosp, hosp_info, hosp_label, hosp_url = load_respnet_any()
         if not hosp.empty:
@@ -9427,6 +9629,23 @@ def main():
                           "no usable live rows and no usable archived file", hosp_url)
     except Exception as exc:
         print(f"[WARN] RESP-NET extension skipped: {type(exc).__name__}: {exc}")
+    # How often CDC updates each dataset this run used (Methods page table).
+    try:
+        sched = cdc_dataset_schedule()
+        save_df(sched, TABLE_DIR / "Table01c_CDC_Dataset_Update_Schedule.csv")
+        print(sched[["dataset_id", "update_frequency", "cdc_last_updated_utc"]].to_string(index=False))
+    except Exception as exc:
+        print(f"[WARN] CDC update-schedule table skipped: {type(exc).__name__}: {exc}")
+    # Downloadable weekly history (county, state, national). Never fatal.
+    print("\n[17d/19] Writing downloadable weekly history files...")
+    try:
+        hist = build_history_tables(wastewater, multimodal, national_week, emerging_week,
+                                    wval_state, wval_nat, hosp)
+        man = write_history_downloads(hist, wastewater["week_end"].max())
+        for k, v in man["files"].items():
+            print(f"  {k}: {v['rows']:,} rows, {v['first_week']} to {v['last_week']}")
+    except Exception as exc:
+        print(f"[WARN] history downloads skipped: {type(exc).__name__}: {exc}")
     if LAG_CALENDAR_AUDIT:
         cal_audit = pd.DataFrame(LAG_CALENDAR_AUDIT)
         save_df(cal_audit, TABLE_DIR / "Table04f_Lag_Calendar_Gap_Audit.csv")

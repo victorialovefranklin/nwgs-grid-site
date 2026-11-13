@@ -205,6 +205,9 @@ def main(export_dir, site_dir):
     D["cdc_wval_agree"] = opt("CdcWvalAgreement", [
         "pathogen", "geography", "level", "paired_weeks", "spearman_r", "p_value_fdr",
         "first_week", "last_week"])
+    D["cdc_schedule"] = opt("CdcSchedule", [
+        "dataset_id", "dataset_name", "role", "update_frequency", "cdc_schedule_text",
+        "cdc_last_updated_utc", "source_url", "status"])
     D["attrition_sites"] = opt("AttritionSite", [
         "site_id", "state_code", "county_fips", "county_name", "first_week", "last_week",
         "n_weeks", "population_served", "weeks_since_last", "status", "went_dormant_week",
@@ -289,6 +292,22 @@ def main(export_dir, site_dir):
                 names[f] = [x["county_name"], x.get("state_code")]
     else:
         D["rep_by_fips"] = None
+
+    # Downloadable weekly history (pipeline 08d) and the list of archived runs.
+    dl = os.getenv("NWGS_DOWNLOAD_DIR")
+    mpath = Path(dl) / "downloads_manifest.json" if dl else None
+    D["downloads"] = json.loads(mpath.read_text(encoding="utf-8")) if mpath and mpath.exists() else None
+    rj = os.getenv("NWGS_RUNS_JSON")
+    runs = json.loads(Path(rj).read_text(encoding="utf-8")) if rj and Path(rj).exists() else []
+    # This run's release is created after the site is built, so add it here.
+    tag_suffix = os.getenv("NWGS_RELEASE_TAG_SUFFIX")
+    if tag_suffix and D["run"].get("run_id"):
+        tag = f'{D["run"]["run_id"]}{tag_suffix}'
+        if not any(x.get("tag") == tag for x in runs):
+            runs.insert(0, {"tag": tag, "title": f'Data through {D["run"].get("data_as_of")} ({D["run"]["run_id"]})',
+                            "published": None, "url": f"https://github.com/victorialovefranklin/nwgs-grid-site/releases/tag/{tag}",
+                            "history": f'{D["run"]["run_id"]}_weekly_history.zip' if D["downloads"] else None})
+    D["runs"] = runs or None
 
     latest = D_summary_latest(r("PathogenSummary"))
     D["latest_sample"] = str(latest.date()) if latest is not None else None

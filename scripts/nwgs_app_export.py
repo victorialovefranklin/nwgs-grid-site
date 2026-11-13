@@ -274,6 +274,11 @@ def main(table_dir, out_dir, allow_mixed=False):
     if t29c is not None and len(t29c):
         ents["CdcWvalAgreement"] = t29c
 
+    # CdcSchedule (Table01c) - how often CDC updates each dataset, read from CDC metadata
+    t01c = find(table_dir, "Table01c_CDC_Dataset_Update_Schedule", required=False)
+    if t01c is not None and len(t01c):
+        ents["CdcSchedule"] = t01c
+
     # Attrition (Table22/22b/22c) - which sites went dark, when, and where
     t22 = find(table_dir, "Table22_Coverage_Attrition_Sites", required=False)
     if t22 is not None and len(t22):

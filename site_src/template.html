@@ -801,6 +801,26 @@ h2{font-weight:700;letter-spacing:-.02em}
 .sitefoot .fhsc img{height:28px;width:auto}
 .qacards{grid-template-columns:minmax(0,300px)!important}
 .sh-short{margin:6px 0 0 18px;padding:0;line-height:1.75}
+/* 5-step tour */
+.tour{gap:10px}
+.tour-wrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:var(--sp-4,24px);align-items:start}
+.tour-map .mapbox{border-radius:8px}
+.tour-text{display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--line);padding-left:var(--sp-4,24px)}
+.tour-text .eb{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.tour-text h3{margin:0;font-size:1.35rem;line-height:1.25}
+.tour-text p{margin:0;line-height:1.6}
+.tour-dots{display:flex;gap:6px}
+.tour-dots button{all:unset;cursor:pointer;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;border:1px solid var(--line);color:var(--ink)}
+.tour-dots button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tour-dots button:focus-visible,.tour-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tour-nav{display:flex;gap:8px;margin-top:6px}
+.tour-nav button{all:unset;cursor:pointer;padding:8px 14px;border:1px solid var(--line);border-radius:var(--r);font-weight:600;font-size:.9rem}
+.tour-nav button.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tour-nav button:disabled{opacity:.4;cursor:default}
+@media(max-width:900px){.tour-wrap{grid-template-columns:1fr}.tour-text{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:14px}}
+@media(prefers-reduced-motion:no-preference){.tour .mapbox svg{animation:tourfade .35s ease}}
+@keyframes tourfade{from{opacity:.25}to{opacity:1}}
+.dl-runs summary{cursor:pointer;font-weight:600;margin:6px 0}.dl-runs .tbl{max-height:360px;overflow:auto}
 </style>
 
 <div class="app">
@@ -918,6 +938,110 @@ function stateMap(el, colorOf, tipOf){
 }
 const cname = f => {const n=D.names[f];return n?`${esc(n[0])}, ${esc(n[1])}`:`County ${f}`};
 
+/* ---------- 5-step tour (story map from Franklin HUB GeoHUB) ----------
+   Every figure comes from this run's D. A chapter whose data is missing in
+   an older export is left out instead of showing a placeholder. */
+const MON_COL = () => [css('--vl'), css('--el'), css('--typ-line')];
+const MON_LBL = ['Wastewater tested', 'Sewers, no site reporting', 'Few homes on sewers'];
+function tourChapters(){
+  const MN=D.monitoring_national, M=D.monitoring, S=Object.fromEntries((D.summary||[]).map(s=>[s.pathogen,s]));
+  const mil=x=>`${Math.round(x/1e6).toLocaleString()} million`;
+  const ch=[];
+  if(MN&&M) ch.push({key:'monitoring',t:'Monitoring',h:'Where wastewater is tested',go:'monitoring',goL:'Find your county',
+    b:`Wastewater is tested in <b>${MN.counties_reporting.toLocaleString()}</b> of ${MN.counties_total.toLocaleString()} U.S. counties. Those counties hold about <b>${mil(MN.sewered_population_in_reporting_counties)}</b> of the ${mil(MN.population_sewered)} people on public sewers.`,
+    leg:()=>legend(MON_COL().map((c,i)=>[c,MON_LBL[i]])),
+    draw:box=>countyMap(box,f=>{const v=M[f];return v?MON_COL()[v[0]]:css('--nodata')},f=>{const v=M[f];return `<b>${cname(f)}</b><div>${v?MON_LBL[v[0]]+(v[1]?` · ${v[1]} site${v[1]===1?'':'s'}`:''):'No data'}</div>`},{label:'Counties by wastewater monitoring status'})});
+  if(D.activity&&Object.keys(D.activity).length) ch.push({key:'signals',t:'Signals',h:'What wastewater shows this week',go:'map',goL:'Open the full map',pick:true,
+    b:p=>{const s=S[p]||{};return `County activity for <b>${p}</b>, four weeks ending ${dateFmt(D.activity_end)}. Nationally it is <b>${esc(String(s.recent_level||'—').toLowerCase())}</b> and <b>${esc(String(s.trend||'—').toLowerCase())}</b>. Each county is compared with its own normal, so colors show change, not case counts.`},
+    leg:()=>levelLegend(),
+    draw:(box,p)=>{const A=D.activity[p]||{};countyMap(box,f=>{const v=A[f];return v?lvColor(level(v[0])):css('--nodata')},f=>{const v=A[f];return `<b>${cname(f)}</b><div>${v?`${level(v[0])} · ${v[1]} site${v[1]===1?'':'s'}`:'No monitored site'}</div>`},{label:`${p} county activity`})}});
+  if(MN&&M&&MN.counties_sewer_service_no_site!=null) ch.push({key:'gaps',t:'Coverage gaps',h:'Who wastewater cannot see yet',go:'equity',goL:'See coverage and equity',
+    b:`<b>${MN.counties_sewer_service_no_site.toLocaleString()}</b> counties have public sewers but no site reporting, about <b>${mil(MN.sewered_population_without_site)}</b> residents. In <b>${MN.counties_limited_sewer_service.toLocaleString()}</b> more, too few homes are on sewers for wastewater to represent the county.`,
+    leg:()=>legend([[MON_COL()[1],MON_LBL[1]],[MON_COL()[2],MON_LBL[2]],[css('--nodata'),'Tested (shown on Monitoring)']]),
+    draw:box=>countyMap(box,f=>{const v=M[f];return v&&v[0]>0?MON_COL()[v[0]]:css('--nodata')},f=>{const v=M[f];return `<b>${cname(f)}</b><div>${v?MON_LBL[v[0]]:'No data'}</div>${v&&v[0]===1?`<div>${Math.round(v[2]).toLocaleString()} people on sewers</div>`:''}`},{label:'Counties without wastewater coverage'})});
+  if((D.models||[]).length&&(D.statelag||[]).length) ch.push({key:'forecasts',t:'Forecasts',h:'Does wastewater help predict clinic visits?',go:'predictive',goL:'See model results',pick:true,
+    b:p=>{const m=D.models.find(x=>x.pathogen===p), r=D.statelag.filter(x=>x.pathogen===p), lead=r.filter(x=>x.significant_fdr&&x.lag_weeks>0).length, same=r.filter(x=>x.significant_fdr&&x.lag_weeks===0).length;
+      return `${m?`<b>${p}:</b> ${esc(m.plain_language)} The full model explains <b>${pct(m.full_model_r2,0)}</b> of week-to-week variation in emergency visits, against ${pct(m.clinical_persistence_r2,0)} from recent clinical data alone. `:''}By state, wastewater and clinics move in the <b>same week</b> in ${same} states and wastewater <b>leads</b> in ${lead}.`},
+    leg:()=>legend([[css('--accent'),'Same week'],[css('--el'),'Wastewater leads'],[css('--nodata'),'Not significant or no data']]),
+    draw:(box,p)=>{const by=Object.fromEntries(D.statelag.filter(x=>x.pathogen===p).map(x=>[x.state_code,x]));
+      stateMap(box,st=>{const r=by[st];return !r||!r.significant_fdr?css('--nodata'):r.lag_weeks>0?css('--el'):css('--accent')},
+        (st,name)=>{const r=by[st];return r?`<b>${esc(name)}</b><div>${esc(r.relationship)}${r.lag_weeks?` by ${r.lag_weeks} wk`:''}</div><div>ρ = ${fmt(r.spearman_r)}</div>`:`<b>${esc(name)}</b><div>No qualifying data</div>`})}});
+  const E=D.equity||[];
+  if(E.length>=2&&M) { const q1=E[0], q4=E[E.length-1], dv=M['47037'];
+    ch.push({key:'equity',t:'Equity',h:'Who is covered well, and who is not',go:'tennessee',goL:'See Tennessee',
+    b:`Among monitored counties, <b>${fmt(q1.pct_analysis_ready,0)}%</b> of the least vulnerable have enough data for analysis, against <b>${fmt(q4.pct_analysis_ready,0)}%</b> of the most vulnerable (odds ratio ${fmt(q1.glm_odds_ratio)} per 0.10 rise in social vulnerability, p ${q1.glm_p_value<0.001?'&lt; 0.001':'= '+fmt(q1.glm_p_value,3)}).${dv?` Here in Tennessee, Davidson County is <b>${MON_LBL[dv[0]].toLowerCase()}</b>${dv[1]?` with ${dv[1]} site${dv[1]===1?'':'s'}`:''}.`:''}`,
+    leg:()=>legend([...MON_COL().map((c,i)=>[c,MON_LBL[i]]),[css('--ink'),'Davidson County']]),
+    draw:box=>{const svg=countyMap(box,f=>{const v=M[f];return v?MON_COL()[v[0]]:css('--nodata')},f=>{const v=M[f];return `<b>${cname(f)}</b><div>${v?MON_LBL[v[0]]:'No data'}</div>`},{filter:d=>String(d.id).startsWith('47'),fit:true,label:'Tennessee counties by monitoring status'});
+      svg.selectAll('path.county').filter(d=>d.id==='47037').attr('stroke',css('--ink')).attr('stroke-width',2.5).raise()}});
+  }
+  return ch;
+}
+function tourPanel(){
+  const ch=tourChapters(); if(!ch.length) return '';
+  return `<section class="panel tour" id="tour" aria-label="Take the ${ch.length}-step tour" tabindex="-1">
+    <header class="ov-h"><h2>Take the ${ch.length}-step tour</h2><span class="small muted">Data through ${dateFmt(D.run.data_as_of)} · updates every week</span></header>
+    <div class="tour-wrap"><div class="tour-map"><div class="mapbox" id="tour-map"></div><div id="tour-leg"></div></div>
+      <div class="tour-text"><div class="tour-dots" role="tablist">${ch.map((c,i)=>`<button role="tab" data-i="${i}" aria-label="${i+1}. ${c.t}">${i+1}</button>`).join('')}</div>
+        <div class="eb" id="tour-eb"></div><h3 id="tour-h"></h3><div class="seg sm" id="tour-p" hidden>${ROUTINE.map((p,i)=>`<button aria-pressed="${i===0}" data-p="${p}">${p}</button>`).join('')}</div>
+        <p id="tour-b" aria-live="polite"></p><a href="#" id="tour-go" class="small"></a>
+        <div class="tour-nav"><button id="tour-prev">← Back</button><button id="tour-next" class="pri">Next →</button></div></div></div>
+  </section>`;
+}
+function initTour(){
+  const root=document.getElementById('tour'); if(!root) return;
+  const ch=tourChapters(); let i=0, P=ROUTINE[0];
+  const show=()=>{const c=ch[i];
+    root.querySelector('#tour-eb').textContent=`Step ${i+1} of ${ch.length} · ${c.t}`;
+    root.querySelector('#tour-h').textContent=c.h;
+    root.querySelector('#tour-p').hidden=!c.pick;
+    root.querySelector('#tour-b').innerHTML=typeof c.b==='function'?c.b(P):c.b;
+    const g=root.querySelector('#tour-go'); g.dataset.go=c.go; g.setAttribute('href','#'+c.go); g.textContent=`${c.goL} →`;
+    c.draw(root.querySelector('#tour-map'),P); root.querySelector('#tour-leg').innerHTML=c.leg();
+    root.querySelectorAll('.tour-dots button').forEach((b,k)=>b.setAttribute('aria-selected',String(k===i)));
+    root.querySelector('#tour-prev').disabled=i===0; const n=root.querySelector('#tour-next');
+    n.textContent=i===ch.length-1?'Start over ↺':'Next →'};
+  root.querySelector('#tour-prev').onclick=()=>{if(i>0){i--;show()}};
+  root.querySelector('#tour-next').onclick=()=>{i=(i+1)%ch.length;show()};
+  root.querySelector('.tour-dots').onclick=e=>{const b=e.target.closest('button');if(b){i=+b.dataset.i;show()}};
+  root.querySelector('#tour-p').onclick=e=>{const b=e.target.closest('button');if(!b)return;P=b.dataset.p;
+    root.querySelectorAll('#tour-p button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));show()};
+  root.addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea'))return;
+    if(e.key==='ArrowRight'&&i<ch.length-1){i++;show();e.preventDefault()} if(e.key==='ArrowLeft'&&i>0){i--;show();e.preventDefault()}});
+  show();
+}
+
+
+function cdcScheduleTable(){
+  const S=D.cdc_schedule;
+  if(!S||!S.length) return `<article class="panel c12"><header><h2>How often CDC updates each dataset</h2></header>
+    <p class="note">The update schedule is read from CDC's metadata during each weekly run. It has not populated for this run yet and appears after the next weekly update.</p></article>`;
+  return `<article class="panel c12"><header><h2>How often CDC updates each dataset</h2><span class="small muted">read from CDC's metadata this run</span></header>
+    <div class="tbl"><table class="tight"><tr><th>Dataset</th><th>Used for</th><th>CDC updates it</th><th>CDC last updated</th></tr>
+    ${S.map(r=>`<tr><td><a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.dataset_name||r.dataset_id)}</a> <span class="mono small">${esc(r.dataset_id)}</span></td><td class="small">${esc(r.role)}</td>
+      <td class="small">${r.cdc_schedule_text?esc(r.cdc_schedule_text):r.update_frequency?esc(r.update_frequency):String(r.status||'').startsWith('FAILED')?'Could not be read this run':'Not stated by CDC'}</td>
+      <td class="small nw">${r.cdc_last_updated_utc?dateFmt(String(r.cdc_last_updated_utc).slice(0,10)):'—'}</td></tr>`).join('')}</table></div>
+    <p class="note">NWGS Grid™ pulls every dataset each Saturday morning (Central time), after CDC's Friday refresh, and rebuilds the site only if every validation check passes.</p></article>`;
+}
+
+/* Downloadable weekly history: latest files served with the site, every run in GitHub Releases. */
+function downloadsPanel(){
+  const M=D.downloads, R=D.runs||[], REPO='https://github.com/victorialovefranklin/nwgs-grid-site';
+  const f=M&&M.files||{}, row=(k,label)=>{const x=f[k];return x?`<tr><td>${label}</td><td class="n">${x.rows.toLocaleString()}</td><td class="nw">${dateFmt(x.first_week)} – ${dateFmt(x.last_week)}</td>
+    <td class="nw"><a href="data/latest/${k}.csv.gz" download>CSV (gzip)</a> · <a href="data/latest/${k}.parquet" download>Parquet</a></td></tr>`:''};
+  const latest=M?`<div class="tbl"><table class="tight"><tr><th>File</th><th class="n">Rows</th><th>Weeks</th><th>Download</th></tr>
+      ${row('nwgs_county_week','Every county')}${row('nwgs_state_week','Every state')}${row('nwgs_national_week','United States')}</table></div>
+    <form class="rform" onsubmit="return false"><label class="rfield">One state's counties (CSV)<select id="dl-state">${(M.states||[]).map(s=>`<option value="${s}">${esc(STATE_NAMES[s]||s)}</option>`).join('')}</select></label>
+      <a class="btn" id="dl-state-go" href="data/latest/counties_by_state/${(M.states||[])[0]||''}.csv" download>Download</a></form>
+    <p class="small">One row per place, pathogen and week, for every week CDC currently reports, data through ${dateFmt(M.data_as_of)}. Only weeks with real samples have a row; nothing is filled in or estimated. County is the finest level, and CDC site identifiers are not included. <a href="data/latest/DATA_DICTIONARY.md" target="_blank" rel="noopener">Data dictionary</a></p>`
+    :`<p class="note">The weekly history files are produced by the weekly pipeline and appear here after the next weekly update.</p>`;
+  const runs=R.length?`<details class="dl-runs"><summary>Every weekly run (${R.length})</summary><div class="tbl"><table class="tight"><tr><th>Run</th><th>Weekly history</th><th>Archive</th></tr>
+      ${R.map(x=>`<tr><td class="small">${esc(x.title||x.tag)}</td><td class="small">${x.history?`<a href="${REPO}/releases/download/${encodeURIComponent(x.tag)}/${encodeURIComponent(x.history)}">${esc(x.history)}</a>`:'<span class="muted">Not in this run (summary tables only)</span>'}</td>
+        <td class="small"><a href="${esc(x.url)}" target="_blank" rel="noopener">Release ↗</a></td></tr>`).join('')}</table></div>
+      <p class="small">Runs before the weekly history files were added hold the summary tables only. A past week cannot be rebuilt exactly as it was published then, so earlier runs are not back-filled.</p></details>`
+    :`<p class="small">Every past run: <a href="${REPO}/releases" target="_blank" rel="noopener">GitHub Releases ↗</a></p>`;
+  return `<article class="panel c12" id="downloads"><header><h2>Download weekly data</h2><span class="small muted">every pathogen · county, state, nation</span></header>${latest}${runs}
+    <p class="note">Cite the run ID and data-through date with any figure. CDC revises earlier weeks, so the same week can differ between runs. Rows from WastewaterSCAN carry its non-commercial license (CC BY-NC 4.0).</p></article>`;
+}
 /* ---------- charts ---------- */
 function lineChart(el, series, o={}){
   el.innerHTML='';
@@ -1913,6 +2037,7 @@ dashboard(){
     ${hs.length?`<div class="hstats">${hs.map(([b,t])=>`<div><b>${b}</b><span>${t}</span></div>`).join('')}</div>`:''}
   </section>`;
   el.innerHTML=`${hero}
+  ${tourPanel()}
   <div class="head"><h1>Respiratory virus signals in U.S. wastewater</h1>
   <p class="muted">Site-standardized wastewater activity for the four weeks ending ${dateFmt(D.activity_end)}, with clinical alignment, spatial clustering and coverage equity from the same weekly run.</p></div>
 
@@ -1970,6 +2095,7 @@ dashboard(){
 
   <p class="note srcline"><b>Sources.</b> CDC National Wastewater Surveillance System (NWSS), six public pathogen datasets on data.cdc.gov, pulled for this run and listed with their dataset identifiers on <a href="#methods" data-go="methods">Methods &amp; sources</a>. Clinical comparison uses CDC's National Syndromic Surveillance Program emergency-department data. Activity is standardized within each site against its own history before any county or national figure is taken.</p>`;
 
+  initTour();
   ROUTINE.forEach(p=>spark(document.getElementById('sp-'+id(p)),D.trend[p].slice(-52).map(d=>d[1]),pcol(p)));
   EMERGING.forEach(p=>spark(document.getElementById('se-'+id(p)),D.emerging[p].slice(-52).map(d=>d[1]*100),css('--warn'),{zero:false,base:0,dom:[0,Math.max(3,d3.max(D.emerging[p].slice(-52),d=>d[1]*100))]}));
 
@@ -2228,6 +2354,7 @@ reports(){
       const x=D.monitoring_names[a],y=D.monitoring_names[b];
       return (x[1]||'').localeCompare(y[1]||'')||(x[0]||'').localeCompare(y[0]||'')});
     el.innerHTML=`<div class="head"><h1>Data &amp; reports</h1><p>Take any of this away: the tables as spreadsheets, or a written report with its maps and figures. Everything carries the run it came from, so a figure can still be checked after it has been pasted into something else.</p></div>
+    <div class="grid">${downloadsPanel()}</div>
     <div class="grid">
       <article class="panel c12 rbuild"><header><h2>Build a written report</h2></header>
         <p class="small">Choose an area and the pathogens to include. The report has narrative, maps and figures, with a caption on every figure.</p>
@@ -2271,6 +2398,8 @@ reports(){
       const on=[...el.querySelectorAll('.r-path:checked')].map(x=>x.value);
       RPATH = on.length===rPathogens().length ? null : on;
     });
+    const dls=document.getElementById('dl-state'), dlg=document.getElementById('dl-state-go');
+    if(dls&&dlg) dls.onchange=()=>dlg.setAttribute('href',`data/latest/counties_by_state/${dls.value}.csv`);
     document.getElementById('r-build').onclick=()=>{buildReport();
       document.getElementById('r-out').scrollIntoView({behavior:'smooth',block:'start'})};
   };
@@ -3015,6 +3144,11 @@ glossary(){
    ['Data & updates',[
     ['latest-sample','Latest sample','The most recent date a wastewater sample was collected in this week’s CDC data. Samples take several days to be tested and reported, so it is usually a few days before the update date.'],
     ['cdc-updated','CDC data updated','When CDC last refreshed its public wastewater datasets. NWGS Grid™ pulls them every Saturday morning (Central time) and rebuilds the site.'],
+    ['update-schedule','Update schedule','How often CDC refreshes a dataset, as CDC itself states it. Most datasets used here are updated weekly on Fridays; PLACES is a yearly release. The table on Methods &amp; sources is read from CDC’s metadata every run.'],
+    ['wval','CDC Wastewater Viral Activity Level (WVAL)','CDC’s own weekly activity measure for SARS-CoV-2, influenza A and RSV at each site, scaled against that site’s baseline. NWGS shows CDC’s national median beside its own index as an outside check. The two are compared by rank, not by value, because they use different baselines and site sets.'],
+    ['resp-net','RESP-NET','CDC’s hospitalization surveillance network (COVID-NET, RSV-NET and FluSurv-NET) reporting laboratory-confirmed hospitalization rates in selected states. NWGS pulls it live each week for its research tables and drops the three newest weeks, which CDC still revises.'],
+    ['weekly-history','Weekly history files','Downloadable tables with one row per place, pathogen and week: every county, every state and the nation, for every week CDC currently reports. CSV and Parquet, with a data dictionary. Only weeks with real samples have a row; CDC site identifiers are not included. The latest files are on Data &amp; reports, and every run keeps its own copy in its release.'],
+    ['tour','5-step tour','The guided walk on the Overview page: Monitoring, Signals, Coverage gaps, Forecasts and Equity. Every number and map in it comes from the same weekly run as the rest of the site.'],
     ['validated','Validated (checks passed)',`Every weekly run passes through ${R.n_checks||(R.n_pass+R.n_warning+R.n_fail)} automated quality checks before anything is published: data parsing, county counts, pathogen independence, spatial and model audits, and cross-table consistency. “${R.n_pass} checks passed” means those checks found no problem. Warnings are listed on the Audit log with an explanation. If any check fails, the site keeps last week’s data instead of publishing.`],
     ['run-id','Run ID','A label for one weekly snapshot of the data (for example run_20261009T1509Z). Every number on the site comes from the same run, so tables and charts always agree. Cite it with the data-through date.'],
     ['tiger','TIGER/Line · Socrata · SRA','Three sources named in the run log. TIGER/Line is the Census Bureau county boundary file, downloaded fresh each run rather than stored. Socrata is the platform CDC publishes its datasets on. The SRA is NCBI’s Sequence Read Archive, the public store of raw sequencing reads.'],
@@ -3092,17 +3226,21 @@ methods(){
   const acc=new Date(R.data_pulled_utc).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   el.innerHTML=`<div class="head"><h1>Methods &amp; sources</h1><p class="muted">How the numbers on this site are made, and every dataset and tool they come from.</p></div>
   <article class="panel c12"><header><h2>Getting the data</h2></header>
-    <p>Every weekly run publishes a permanent release holding the complete set of pipeline tables, the figures, the whole app export, the manifest and the run log: <a href="https://github.com/victorialovefranklin/nwgs-grid-site/releases" target="_blank" rel="noopener">github.com/victorialovefranklin/nwgs-grid-site/releases</a>. Cite the release your numbers came from rather than the live site, because the live site is rebuilt every week and a release does not change.</p>
+    <p>The full weekly history for every pathogen by county, state and nation can be downloaded as CSV or Parquet from <a href="#reports" data-go="reports">Data &amp; reports</a>. The latest files are served with the site; each run's files are kept in its release. Only weeks with real samples have a row, and the finest level is the county.</p>
+  <p>Every weekly run publishes a permanent release holding the complete set of pipeline tables, the weekly history files (from the run that added them onward), the figures, the whole app export, the manifest and the run log: <a href="https://github.com/victorialovefranklin/nwgs-grid-site/releases" target="_blank" rel="noopener">github.com/victorialovefranklin/nwgs-grid-site/releases</a>. Cite the release your numbers came from rather than the live site, because the live site is rebuilt every week and a release does not change.</p>
     <p class="small">For a written summary of any county, state or the country as a whole, with its maps and figures, use <a href="#reports" data-go="reports">Data &amp; reports</a>.</p></article>
+  ${cdcScheduleTable()}
   <article class="panel c12"><header><h2>Materials and methods</h2><span class="small muted">what the pipeline does, in order</span></header>
     <p>Every figure on this site is produced by one automated pipeline that runs weekly and rebuilds the whole site from a single frozen snapshot. The steps below run in this order; each is recorded in the run log, and the <a href="#audit" data-go="audit">Audit log</a> reports the result of every check.</p>
     <ol class="methodsteps">
-      <li><b>Acquisition.</b> Six CDC National Wastewater Surveillance System pathogen datasets, the NSSP emergency-department series and CDC PLACES are pulled from the Socrata API on data.cdc.gov. Each dataset is saved unmodified as a frozen snapshot with its row count and the provider's own update timestamp, so the inputs to any past run can be recovered exactly.</li>
+      <li><b>Acquisition.</b> Six CDC National Wastewater Surveillance System pathogen datasets, CDC's Wastewater Viral Activity Level, the NSSP emergency-department series, RESP-NET hospitalization rates and CDC PLACES are pulled from the Socrata API on data.cdc.gov. How often CDC updates each one is read from CDC's own metadata every run and listed below. Each dataset is saved unmodified as a frozen snapshot with its row count and the provider's own update timestamp, so the inputs to any past run can be recovered exactly.</li>
       <li><b>Harmonization.</b> The six wastewater datasets do not share a schema. Fields are mapped onto a common set of names through an explicit alias table, and the mapping actually used is written out per pathogen rather than assumed. County identifiers are normalized to five-digit FIPS, and sewersheds that span several counties are kept in their native multi-county form for coverage work instead of being forced to one county.</li>
       <li><b>Measurement selection.</b> Where a dataset offers more than one concentration measure, one is chosen by a fixed, documented hierarchy: fecal-normalized first, then flow-population-normalized, then raw. The choice is recorded per row, so no figure silently mixes measurement types.</li>
       <li><b>Within-site standardization.</b> Absolute concentrations are not comparable between sites, because laboratories, methods and sewersheds differ. Each site is therefore compared only against its own history: concentrations are log-transformed and converted to a z-score within that site, grouped by laboratory method and sample matrix. County and national figures are medians across those standardized values, never averages of raw concentrations.</li>
       <li><b>Quality control.</b> Inhibition and no-template-control flags are carried through rather than dropped, zero and negative concentrations are treated as missing before log transformation, and a sample never tested is recorded as untested rather than as a negative.</li>
       <li><b>Analysis.</b> Clinical alignment uses Spearman cross-correlation at lags of 0&ndash;6 weeks with Benjamini&ndash;Hochberg correction across all state&ndash;pathogen pairs. Spatial clustering uses global and local Moran's I on a six-nearest-neighbour graph in EPSG:5070 with permutation inference. Coverage models are binomial GLMs at county level. Forecast models are evaluated only on weeks they never saw.</li>
+      <li><b>External check against CDC.</b> CDC publishes its own Wastewater Viral Activity Level (WVAL) for SARS-CoV-2, influenza A and RSV. NWGS takes the median site WVAL nationally and by state, the way CDC aggregates it, and reports how closely the NWGS index rises and falls with it (Spearman rank correlation on the weeks both report). The two use different baselines and site sets, so they are compared by rank, never by value, and WVAL is never an input to the NWGS index.</li>
+      <li><b>Hospitalization extension.</b> State-week wastewater is compared with laboratory-confirmed hospitalization rates from CDC RESP-NET (COVID-NET, RSV-NET, FluSurv-NET), pulled live each run. CDC's three most recent weeks are left out because CDC still revises them. If the live pull fails, the archived October 2, 2025 copy is used and the run log says so. These results feed the research tables in each release, not the site.</li>
       <li><b>Validation gate.</b> The run passes through automated checks covering parsing, county counts, pathogen independence, spatial and model audits and cross-table consistency. Warnings are published with an explanation attached. <b>If any check fails, nothing is published and the previous week's site is kept.</b></li>
       <li><b>Publication.</b> The site is one static page built from a single export, so every table and chart on it comes from the same run. The run identifier and data-through date are shown on every page, and each week's tables, figures and log are archived as a permanent release for citation.</li>
     </ol>
@@ -3118,6 +3256,7 @@ methods(){
     ${D.sources.map(s=>`<li>Centers for Disease Control and Prevention. <i>${esc(s.dataset_name)}</i> [dataset <span class="mono">${s.dataset_id}</span>]. National Wastewater Surveillance System (NWSS). data.cdc.gov; updated ${dateFmt(String(s.updated_utc).slice(0,10))}; ${s.rows.toLocaleString()} rows. <a href="${s.source_url}" target="_blank" rel="noopener">${s.source_url.replace('https://','')}</a></li>`).join('')}
     ${D.cdc_wval?`<li>Centers for Disease Control and Prevention. <i>CDC Wastewater Viral Activity Level for SARS-CoV-2, Influenza A and RSV</i> [dataset <span class="mono">atcp-73re</span>]. NWSS. data.cdc.gov. Used only as an external comparison for the NWGS index. <a href="https://data.cdc.gov/d/atcp-73re" target="_blank" rel="noopener">data.cdc.gov/d/atcp-73re</a></li>`:''}
     <li>Centers for Disease Control and Prevention. <i>NSSP Emergency Department Visit Trajectories by State and Sub State Regions: COVID-19, Flu, RSV, Combined</i> [dataset <span class="mono">rdmq-nq56</span>]. National Syndromic Surveillance Program. <a href="https://data.cdc.gov/d/rdmq-nq56" target="_blank" rel="noopener">data.cdc.gov/d/rdmq-nq56</a></li>
+    <li>Centers for Disease Control and Prevention. <i>RESP-NET Rates and Clinical Data</i> [dataset <span class="mono">kvib-3txy</span>]. Respiratory Virus Hospitalization Surveillance Network. Used for the hospitalization research tables. <a href="https://data.cdc.gov/d/kvib-3txy" target="_blank" rel="noopener">data.cdc.gov/d/kvib-3txy</a></li>
     <li>Centers for Disease Control and Prevention. <i>PLACES: Local Data for Better Health, County Data</i> [dataset <span class="mono">swc5-untb</span>]. County health context measures. <a href="https://data.cdc.gov/d/swc5-untb" target="_blank" rel="noopener">data.cdc.gov/d/swc5-untb</a></li>
     <li>Centers for Disease Control and Prevention / Agency for Toxic Substances and Disease Registry / Geospatial Research, Analysis, and Services Program. <i>CDC/ATSDR Social Vulnerability Index 2022 Database, US (county)</i>. <a href="https://www.atsdr.cdc.gov/place-health/php/svi/" target="_blank" rel="noopener">atsdr.cdc.gov/place-health/php/svi</a></li>
     <li>U.S. Census Bureau. <i>2025 TIGER/Line Shapefiles: Counties</i>. <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target="_blank" rel="noopener">census.gov TIGER/Line</a></li>
