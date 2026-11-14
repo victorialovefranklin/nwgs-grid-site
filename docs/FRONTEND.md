@@ -78,6 +78,7 @@ width.
 | `audit` | Audit log |
 | `methods` | Methods & sources |
 | `glossary` | Glossary |
+| `licensing` | Licensing & terms |
 | `about` | About & how to cite |
 
 **Adding a view** means four changes in `template.html`: an entry in `VIEWS`,

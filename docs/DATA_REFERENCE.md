@@ -904,14 +904,14 @@ its fetch for the run.
 | `morans_i` | number | no | `0.2376` | Global Moran's I. Zero means activity is scattered at random across counties; positive means like sits next to like. |
 | `expected_i` | number | no | `-0.001302` | Value of Moran's I expected under spatial randomness, for comparison. |
 | `p_sim` | number | no | `0.001` |  |
-| `z_sim` | number | no | `12.31` |  |
+| `z_sim` | number | no | `12.41` |  |
 | `recent_activity_counties` | integer | no | `786` |  |
 | `total_excluded_from_spatial` | integer | no | `17` |  |
-| `high-high` | integer | no | `67` |  |
+| `high-high` | integer | no | `68` |  |
 | `high-low` | integer | no | `14` |  |
 | `low-high` | integer | no | `20` |  |
-| `low-low` | integer | no | `85` |  |
-| `not_significant` | integer | no | `583` |  |
+| `low-low` | integer | no | `88` |  |
+| `not_significant` | integer | no | `579` |  |
 
 ### 3.47 StateLag
 
@@ -940,7 +940,7 @@ its fetch for the run.
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
 | `pdb_entry_id` | text | no | `1RU7` |  |
-| `entity_id` | integer | no | `1` |  |
+| `entity_id` | integer | no | `2` |  |
 | `feature_type` | text | no | `Signal peptide` | UniProt feature class for the annotated region. |
 | `feature_description` | text | no | `Signal peptide` | UniProt description of the region. |
 | `uniprot_accession` | text | no | `P03452` | UniProt accession the annotation came from. |
@@ -951,7 +951,7 @@ its fetch for the run.
 | `pdb_chain` | text | yes | `A` | Chain the region maps to in the structure. |
 | `pdb_start` | number | yes | `1` | Start residue in PDB numbering. |
 | `pdb_end` | number | yes | `3` | End residue in PDB numbering. |
-| `mapping_status` | text | no | `MAPPED` | Whether the UniProt region could be aligned to PDB residue numbering. Regions that cannot be aligned are not displayed. |
+| `mapping_status` | text | no | `NOT_IN_STRUCTURE` | Whether the UniProt region could be aligned to PDB residue numbering. Regions that cannot be aligned are not displayed. |
 | `annotation_source` | text | no | `UniProtKB` |  |
 | `annotation_source_url` | text | no | `https://www.uniprot.org/uniprotkb/P03452`… | Link to the annotation at its source. |
 | `expert_review_status` | text | no | `pending_expert_review` | Whether a domain expert has reviewed the annotation set. |
