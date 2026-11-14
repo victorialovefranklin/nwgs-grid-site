@@ -1098,7 +1098,7 @@ function stateMap(el, colorOf, tipOf){
   svg.append('g').selectAll('path').data(statesFeat).join('path').attr('d',path).attr('stroke',css('--surface')).attr('stroke-width',1)
     .attr('fill',d=>colorOf(STATE_FIPS[d.id])).on('mouseenter',(e,d)=>showTip(e,tipOf(STATE_FIPS[d.id],d.properties.name))).on('mousemove',moveTip).on('mouseleave',hideTip);
 }
-const cname = f => {const n=D.names[f];return n?`${esc(n[0])}, ${esc(n[1])}`:`County ${f}`};
+const cname = f => {const n=D.names[f]||(D.monitoring_names||{})[f];return n?`${esc(n[0])}, ${esc(n[1])}`:`County ${f}`};
 
 /* ---------- 5-step tour (story map from Franklin HUB GeoHUB) ----------
    Every figure comes from this run's D. A chapter whose data is missing in
