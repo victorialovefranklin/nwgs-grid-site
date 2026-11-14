@@ -5,6 +5,6 @@
 [17c/19] RESP-NET hospitalization alignment and nowcast validation...
 [OK] kvib-3txy: RESP-NET Rates and Clinical Data | 12 API fields
 [RESP-NET] 7429 state-weeks kept, 13 states, 2022-10-01 to 2026-10-10; nowcast weeks dropped: {'COVID-NET': ['2026-10-17', '2026-10-24', '2026-10-31'], 'FluSurv-NET': ['2026-10-17', '2026-10-24', '2026-10-31'], 'RSV-NET': ['2026-10-17', '2026-10-24', '2026-10-31']}
-[OK] source CDC RESP-NET hospitalization rates (live kvib-3txy, pulled 2026-11-13): OK - 7429 state-weeks, 13 states, 2022-10-01 to 2026-10-10
+[OK] source CDC RESP-NET hospitalization rates (live kvib-3txy, pulled 2026-11-14): OK - 7429 state-weeks, 13 states, 2022-10-01 to 2026-10-10
 [LAG CALENDAR] 38 of 157 state-pathogen series had missing weeks (337 gap weeks); 0 not on a weekly grid
-run 60 at 2026-11-13T21:05Z
+run 62 at 2026-11-14T19:12Z
