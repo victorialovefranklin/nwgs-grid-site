@@ -911,8 +911,11 @@ h2{font-weight:700;letter-spacing:-.02em}
 .tour-nav button{border-radius:999px}
 
 /* Footer: black band, mirrors the Franklin HUB site */
-.sitefoot{background:var(--fh-black);color:#aab1bb;border-top:0;box-shadow:0 0 0 100vmax var(--fh-black);clip-path:inset(0 -100vmax);
-  margin-top:48px;padding:36px 0 40px}
+.sitefoot{background:#fff;color:#69707b;border-top:1px solid #e6e3ee;box-shadow:0 0 0 100vmax #fff;clip-path:inset(0 -100vmax);
+  margin-top:48px;padding:28px 0 36px;flex-direction:column;gap:6px!important}
+.sitefoot a{color:#5d20b7!important}
+.sitefoot .f1{color:#161a26;font-size:.84rem}.sitefoot .f1 b{font-weight:800}
+.sitefoot .f2{font-size:.78rem}
 .sitefoot a{color:var(--fh-lime)}
 .sitefoot .fhsc{color:#e9ecef}
 .sitefoot .fhsc img{height:30px;background:#fff;padding:5px 9px;border-radius:4px}
@@ -1024,10 +1027,8 @@ tbody tr:hover td{background:#fafaf6}
     <section class="view" id="v-licensing" hidden></section>
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
-      <span class="fhsc"><span>A research platform of</span><img src="img/fhsc-logo.png" alt="Franklin HUB SMART Center" width="150" height="29"></span>
-      <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved. Licensed through FRANKLIN HUB SMART Center LLC.</span>
-      <span class="footmail"></span>
-      <span>NWGS Grid™ · <a href="#about" data-go="about">About, contact &amp; how to cite</a> · <a href="#licensing" data-go="licensing">Licensing &amp; terms</a></span>
+      <span class="f1"><b>NWGS Grid™</b> · A Franklin HUB SMART Center research platform · <span class="footmail"></span></span>
+      <span class="f2">© <span class="cy">2026</span> Victoria Love Franklin · Licensed through FRANKLIN HUB SMART Center LLC · <a href="#about" data-go="about">About &amp; how to cite</a> · <a href="#licensing" data-go="licensing">Licensing &amp; terms</a></span>
     </footer>
   </main>
 </div>
