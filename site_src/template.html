@@ -1021,12 +1021,13 @@ tbody tr:hover td{background:#fafaf6}
     <section class="view" id="v-methods" hidden></section>
     <section class="view" id="v-glossary" hidden></section>
     <section class="view" id="v-why" hidden></section>
+    <section class="view" id="v-licensing" hidden></section>
     <section class="view" id="v-about" hidden></section>
     <footer class="sitefoot">
       <span class="fhsc"><span>A research platform of</span><img src="img/fhsc-logo.png" alt="Franklin HUB SMART Center" width="150" height="29"></span>
-      <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved.</span>
+      <span>© <span class="cy">2026</span> Victoria Love Franklin. All rights reserved. Licensed through FRANKLIN HUB SMART Center LLC.</span>
       <span class="footmail"></span>
-      <span>NWGS Grid™ · <a href="#about" data-go="about">About, contact &amp; how to cite</a></span>
+      <span>NWGS Grid™ · <a href="#about" data-go="about">About, contact &amp; how to cite</a> · <a href="#licensing" data-go="licensing">Licensing &amp; terms</a></span>
     </footer>
   </main>
 </div>
@@ -1391,7 +1392,7 @@ const levelLegend = () => legend([...LEVELS.map(l=>[lvColor(l),l]),[css('--nodat
 const chip = l => `<span class="chip" style="background:${lvColor(l)};color:${['Typical','Low','Elevated'].includes(l)?'#13222a':'#fff'};${l==='Typical'?'border-color:var(--typ-line)':''}">${esc(l)}</span>`;
 
 /* ---------- routing ---------- */
-const VIEWS=[['start','Start here'],['why','Why NWGS Grid exists'],['dashboard','This week'],['map','County map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['reports','Data & reports'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['about','About & how to cite']];
+const VIEWS=[['start','Start here'],['why','Why NWGS Grid exists'],['dashboard','This week'],['map','County map'],['analytics','Trends & timing'],['leadtime','Lead time'],['predictive','Predictive models'],['monitoring','Where monitoring happens'],['equity','Coverage & equity'],['global','Global coverage'],['tennessee','Tennessee'],['genomics','Genomics & AMR'],['structures','Protein structures'],['alerts','Alerts'],['myalerts','My alerts'],['reports','Data & reports'],['audit','Audit log'],['methods','Methods & sources'],['glossary','Glossary'],['licensing','Licensing & terms'],['about','About & how to cite']];
 const built={};
 let PRESET_STATE='', ALERT_STATE='';
 const nav=document.getElementById('nav');
@@ -1406,7 +1407,7 @@ const GROUPS=[
   ['Trends & Forecasts',   ['analytics','leadtime','predictive']],
   ['Coverage & Equity',    ['equity','monitoring','tennessee','global']],
   ['Genomics & Emerging',  ['genomics','structures']],
-  ['Methods & Trust',      ['audit','methods','glossary','reports','about']],
+  ['Methods & Trust',      ['audit','methods','glossary','reports','licensing','about']],
 ];
 const LABEL=Object.fromEntries(VIEWS);
 // A view missing from every group would become unreachable from the menu.
@@ -1500,7 +1501,7 @@ const checkWord = R.n_fail ? `${R.n_fail} failed`
   : `All ${R.n_pass} passed`;
 document.getElementById('status').innerHTML=
   `<div class="sinfo">
-     <span class="sitem"><span class="slab">Data through</span>
+     <span class="sitem"><span class="slab">Latest sample</span>
        <b>${dateFmt(D.latest_sample||R.data_as_of)}</b>
        <button class="qmark" data-gloss="latest-sample" aria-label="What is the latest sample?">?</button></span>
      <span class="sitem opt-s"><span class="slab">Last updated</span>
@@ -3069,6 +3070,39 @@ myalerts(){
   load();
 },
 
+licensing(){
+  const el=document.getElementById('v-licensing');
+  const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
+  el.innerHTML=`<div class="head"><h1>Licensing &amp; terms</h1><p>NWGS Grid™ is free to view and cite. Organizations that build it into their work license it through FRANKLIN HUB SMART Center LLC.</p></div>
+  <div class="grid">
+  <article class="panel c6"><h2>Free to use</h2>
+    <p>You may view every public page and use it for personal, educational, research, journalism and public&#8209;health information, and quote figures or show screenshots with credit.</p>
+    <p class="small muted">Cite the data&#8209;through date and run ID shown on <a href="#about" data-go="about">About &amp; how to cite</a>, and credit the original data sources listed on <a href="#methods" data-go="methods">Methods &amp; sources</a>.</p></article>
+  <article class="panel c6"><h2>What needs a license</h2>
+    <ul style="margin:0 0 0 20px;padding:0;line-height:1.6">
+      <li>Using NWGS Grid™ inside an organization’s operations, products or services</li>
+      <li>Bulk downloads, a weekly data feed or the API</li>
+      <li>Custom views, alerts or integrations for your area</li>
+      <li>The source code, pipeline and reproducibility package</li></ul></article>
+  <article class="panel c6"><h2>What a license includes</h2>
+    <p><b>Core</b>, included in every license: overview, county map, trends and timing, alerts, audit log, and methods and sources.</p>
+    <p><b>Add&#8209;on modules:</b> advanced analytics (lead time, predictive models, clinical alignment, clusters), coverage and equity, genomics and AMR, global coverage, and data and API.</p>
+    <p class="small muted">New features are offered as add&#8209;ons as they launch, with a free preview for current licensees. Updates to modules you license are included.</p></article>
+  <article class="panel c6"><h2>Licenses by state or national</h2>
+    <p>Licenses cover one state, several states, or the whole country (all 50 states and DC), for government, public health, academic, community and enterprise teams. A reproducibility package (source code, ready&#8209;to&#8209;run environment, validation checks, audit log and setup support) can be added at any tier.</p>
+    <p class="small muted">Pricing is shared on request.</p>
+    <p><a class="btn primary" href="#about" data-go="about">Request a license</a> <a class="btn" href="${mail('NWGS Grid license request','Name:\nOrganization:\nState(s) or national:\nIntended use:\nModules or reproducibility package:\n')}">Email instead</a></p></article>
+  <article class="panel c12"><h2>Terms of use</h2>
+    <ul style="margin:0 0 0 20px;padding:0;line-height:1.6">
+      <li><b>Not allowed:</b> reselling or republishing the tool or its outputs as your own service, scraping or overloading the site, removing credits or trademarks, implying endorsement, or trying to identify any individual from the data.</li>
+      <li><b>Data sources</b> keep their own terms. U.S. government data such as CDC data is not subject to copyright; some sources require specific credit, and data licensed for noncommercial use only is shown for noncommercial purposes.</li>
+      <li><b>Not medical or emergency advice.</b> NWGS Grid™ describes patterns in available data for research, planning and awareness. Data can be delayed, incomplete or revised.</li>
+      <li><b>No warranty.</b> The site is provided as is. To the extent the law allows, no liability is accepted for decisions made using it.</li>
+      <li><b>Ownership.</b> The software, pipeline, design, text, processed data and the name NWGS Grid™ are proprietary. Using the free site gives no rights to them.</li></ul>
+    <p class="small muted">Full terms of use for NWGS Grid™ and GridAI™: <a href="https://franklinhubsmartcenter.com/licensing" target="_blank" rel="noopener">franklinhubsmartcenter.com/licensing</a>. Tennessee law applies.</p></article>
+  </div>`;
+},
+
 about(){
   const el=document.getElementById('v-about');
   const mail=(subj,body)=>`mailto:${EMAIL}?subject=${encodeURIComponent(subj)}${body?`&body=${encodeURIComponent(body)}`:''}`;
@@ -3158,7 +3192,7 @@ about(){
     <p class="note">The poster’s stated limitation, missing sewer-access location data for the study site, is the same problem this project set out to solve at national scale: you cannot describe who surveillance reaches without knowing where the sewershed actually is. Since October 2026 it is measured rather than approximated, from EPA’s national sewershed boundaries. The poster itself was collaborative work with the co-authors named above, while <b>NWGS Grid™ is independent work</b> that followed it.</p></article>
   <div class="grid">
   <article class="panel c6"><h2>Work with NWGS Grid</h2>
-    <div class="opt"><h3>License request</h3><p class="small muted">Use of the code, pipeline, figures or data products in research, a product or a service.</p>
+    <div class="opt"><h3>License request</h3><p class="small muted">Use of the code, pipeline, figures or data products in research, a product or a service. See <a href="#licensing" data-go="licensing">what a license includes</a>.</p>
       ${SB?`<details><summary class="btn">Request a license</summary><form class="form" id="lic-form" style="margin-top:10px">
         <div class="row2"><label>Name<input id="lic-name" required maxlength="200" autocomplete="name"></label><label>Email<input id="lic-email" type="email" required maxlength="200" autocomplete="email" value="${esc(USER?.email||'')}"></label></div>
         <div class="row2"><label>Organization<input id="lic-org" maxlength="200" autocomplete="organization"></label><label>Intended use<select id="lic-use"><option>Research</option><option>Commercial</option><option>Teaching</option><option>Public health practice</option><option>Other</option></select></label></div>
@@ -3180,7 +3214,7 @@ about(){
     <p class="cite">Franklin, V. L. (${pulledYear}). <i>NWGS Grid™: National Wastewater Genomics Smart Grid</i> (data through ${dateFmt(R.data_as_of)}, ${esc(R.run_id)}) [Software and web dashboard]. ${esc(site)}</p>
     <p class="small muted">Numbers change every week as CDC updates its data. Cite the data-through date and run ID shown here, and use one weekly release for all numbers in a paper.</p></article>
   <article class="panel"><h2>Copyright &amp; terms</h2>
-    <p class="small">© ${copyYears} Victoria Love Franklin. All rights reserved. The code, analysis, design, text, tables and figures may not be copied, modified or redistributed without written permission. Linking and scholarly citation with attribution are welcome.</p>
+    <p class="small">© ${copyYears} Victoria Love Franklin. All rights reserved. The code, analysis, design, text, tables and figures may not be copied, modified or redistributed without written permission. Linking and scholarly citation with attribution are welcome. Licenses are issued through FRANKLIN HUB SMART Center LLC; see <a href="#licensing" data-go="licensing">Licensing &amp; terms</a>.</p>
     <p class="small muted">Underlying data from CDC, CDC/ATSDR, the U.S. Census Bureau, USDA Economic Research Service, the U.S. Environmental Protection Agency, NCBI, RCSB PDB, UniProt, WHO/UNICEF JMP, the World Bank and the Robert Koch Institute remain subject to their providers’ terms. Maps use us-atlas, d3 and topojson (ISC licenses). For research and public-health information only; not medical advice. Not affiliated with or endorsed by CDC. NWGS Grid™ is a trademark of Victoria Love Franklin.</p></article>
   </div></div>`;
   const lic=document.getElementById('lic-form');
