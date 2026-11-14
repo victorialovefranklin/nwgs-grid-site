@@ -236,7 +236,7 @@ precomputed: nothing is queried at page load, so any page can be reproduced
 exactly from the archived release for its run.
 
 {table([["`site_src/template.html`", "The entire front end: markup, styles and script in one file."],
-        ["`site_src/counties-albers-10m.json`", "County and state geometry (us-atlas, ISC licence)."],
+        ["`site_src/counties-albers-10m.json`", "County and state geometry (us-atlas, ISC licence), with Connecticut's nine planning regions in place of its retired counties."],
         ["`site_src/supabase.json`", "Public project URL and publishable key for sign-in."],
         ["`site_src/img/`", "Logo, favicon, portrait and poster images."],
         ["`scripts/build_site.py`", "Reads an export, builds the payload, writes the page."]],
@@ -689,6 +689,17 @@ Retrieved from `data.cdc.gov` through the Socrata API. Context data comes from
 the US Census Bureau, CDC/ATSDR, CDC PLACES, NCBI, RCSB PDB, UniProt, the World
 Bank and WHO/UNICEF JMP; each is recorded on the Audit log with the outcome of
 its fetch for the run.
+
+**Connecticut county codes.** In 2022 Connecticut's eight counties
+(09001-09015) were replaced by nine planning regions (09110-09190). CDC still
+labels Connecticut sites with the retired codes; every other source and the
+map use the regions. The pipeline translates CDC's codes with
+`static_inputs/CT_COUNTY_TO_PLANNING_REGION.csv` (rule
+`nwgs-ct-planning-region-v1`): a site is credited to each region holding at
+least 25% of its old county's sewered residents, and its single `county_fips`
+is the region holding the largest share. CDC's own code is kept in
+`county_fips_cdc`. Connecticut rows in every entity below therefore carry
+planning-region codes, and are approximate at the region edges.
 
 ---
 

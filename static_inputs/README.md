@@ -19,6 +19,7 @@ The large files are gzipped. Every byte of the original is preserved —
 | `US_Wastewater_AMR_ARG_2024.csv` | [Kim et al. 2026](https://doi.org/10.1038/s41467-026-71195-4), CC BY 4.0, `Averaged` sheet of the published manuscript data | 2026-10-16 | 1,792 rows, 163 plants, 39 states | 0.3 MB |
 | `Kim_2025_ManuscriptData.xlsx` | The same study's full workbook, archived whole: `README`, `dPCR_Conc`, `Averaged`, `Aggregated`, `Determinants` | 2026-10-16 | 4,811 dPCR rows | 0.9 MB |
 | `RESPNET_Hospitalization_Rates_20251002.csv.gz` | [CDC RESP-NET rates](https://doi.org/10.3886/E238559V1-219009) (data.cdc.gov kvib-3txy), archived by ICPSR/DataLumos | 2025-10-02 | 50,703 rows × 12 cols, 6.6 MB | 0.5 MB |
+| `CT_COUNTY_TO_PLANNING_REGION.csv` | Built from the [CT Data Collaborative 2022 tract crosswalk](https://github.com/CT-Data-Collaborative/2022-tract-crosswalk) (879 tracts, 2020 county and 2022 planning-region codes), weighted by SVI 2022 tract population and EPA sewered population | 2026-11-14 | 19 county–region pairs | <0.1 MB |
 | `NWGS_ASSAY_TARGETS.template.csv` | Template for the optional curated assay-target panel | — | — | <0.1 MB |
 | `NWGS_FORECAST_LEDGER.csv` | Written back by the workflow after each run | — | grows weekly | — |
 
@@ -39,6 +40,18 @@ pivoted before use.
 which replaced its eight counties. Surveillance records still carrying the
 retired county codes will not join, and the unmatched identifiers are reported
 in `Table06e` rather than discarded.
+
+**CDC NWSS still labels Connecticut sites with the retired county codes**
+(09001–09015), so the pipeline translates them with
+`CT_COUNTY_TO_PLANNING_REGION.csv` when it reads CDC's files. The old counties
+do not nest inside the regions and CDC does not say which town a plant is in,
+so a site is credited to every region holding at least 25% of its old county's
+sewered residents, and its single county code becomes the region holding the
+largest share (rule `nwgs-ct-planning-region-v1`). Fairfield County, for
+example, is credited to Western Connecticut (52% of its sewered residents) and
+Greater Bridgeport (45%). The original CDC code is kept as `county_fips_cdc`.
+This is an approximation at the edges and is stated as one wherever
+Connecticut figures appear.
 
 **EPA's sewershed boundaries are 81% modelled.** 13,826 of 17,079 were produced
 by machine learning and 3,253 come from reported sources. `Method`, `Source`,

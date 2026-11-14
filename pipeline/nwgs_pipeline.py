@@ -533,6 +533,8 @@ EPA_CW_TR_PATH = Path(os.getenv("NWGS_EPA_CROSSWALK_TR_PATH",
                                 str(STATIC_ROOT / "EPA_Sewershed_Crosswalk_tracts.csv.gz")))
 EPA_SEWERSHED_PATH = Path(os.getenv("NWGS_EPA_SEWERSHED_PATH",
                                     str(STATIC_ROOT / "EPA_Sewershed_Attributes.csv.gz")))
+CT_CROSSWALK_PATH = Path(os.getenv("NWGS_CT_CROSSWALK_PATH",
+                                   str(STATIC_ROOT / "CT_COUNTY_TO_PLANNING_REGION.csv")))
 
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 PROC_DIR = PROJECT_ROOT / "data" / "processed"
@@ -824,6 +826,74 @@ def normalize_fips(x):
         return pd.NA
     return s.zfill(5)[-5:]
 
+# ------------------------------------------------------------
+# Connecticut county codes (v5.25)
+#
+# In 2022 the Census Bureau replaced Connecticut's eight counties
+# (09001-09015) with nine planning regions (09110-09190). Every reference
+# layer here - SVI, RUCC, the EPA sewershed crosswalk and the map - uses the
+# regions. CDC NWSS still labels Connecticut sites with the retired county
+# codes, so without a translation none of them join and the whole state
+# reads as untested.
+#
+# The old counties do not nest inside the regions, and CDC does not publish
+# which town a plant sits in. A site labelled with an old county is
+# therefore credited to every region that holds at least
+# CT_REGION_MIN_SHARE of that county's sewered residents, and its single
+# county code becomes the region holding the largest share. The shares come
+# from census tracts (CT Data Collaborative 2022 tract crosswalk) weighted by
+# EPA sewered population, and are stored in static_inputs so the rule can be
+# checked. The original CDC code is kept in county_fips_cdc.
+# ------------------------------------------------------------
+CT_CROSSWALK_RULE_VERSION = "nwgs-ct-planning-region-v1"
+CT_REGION_MIN_SHARE = 0.25
+_CT_XWALK = None
+
+
+def ct_crosswalk():
+    """{old county fips: (primary region, [regions credited])}, empty if the file is absent."""
+    global _CT_XWALK
+    if _CT_XWALK is not None:
+        return _CT_XWALK
+    _CT_XWALK = {}
+    if not CT_CROSSWALK_PATH.exists():
+        print(f"[CT] no crosswalk at {CT_CROSSWALK_PATH}; Connecticut sites keep CDC's retired county codes")
+        return _CT_XWALK
+    cw = pd.read_csv(CT_CROSSWALK_PATH, dtype={"old_county_fips": str, "region_fips": str})
+    for old, g in cw.groupby("old_county_fips"):
+        g = g.sort_values("sewered_share", ascending=False)
+        primary = g["region_fips"].iat[0]
+        credited = [r for r in g.loc[g["sewered_share"] >= CT_REGION_MIN_SHARE, "region_fips"]]
+        if primary not in credited:
+            credited.insert(0, primary)
+        _CT_XWALK[old] = (primary, credited)
+    return _CT_XWALK
+
+
+def ct_region_list(native):
+    """Rewrite a CDC county list, translating retired Connecticut codes."""
+    if pd.isna(native):
+        return native
+    xw = ct_crosswalk()
+    if not xw:
+        return native
+    bits = [b for b in re.split(r"[,;|]", str(native)) if str(b).strip()]
+    out = []
+    for b in bits:
+        f = normalize_fips(b)
+        regions = xw.get(f, (None, [f]))[1] if pd.notna(f) else []
+        for r in regions:
+            if r not in out:
+                out.append(r)
+    return ",".join(out) if out else native
+
+
+def ct_primary_region(fips):
+    if pd.isna(fips):
+        return fips
+    return ct_crosswalk().get(str(fips), (fips, None))[0]
+
+
 def state_fips_from_county(fips):
     if pd.isna(fips):
         return pd.NA
@@ -1079,6 +1149,21 @@ def harmonize_pathogen(df, pathogen_key, meta):
     out["county_fips"] = out["county_fips"].astype("string").map(
         lambda x: normalize_fips(x) if pd.notna(x) and "," not in str(x) else pd.NA
     )
+
+    # Retired Connecticut county codes -> 2022 planning regions (see ct_crosswalk).
+    out["county_fips_cdc"] = out["county_fips_native"]
+    # The District of Columbia has one county-equivalent, 11001. CDC records
+    # occasionally carry 11000 or another 11xxx code; any of them can only mean 11001.
+    dc = out["county_fips_native"].astype("string").str.fullmatch(r"\s*0?11\d{3}\s*", na=False)
+    if dc.any():
+        out.loc[dc, "county_fips_native"] = "11001"
+        out.loc[dc, "county_fips"] = "11001"
+    ct = out["county_fips_native"].astype("string").str.contains(r"(?:^|[,;|\s])0?90(?:0[1-9]|1[0-5])\b", regex=True, na=False)
+    if ct.any():
+        out.loc[ct, "county_fips_native"] = out.loc[ct, "county_fips_native"].map(ct_region_list)
+        out.loc[ct, "county_fips"] = out.loc[ct, "county_fips"].map(ct_primary_region)
+        print(f"[CT] {pathogen_key}: {int(ct.sum())} rows moved from retired county codes to planning regions "
+              f"({CT_CROSSWALK_RULE_VERSION}, regions credited at >= {CT_REGION_MIN_SHARE:.0%} of sewered residents)")
 
     # QC flags remain transparent; "not tested" is not a failure.
     inhib = out["inhibition_detect"].fillna("not reported").astype(str).str.strip().str.lower()

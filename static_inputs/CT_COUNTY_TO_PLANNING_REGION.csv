@@ -1,0 +1,20 @@
+old_county_fips,old_county_name,region_fips,region_name,residents,sewered_residents,population_share,sewered_share
+09001,Fairfield County,09120,Greater Bridgeport Planning Region,326381,306332,0.3406,0.4484
+09001,Fairfield County,09140,Naugatuck Valley Planning Region,41206,24082,0.043,0.0352
+09001,Fairfield County,09190,Western Connecticut Planning Region,590784,352814,0.6164,0.5164
+09003,Hartford County,09110,Capitol Planning Region,825488,695221,0.9194,0.9245
+09003,Hartford County,09140,Naugatuck Valley Planning Region,61052,55723,0.068,0.0741
+09003,Hartford County,09160,Northwest Hills Planning Region,11363,1040,0.0127,0.0014
+09005,Litchfield County,09140,Naugatuck Valley Planning Region,54550,28813,0.2937,0.3477
+09005,Litchfield County,09160,Northwest Hills Planning Region,101333,48853,0.5455,0.5896
+09005,Litchfield County,09190,Western Connecticut Planning Region,29882,5197,0.1609,0.0627
+09007,Middlesex County,09130,Lower Connecticut River Valley Planning Region,165206,56086,1.0,1.0
+09009,New Haven County,09140,Naugatuck Valley Planning Region,295079,210178,0.3406,0.2885
+09009,New Haven County,09170,South Central Connecticut Planning Region,571298,518443,0.6594,0.7115
+09011,New London County,09130,Lower Connecticut River Valley Planning Region,10038,233,0.0374,0.0016
+09011,New London County,09150,Northeastern Connecticut Planning Region,2567,0,0.0096,0.0
+09011,New London County,09180,Southeastern Connecticut Planning Region,255843,145245,0.953,0.9984
+09013,Tolland County,09110,Capitol Planning Region,151677,60369,0.994,1.0
+09013,Tolland County,09150,Northeastern Connecticut Planning Region,917,0,0.006,0.0
+09015,Windham County,09150,Northeastern Connecticut Planning Region,92203,33077,0.7904,0.4761
+09015,Windham County,09180,Southeastern Connecticut Planning Region,24450,36404,0.2096,0.5239

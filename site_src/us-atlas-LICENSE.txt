@@ -11,3 +11,20 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
+
+---------------------------------------------------------------------------
+Connecticut planning regions (09110-09190) in counties-albers-10m.json are
+taken from growella/us-counties-10m-topojson
+(https://github.com/growella/us-counties-10m-topojson), which carries the
+official State of Connecticut planning-region boundaries, projected here to
+the same Albers USA layout (scale 1300, translate 487.5, 305) and simplified
+to the detail of the surrounding counties. They replace the eight retired
+Connecticut counties (09001-09015).
+
+ISC License
+
+Copyright (c) 2025, Homebuyer.com and contributors
+
+Permission to use, copy, modify, and/or distribute this software for any purpose
+with or without fee is hereby granted, provided that the above copyright notice
+and this permission notice appear in all copies.
