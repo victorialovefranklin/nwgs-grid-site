@@ -2633,6 +2633,8 @@ reports(){
 
 monitoring(){
   const el=document.getElementById('v-monitoring');
+  const ST_BINS=[[0,0.2,'Under 20%'],[0.2,0.4,'20–39%'],[0.4,0.6,'40–59%'],[0.6,0.8,'60–79%'],[0.8,1.01,'80% or more']];
+  const ST_COL=['#f2e6d2','#d9c08f','#9fb3cf','#5f80b3','#1d4f91'];
   const head=`<div class="head"><h1>Where monitoring happens</h1><p>Look up any county to see whether wastewater from your area is being tested, and what the answer depends on.</p></div>`;
   const M=D.monitoring, N=D.monitoring_names, NAT=D.monitoring_national;
   if(!M){el.innerHTML=head+`<article class="panel c12">${notLoaded('Monitoring status by county','CDC NWSS site reports, EPA National Sewershed Dataset and the USDA county classification','Without the sewer figures a county cannot be described as reachable or not, and no description is guessed in their place.')}</article>`;return}
@@ -2699,6 +2701,17 @@ monitoring(){
     <p class="small">Most places where wastewater is not being tested do have sewers. That matters, because it means the limit is usually not the method. Wastewater testing can only see people whose homes drain to a sewer, and in counties shown in pale grey that is a small share of residents whatever is spent.</p>
     <p class="note"><b>This is a description, not a scorecard.</b> Taking part in national wastewater surveillance is voluntary, and there are sound reasons a county may not: the cost of sampling and laboratory work, distance from a laboratory, staffing, or a treatment plant too small to sample usefully. A site may also be operating and simply not reporting to the national system. Nothing here says that any county, utility or health department has fallen short.</p>
     <p class="note"><b>Where the sewer figures come from.</b> Sewer service is measured from the <a href="https://github.com/USEPA/Sewersheds" target="_blank" rel="noopener">EPA National Sewershed Dataset</a>, which maps the area draining to each treatment plant and shares out census population by building footprints. EPA produced ${NAT&&NAT.sewersheds_modelled?num(NAT.sewersheds_modelled):'most'} of those boundaries with a model and ${NAT&&NAT.sewersheds_sourced?num(NAT.sewersheds_sourced):'the rest'} from boundaries reported by the utilities themselves, so an individual county's sewer share is an estimate rather than a survey. The counts above move if the modelled boundaries are excluded; <a href="#methods" data-go="methods">Methods &amp; sources</a> gives the range. Vulnerability figures use the <a href="https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html" target="_blank" rel="noopener">CDC/ATSDR Social Vulnerability Index</a> for 2022.</p>
+  </article>
+
+  <article class="panel c12" id="mon-states"><header><h2>State by state</h2></header>
+    <p>The share of each state's residents on sewers who live in a county where wastewater is being tested. Low shares mark the states where national wastewater surveillance sees least.</p>
+    <div class="mapbox" id="mon-stmap"></div>
+    ${legend(ST_BINS.map((b,i)=>[ST_COL[i],b[2]]).concat([[css('--nodata'),'No data or not matched']]))}
+    <h3 style="margin:22px 0 8px">Least covered states</h3>
+    <div class="tbl scroll"><table id="mon-st-low"></table></div>
+    <details style="margin-top:12px"><summary class="btn small">Show all states</summary><div class="tbl scroll" style="margin-top:10px"><table id="mon-st-all"></table></div></details>
+    <p class="note" id="mon-st-note"></p>
+    <p class="small">Counted from the same county classification as the national map: a county counts as tested when at least one site reported in this update, and its sewered residents count as reached. Counties without sewer figures are left out of the share.</p>
   </article></div>`;
 
   const byName={}; opts.forEach(f=>{const n=(N&&N[f])||['',''];
@@ -2709,6 +2722,30 @@ monitoring(){
   document.getElementById('mon-form').onsubmit=e=>{e.preventDefault();
     const f=byName[inp.value.trim().toLowerCase()];
     if(f)show(f);else document.getElementById('mon-answer').innerHTML='<p class="small">No county of that name. Start typing and pick from the list.</p>'};
+
+  // State roll-up: sum the county classification into each state.
+  const ST={};
+  Object.entries(M).forEach(([f,v])=>{const st=STATE_FIPS[f.slice(0,2)];if(!st)return;
+    const r=ST[st]||(ST[st]={st,n:0,tested:0,sew:0,sewTested:0});
+    r.n++; if(v[0]===0)r.tested++;
+    if(v[2]!=null){r.sew+=v[2]; if(v[0]===0)r.sewTested+=v[2];}});
+  // A state with no tested county but with county activity in this run has
+  // mismatched county codes (Connecticut switched to planning regions in 2022),
+  // so its share cannot be computed honestly and is shown as unmatched.
+  const actSt=new Set();Object.values(D.activity||{}).forEach(A=>Object.keys(A||{}).forEach(f=>{const st=STATE_FIPS[f.slice(0,2)];if(st)actSt.add(st)}));
+  Object.values(ST).forEach(r=>{r.mismatch=r.tested===0&&actSt.has(r.st);r.share=!r.mismatch&&r.sew>0?r.sewTested/r.sew:null});
+  const MISS=Object.values(ST).filter(r=>r.mismatch).map(r=>STATE_NAMES[r.st]||r.st);
+  const binCol=v=>{if(v==null)return css('--nodata');const i=ST_BINS.findIndex(b=>v>=b[0]&&v<b[1]);return ST_COL[i<0?ST_COL.length-1:i]};
+  stateMap(document.getElementById('mon-stmap'),st=>binCol(ST[st]?ST[st].share:null),
+    (st,name)=>{const r=ST[st];if(!r)return `<b>${esc(name)}</b><div>No data</div>`;
+      if(r.mismatch)return `<b>${esc(name)}</b><div>County codes don't match in this run</div>`;
+      return `<b>${esc(name)}</b><div>${r.share==null?'No sewer data':pct(r.share)+' of residents on sewers in a tested county'}</div><div>${r.tested} of ${r.n} counties tested</div>`});
+  const rows=Object.values(ST).filter(r=>r.share!=null);
+  const tbl=list=>`<thead><tr><th>State</th><th class="num">Counties tested</th><th class="num">Residents on sewers in a tested county</th><th class="num">Share</th></tr></thead><tbody>${list.map(r=>`<tr><td>${esc(STATE_NAMES[r.st]||r.st)}</td><td class="num mono">${r.tested} of ${r.n}</td><td class="num mono">${Math.round(r.sewTested).toLocaleString()} of ${Math.round(r.sew).toLocaleString()}</td><td class="num mono">${pct(r.share)}</td></tr>`).join('')}</tbody>`;
+  const low=[...rows].sort((a,b)=>a.share-b.share||a.sew-b.sew);
+  document.getElementById('mon-st-low').innerHTML=tbl(low.slice(0,10));
+  if(MISS.length)document.getElementById('mon-st-note').innerHTML=`<b>Not ranked: ${MISS.map(esc).join(', ')}.</b> Wastewater results here use the old county codes while sewer figures use the new boundaries (Connecticut replaced its counties with planning regions in 2022), so the two can't be matched in this run.`;
+  document.getElementById('mon-st-all').innerHTML=tbl([...rows].sort((a,b)=>(STATE_NAMES[a.st]||a.st).localeCompare(STATE_NAMES[b.st]||b.st)));
 
   countyMap(document.getElementById('mon-map'),
     f=>{const v=M[f];return v?SCOL[v[0]]:css('--nodata')},
