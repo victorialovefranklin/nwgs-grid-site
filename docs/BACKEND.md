@@ -35,9 +35,9 @@ and nothing compiled: every line below is read as it was written.
 
 | Language | Files | Lines | Used for |
 |---|---|---|---|
-| Python | 7 | 11,802 | Pipeline, export, validation, site build, alert email, documentation |
-| HTML, CSS, JavaScript | 2 | 6,306 | The published page: markup, styles and script in one file |
-| Markdown | 12 | 2,658 | Documentation sources |
+| Python | 7 | 11,888 | Pipeline, export, validation, site build, alert email, documentation |
+| HTML, CSS, JavaScript | 2 | 6,346 | The published page: markup, styles and script in one file |
+| Markdown | 12 | 2,671 | Documentation sources |
 | JavaScript (Node) | 1 | 329 | Markdown to Word conversion |
 | YAML | 1 | 270 | GitHub Actions workflow |
 | SQL (PostgreSQL) | 1 | 120 | Database tables and row-level security |
@@ -89,7 +89,7 @@ Loaded from a CDN at a pinned version. None is bundled, and the page's data, tab
 
 ## 3. The pipeline
 
-`pipeline/nwgs_pipeline.py` is a single module of about 9,831 lines, organized into numbered sections:
+`pipeline/nwgs_pipeline.py` is a single module of about 9,916 lines, organized into numbered sections:
 
 | Section | What it covers |
 |---|---|
@@ -265,14 +265,14 @@ which is public by design.
 | `scripts/` | `build_audit_doc.py`, `build_docs.py`, `build_site.py`, `doc_columns.py`, `nwgs_app_export.py`, `send_alerts.py` | Build and delivery utilities run by the workflow. |
 | `site_src/` | 20 files | The site source: the page template, county geometry, images and the public Supabase configuration. |
 | `snapshot/` | 1 file |  |
-| `static_inputs/` | 12 files | Inputs the pipeline cannot download for itself, plus the committed forecast ledger seed. |
+| `static_inputs/` | 13 files | Inputs the pipeline cannot download for itself, plus the committed forecast ledger seed. |
 | `supabase/` | 1 file | The database schema: tables, row-level security and policies. The source of truth for the Supabase project. |
 | `.gitattributes` | under 1 KB |  |
 | `.gitignore` | under 1 KB | What is deliberately excluded; see 7.1. |
 | `CITATION.cff` | under 1 KB | Machine-readable citation metadata, used by GitHub's “Cite this repository” button. |
 | `CNAME` | under 1 KB |  |
 | `LICENSE` | 2 KB | All rights reserved. No reuse without written permission. |
-| `pipeline_log.txt` | 32 KB |  |
+| `pipeline_log.txt` | 33 KB |  |
 | `README.md` | 15 KB | Repository overview and setup notes. |
 | `requirements.txt` | under 1 KB | Pinned Python dependencies installed at the start of every run. |
 

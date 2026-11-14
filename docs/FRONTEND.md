@@ -29,7 +29,7 @@ exactly from the archived release for its run.
 | File | Role |
 |---|---|
 | `site_src/template.html` | The entire front end: markup, styles and script in one file. |
-| `site_src/counties-albers-10m.json` | County and state geometry (us-atlas, ISC licence). |
+| `site_src/counties-albers-10m.json` | County and state geometry (us-atlas, ISC licence), with Connecticut's nine planning regions in place of its retired counties. |
 | `site_src/supabase.json` | Public project URL and publishable key for sign-in. |
 | `site_src/img/` | Logo, favicon, portrait and poster images. |
 | `scripts/build_site.py` | Reads an export, builds the payload, writes the page. |

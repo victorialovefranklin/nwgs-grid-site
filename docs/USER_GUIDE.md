@@ -33,7 +33,7 @@ course of an illness.
 partial and uneven. The map marks counties with no monitored site separately
 from counties that are quiet, and the two mean entirely different things.
 
-As an example, in the run described here SARS-CoV-2 sat at a median site z-score of -0.10 across 1,879 sites in 1,092 counties.
+As an example, in the run described here SARS-CoV-2 sat at a median site z-score of -0.10 across 1,879 sites in 1,093 counties.
 
 ---
 

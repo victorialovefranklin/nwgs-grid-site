@@ -47,6 +47,17 @@ the US Census Bureau, CDC/ATSDR, CDC PLACES, NCBI, RCSB PDB, UniProt, the World
 Bank and WHO/UNICEF JMP; each is recorded on the Audit log with the outcome of
 its fetch for the run.
 
+**Connecticut county codes.** In 2022 Connecticut's eight counties
+(09001-09015) were replaced by nine planning regions (09110-09190). CDC still
+labels Connecticut sites with the retired codes; every other source and the
+map use the regions. The pipeline translates CDC's codes with
+`static_inputs/CT_COUNTY_TO_PLANNING_REGION.csv` (rule
+`nwgs-ct-planning-region-v1`): a site is credited to each region holding at
+least 25% of its old county's sewered residents, and its single `county_fips`
+is the region holding the largest share. CDC's own code is kept in
+`county_fips_cdc`. Connecticut rows in every entity below therefore carry
+planning-region codes, and are approximate at the region edges.
+
 ---
 
 ## 3. Entities
@@ -134,10 +145,10 @@ its fetch for the run.
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `svi_quartile` | text | no | `Q1 least vulnerable` | Quartile of CDC/ATSDR Social Vulnerability Index, Q1 least vulnerable to Q4 most vulnerable. |
-| `sites` | integer | no | `443` | Number of distinct monitoring sites contributing to the row. |
-| `dormant` | integer | no | `146` |  |
-| `population_served` | integer | no | `16730544` | Population served by the monitoring site, as reported to CDC. |
-| `pct_dormant` | number | no | `33` |  |
+| `sites` | integer | no | `448` | Number of distinct monitoring sites contributing to the row. |
+| `dormant` | integer | no | `147` |  |
+| `population_served` | integer | no | `16830925` | Population served by the monitoring site, as reported to CDC. |
+| `pct_dormant` | number | no | `32.8` |  |
 
 ### 3.6 AttritionYearly
 
@@ -166,7 +177,7 @@ its fetch for the run.
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `component` | text | no | `SARS-CoV-2 recent activity` | Check or source the row reports on. |
 | `status` | text | no | `PASS` | Outcome recorded for this row by the pipeline. |
-| `detail` | text | no | `803 recent counties` | Free-text explanation attached to the outcome. |
+| `detail` | text | no | `804 recent counties` | Free-text explanation attached to the outcome. |
 | `source` | text | no | `Table13` | Table or step that produced the row. |
 
 ### 3.8 CdcSchedule
@@ -224,7 +235,7 @@ its fetch for the run.
 
 ### 3.11 CountyActivity
 
-2,357 rows, 11 columns.
+2,360 rows, 11 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
@@ -242,7 +253,7 @@ its fetch for the run.
 
 ### 3.12 CountyCluster
 
-2,306 rows, 10 columns.
+2,327 rows, 10 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
@@ -251,15 +262,15 @@ its fetch for the run.
 | `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
 | `county_fips` | integer | no | `39057` | Five-digit FIPS code identifying the county. |
 | `activity_z` | number | no | `-0.7238` |  |
-| `local_morans_i` | number | no | `0.3656` | Local Moran's I for the county. |
-| `p_sim` | number | no | `0.093` | Pseudo p-value from permutation inference. |
+| `local_morans_i` | number | no | `0.3659` | Local Moran's I for the county. |
+| `p_sim` | number | no | `0.086` | Pseudo p-value from permutation inference. |
 | `lisa_cluster` | text | no | `Not Significant` | Cluster type: High-High, Low-Low, High-Low, Low-High or Not Significant. |
 | `county_name` | text | no | `Greene County` | County name as published by CDC. |
 | `state_code` | text | no | `OH` | Two-letter US state or territory abbreviation. |
 
 ### 3.13 CountyCoverage
 
-4,731 rows, 14 columns.
+4,738 rows, 14 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
@@ -295,7 +306,7 @@ its fetch for the run.
 
 ### 3.15 EmergingCounty
 
-1,156 rows, 10 columns.
+1,159 rows, 10 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
@@ -336,12 +347,12 @@ its fetch for the run.
 | `model` | text | no | `unadjusted` | Model the row refers to. |
 | `term` | text | no | `svi_10pct` |  |
 | `term_label` | text | no | `SVI overall rank, per 0.10 increase` |  |
-| `n_counties` | integer | no | `1086` |  |
-| `n_events` | integer | no | `893` |  |
-| `odds_ratio` | number | no | `0.8884` |  |
-| `or_95ci_low` | number | no | `0.8381` |  |
-| `or_95ci_high` | number | no | `0.9416` |  |
-| `p_value` | number | no | `6.7e-05` |  |
+| `n_counties` | integer | no | `1094` |  |
+| `n_events` | integer | no | `900` |  |
+| `odds_ratio` | number | no | `0.8907` |  |
+| `or_95ci_low` | number | no | `0.8404` |  |
+| `or_95ci_high` | number | no | `0.944` |  |
+| `p_value` | number | no | `9.4e-05` |  |
 
 ### 3.18 EquitySummary
 
@@ -352,15 +363,15 @@ its fetch for the run.
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `svi_quartile` | text | no | `Q1 Lower vulnerability` | Quartile of CDC/ATSDR Social Vulnerability Index, Q1 least vulnerable to Q4 most vulnerable. |
-| `counties` | integer | no | `272` |  |
+| `counties` | integer | no | `274` |  |
 | `median_surveillance_weeks` | number | no | `203` | Median weeks of surveillance across counties in the quartile. |
-| `pct_analysis_ready` | number | no | `87.5` | Share of counties in the quartile that are analysis-ready. |
-| `mean_svi` | number | no | `0.1469` | Mean Social Vulnerability Index across counties in the quartile. |
-| `glm_n_counties` | integer | no | `1086` |  |
-| `glm_odds_ratio` | number | no | `0.8884` |  |
-| `glm_or_95ci_low` | number | no | `0.8381` |  |
-| `glm_or_95ci_high` | number | no | `0.9416` |  |
-| `glm_p_value` | number | no | `6.7e-05` |  |
+| `pct_analysis_ready` | number | no | `87.23` | Share of counties in the quartile that are analysis-ready. |
+| `mean_svi` | number | no | `0.1477` | Mean Social Vulnerability Index across counties in the quartile. |
+| `glm_n_counties` | integer | no | `1094` |  |
+| `glm_odds_ratio` | number | no | `0.8907` |  |
+| `glm_or_95ci_low` | number | no | `0.8404` |  |
+| `glm_or_95ci_high` | number | no | `0.944` |  |
+| `glm_p_value` | number | no | `9.4e-05` |  |
 
 ### 3.19 ForecastRecord
 
@@ -572,13 +583,13 @@ its fetch for the run.
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `counties_total` | integer | no | `3144` |  |
-| `counties_reporting` | integer | no | `1086` |  |
-| `counties_sewer_service_no_site` | integer | no | `1598` |  |
+| `counties_reporting` | integer | no | `1094` |  |
+| `counties_sewer_service_no_site` | integer | no | `1590` |  |
 | `counties_limited_sewer_service` | integer | no | `460` |  |
 | `population_total` | number | no | `3.314e+08` |  |
 | `population_sewered` | number | no | `2.403e+08` |  |
-| `sewered_population_in_reporting_counties` | number | no | `2.035e+08` |  |
-| `sewered_population_without_site` | number | no | `3.533e+07` |  |
+| `sewered_population_in_reporting_counties` | number | no | `2.06e+08` |  |
+| `sewered_population_without_site` | number | no | `3.281e+07` |  |
 | `sewersheds_modelled` | integer | no | `13826` |  |
 | `sewersheds_sourced` | integer | no | `3253` |  |
 | `rule_version` | text | no | `nwgs-monitoring-status-v1` |  |
@@ -634,7 +645,7 @@ its fetch for the run.
 | `pathogen_group` | text | no | `routine_respiratory` | Routine respiratory pathogen or emerging detection-based pathogen. |
 | `records` | integer | no | `339549` | Number of records retrieved. |
 | `sites` | integer | no | `1510` | Number of distinct monitoring sites contributing to the row. |
-| `counties_represented` | integer | no | `960` | Distinct counties with at least one reporting site, over all time. |
+| `counties_represented` | integer | no | `961` | Distinct counties with at least one reporting site, over all time. |
 | `states_territories` | integer | no | `52` | Distinct states and territories with at least one reporting site. |
 | `first_observation` | date | no | `2022-10-01` | Earliest sample date present for the pathogen. |
 | `latest_observation` | date | no | `2026-11-10` | Most recent sample date present for the pathogen. |
@@ -686,7 +697,7 @@ its fetch for the run.
 
 ### 3.35 Representativeness
 
-1,099 rows, 18 columns.
+1,100 rows, 18 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
@@ -717,16 +728,16 @@ its fetch for the run.
 |---|---|---|---|---|
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
-| `counties_total` | integer | no | `1099` | Counties with enough data to assess. |
-| `counties_monitored` | integer | no | `967` | Counties with at least one monitored site. |
-| `counties_unmonitored` | integer | no | `132` | Counties assessed but with no monitored site. |
-| `median_sewer_share_monitored` | number | no | `0.432` | Median sewer share across monitored counties. |
-| `population_total` | number | no | `2.616e+08` |  |
+| `counties_total` | integer | no | `1100` | Counties with enough data to assess. |
+| `counties_monitored` | integer | no | `965` | Counties with at least one monitored site. |
+| `counties_unmonitored` | integer | no | `135` | Counties assessed but with no monitored site. |
+| `median_sewer_share_monitored` | number | no | `0.4319` | Median sewer share across monitored counties. |
+| `population_total` | number | no | `2.65e+08` |  |
 | `population_in_sewershed` | number | no | `1.589e+08` |  |
-| `pct_population_in_sewershed` | number | no | `60.74` | Share of the assessed population living in a monitored sewershed. |
+| `pct_population_in_sewershed` | number | no | `59.95` | Share of the assessed population living in a monitored sewershed. |
 | `counties_sewershed_crosses` | integer | no | `58` | Counties whose sewershed crosses a county boundary, where the county proxy is weakest. |
-| `median_svi_gap_monitored` | number | no | `-0.0147` | Median vulnerability gap across monitored counties. |
-| `median_svi_gap_unmonitored` | number | no | `-0.0263` | Median vulnerability gap across unmonitored counties. |
+| `median_svi_gap_monitored` | number | no | `-0.015` | Median vulnerability gap across monitored counties. |
+| `median_svi_gap_unmonitored` | number | no | `-0.0232` | Median vulnerability gap across unmonitored counties. |
 
 ### 3.37 RespnetLagBest
 
@@ -899,19 +910,19 @@ its fetch for the run.
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
-| `n_counties` | integer | no | `769` | Counties entering the spatial analysis. |
+| `n_counties` | integer | no | `776` | Counties entering the spatial analysis. |
 | `weights_method` | text | no | `KNN_k6_EPSG5070` | How neighbours were defined, including the number of nearest neighbours and the projection. |
-| `morans_i` | number | no | `0.2376` | Global Moran's I. Zero means activity is scattered at random across counties; positive means like sits next to like. |
-| `expected_i` | number | no | `-0.001302` | Value of Moran's I expected under spatial randomness, for comparison. |
+| `morans_i` | number | no | `0.237` | Global Moran's I. Zero means activity is scattered at random across counties; positive means like sits next to like. |
+| `expected_i` | number | no | `-0.00129` | Value of Moran's I expected under spatial randomness, for comparison. |
 | `p_sim` | number | no | `0.001` |  |
-| `z_sim` | number | no | `12.41` |  |
-| `recent_activity_counties` | integer | no | `786` |  |
-| `total_excluded_from_spatial` | integer | no | `17` |  |
-| `high-high` | integer | no | `68` |  |
-| `high-low` | integer | no | `14` |  |
+| `z_sim` | number | no | `12.09` |  |
+| `recent_activity_counties` | integer | no | `787` |  |
+| `total_excluded_from_spatial` | integer | no | `11` |  |
+| `high-high` | integer | no | `71` |  |
+| `high-low` | integer | no | `13` |  |
 | `low-high` | integer | no | `20` |  |
-| `low-low` | integer | no | `88` |  |
-| `not_significant` | integer | no | `579` |  |
+| `low-low` | integer | no | `81` |  |
+| `not_significant` | integer | no | `591` |  |
 
 ### 3.47 StateLag
 
@@ -940,7 +951,7 @@ its fetch for the run.
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
 | `pdb_entry_id` | text | no | `1RU7` |  |
-| `entity_id` | integer | no | `2` |  |
+| `entity_id` | integer | no | `1` |  |
 | `feature_type` | text | no | `Signal peptide` | UniProt feature class for the annotated region. |
 | `feature_description` | text | no | `Signal peptide` | UniProt description of the region. |
 | `uniprot_accession` | text | no | `P03452` | UniProt accession the annotation came from. |
@@ -951,7 +962,7 @@ its fetch for the run.
 | `pdb_chain` | text | yes | `A` | Chain the region maps to in the structure. |
 | `pdb_start` | number | yes | `1` | Start residue in PDB numbering. |
 | `pdb_end` | number | yes | `3` | End residue in PDB numbering. |
-| `mapping_status` | text | no | `NOT_IN_STRUCTURE` | Whether the UniProt region could be aligned to PDB residue numbering. Regions that cannot be aligned are not displayed. |
+| `mapping_status` | text | no | `MAPPED` | Whether the UniProt region could be aligned to PDB residue numbering. Regions that cannot be aligned are not displayed. |
 | `annotation_source` | text | no | `UniProtKB` |  |
 | `annotation_source_url` | text | no | `https://www.uniprot.org/uniprotkb/P03452`… | Link to the annotation at its source. |
 | `expert_review_status` | text | no | `pending_expert_review` | Whether a domain expert has reviewed the annotation set. |
@@ -1049,9 +1060,9 @@ its fetch for the run.
 | `rucc_label` | text | no | `Metro, 1 million or more` |  |
 | `is_metro` | boolean | no | `True` |  |
 | `n_us_counties` | integer | no | `443` |  |
-| `n_counties_surveilled` | integer | no | `267` |  |
-| `pct_of_class_surveilled` | number | no | `60.3` |  |
-| `pct_of_surveilled_network` | number | no | `24.6` |  |
+| `n_counties_surveilled` | integer | no | `268` |  |
+| `pct_of_class_surveilled` | number | no | `60.5` |  |
+| `pct_of_surveilled_network` | number | no | `24.5` |  |
 | `pct_of_us_counties` | number | no | `14.1` |  |
 | `population_2020_us` | integer | no | `189022706` |  |
-| `population_2020_surveilled` | integer | no | `171687943` |  |
+| `population_2020_surveilled` | integer | no | `172664191` |  |
