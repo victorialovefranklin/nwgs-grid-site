@@ -1204,7 +1204,16 @@ def explode_multicounty_for_coverage(h):
         if pd.isna(v):
             return []
         bits = re.split(r"[,;|]", str(v))
-        return [normalize_fips(b) for b in bits if normalize_fips(b) is not pd.NA and pd.notna(normalize_fips(b))]
+        out = []
+        for b in bits:
+            f = normalize_fips(b)
+            if f is pd.NA or pd.isna(f):
+                continue
+            # Any 11xxx code inside a multi-county list is the District, 11001.
+            f = "11001" if str(f).startswith("11") else f
+            if f not in out:
+                out.append(f)
+        return out
     x["county_fips_list"] = x["county_fips_native"].map(split_fips)
     x = x.explode("county_fips_list")
     x["county_fips"] = x["county_fips_list"]
