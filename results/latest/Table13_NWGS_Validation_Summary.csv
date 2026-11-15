@@ -21,7 +21,7 @@ SVI surveillance readiness inferential model,PASS,OR=0.891 per 0.10 SVI increase
 AMR/ARG module,PASS,11 ARG targets
 AMR/ARG classification audit (target mapping + Detect/outlier coding),PASS,"target mapping, Detect coding, and outlier coding look consistent"
 RCSB protein/structure visualization,PASS,6/6 protein PNGs rendered; 6/6 RCSB metadata queries passed; publication figure requires 6/6
-Urbanicity coverage (USDA RUCC 2023),WARNING_UNMATCHED_COUNTIES,metropolitan counties are 60.1% of the surveilled network but 37.7% of all counties; the network reaches 55.5% of metropolitan and 22.3% of nonmetropolitan counties; 3 county identifier(s) in the roster are not in the USDA county file and are absent from this axis (see Table06e)
+Urbanicity coverage (USDA RUCC 2023),WARNING_UNMATCHED_COUNTIES,metropolitan counties are 60.1% of the surveilled network but 37.7% of all counties; the network reaches 55.5% of metropolitan and 22.3% of nonmetropolitan counties; 1 county identifier(s) in the roster are not in the USDA county file and are absent from this axis (see Table06e)
 Monitoring status by county,WARNING_PARTIAL_VULNERABILITY,"3,144 counties: 1,094 with a site reporting, 1,590 with sewer service and no reporting site, 460 where few residents are on sewers; 71 counties have no vulnerability figure for their sewered residents and are reported as unscored"
 CDC PHIL pathogen reference imagery,WARNING_PARTIAL_IMAGES,0/6 pathogen reference images downloaded
 Manuscript figure layout: Figure 2 (Tennessee Surveillance Coverage),PASS,Page aspect 2692x3258px. Figure prepared for the manuscript at portrait aspect; not used on the website.
