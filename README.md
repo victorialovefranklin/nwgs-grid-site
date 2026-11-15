@@ -2,6 +2,16 @@
 
 ### 🌐 Live site: **[nwgsgrid.com](https://nwgsgrid.com/)**
 
+[User guide](docs/USER_GUIDE.md) ·
+[Methods](https://nwgsgrid.com/#methods) ·
+[Data reference](docs/DATA_REFERENCE.md) ·
+[Front end](docs/FRONTEND.md) ·
+[Back end](docs/BACKEND.md) ·
+[Runbook](docs/RUNBOOK.md) ·
+[Dashboard audit](docs/DASHBOARD_AUDIT.md) ·
+[Releases](https://github.com/victorialovefranklin/nwgs-grid-site/releases) ·
+[Cite](CITATION.cff)
+
 **Full website file (download and open in a browser):** [snapshot/NWGS_Grid_website.html](snapshot/NWGS_Grid_website.html) · Page source: [site_src/template.html](site_src/template.html)
 
 Weekly, validated wastewater surveillance of respiratory and emerging pathogens across U.S. counties,
@@ -232,3 +242,8 @@ pip install pandas numpy
 python scripts/build_site.py sample_export site
 ```
 Then open `site/index.html`.
+
+## Related tools
+
+- [GridAI™ · SEGDA](https://gridaitm.com/) ([README](https://github.com/Franklin-Research-Hub/GridAI#readme)): how county averages hide census-tract energy and environmental-justice burden.
+- [BioGrid Sentinel™](https://victorialovefranklin.github.io/BioGrid-Sentinel/) ([README](https://github.com/victorialovefranklin/BioGrid-Sentinel#readme)): geospatial digital twin for nuclear infrastructure resilience and community health preparedness (research prototype, simulated data).
