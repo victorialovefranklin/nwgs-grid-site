@@ -263,14 +263,14 @@ planning-region codes, and are approximate at the region edges.
 | `county_fips` | integer | no | `39057` | Five-digit FIPS code identifying the county. |
 | `activity_z` | number | no | `-0.7238` |  |
 | `local_morans_i` | number | no | `0.3659` | Local Moran's I for the county. |
-| `p_sim` | number | no | `0.092` | Pseudo p-value from permutation inference. |
+| `p_sim` | number | no | `0.078` | Pseudo p-value from permutation inference. |
 | `lisa_cluster` | text | no | `Not Significant` | Cluster type: High-High, Low-Low, High-Low, Low-High or Not Significant. |
 | `county_name` | text | no | `Greene County` | County name as published by CDC. |
 | `state_code` | text | no | `OH` | Two-letter US state or territory abbreviation. |
 
 ### 3.13 CountyCoverage
 
-4,738 rows, 14 columns.
+4,731 rows, 14 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
@@ -645,7 +645,7 @@ planning-region codes, and are approximate at the region edges.
 | `pathogen_group` | text | no | `routine_respiratory` | Routine respiratory pathogen or emerging detection-based pathogen. |
 | `records` | integer | no | `339549` | Number of records retrieved. |
 | `sites` | integer | no | `1510` | Number of distinct monitoring sites contributing to the row. |
-| `counties_represented` | integer | no | `961` | Distinct counties with at least one reporting site, over all time. |
+| `counties_represented` | integer | no | `960` | Distinct counties with at least one reporting site, over all time. |
 | `states_territories` | integer | no | `52` | Distinct states and territories with at least one reporting site. |
 | `first_observation` | date | no | `2022-10-01` | Earliest sample date present for the pathogen. |
 | `latest_observation` | date | no | `2026-11-10` | Most recent sample date present for the pathogen. |
@@ -697,7 +697,7 @@ planning-region codes, and are approximate at the region edges.
 
 ### 3.35 Representativeness
 
-1,100 rows, 18 columns.
+1,098 rows, 18 columns.
 
 | Column | Type | Ever empty | Example | Description |
 |---|---|---|---|---|
@@ -728,9 +728,9 @@ planning-region codes, and are approximate at the region edges.
 |---|---|---|---|---|
 | `run_id` | text | no | `run_20261113T1621Z` | Identifier of the weekly run that produced the row. Derived from CDC's own dataset update timestamp, so it names the data vintage rather than the time the job executed. |
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
-| `counties_total` | integer | no | `1100` | Counties with enough data to assess. |
+| `counties_total` | integer | no | `1098` | Counties with enough data to assess. |
 | `counties_monitored` | integer | no | `965` | Counties with at least one monitored site. |
-| `counties_unmonitored` | integer | no | `135` | Counties assessed but with no monitored site. |
+| `counties_unmonitored` | integer | no | `133` | Counties assessed but with no monitored site. |
 | `median_sewer_share_monitored` | number | no | `0.4319` | Median sewer share across monitored counties. |
 | `population_total` | number | no | `2.65e+08` |  |
 | `population_in_sewershed` | number | no | `1.589e+08` |  |
@@ -915,14 +915,14 @@ planning-region codes, and are approximate at the region edges.
 | `morans_i` | number | no | `0.237` | Global Moran's I. Zero means activity is scattered at random across counties; positive means like sits next to like. |
 | `expected_i` | number | no | `-0.00129` | Value of Moran's I expected under spatial randomness, for comparison. |
 | `p_sim` | number | no | `0.001` |  |
-| `z_sim` | number | no | `12.23` |  |
+| `z_sim` | number | no | `12.15` |  |
 | `recent_activity_counties` | integer | no | `787` |  |
 | `total_excluded_from_spatial` | integer | no | `11` |  |
-| `high-high` | integer | no | `70` |  |
-| `high-low` | integer | no | `15` |  |
-| `low-high` | integer | no | `21` |  |
+| `high-high` | integer | no | `74` |  |
+| `high-low` | integer | no | `14` |  |
+| `low-high` | integer | no | `20` |  |
 | `low-low` | integer | no | `88` |  |
-| `not_significant` | integer | no | `582` |  |
+| `not_significant` | integer | no | `580` |  |
 
 ### 3.47 StateLag
 
@@ -951,7 +951,7 @@ planning-region codes, and are approximate at the region edges.
 | `data_as_of` | date | no | `2026-11-14` | End of the data window for the run, as published. |
 | `pathogen` | text | no | `Influenza A` | Pathogen the row describes: SARS-CoV-2, RSV, Influenza A, Influenza A(H5), Measles or Mpox. |
 | `pdb_entry_id` | text | no | `1RU7` |  |
-| `entity_id` | integer | no | `2` |  |
+| `entity_id` | integer | no | `1` |  |
 | `feature_type` | text | no | `Signal peptide` | UniProt feature class for the annotated region. |
 | `feature_description` | text | no | `Signal peptide` | UniProt description of the region. |
 | `uniprot_accession` | text | no | `P03452` | UniProt accession the annotation came from. |
@@ -962,7 +962,7 @@ planning-region codes, and are approximate at the region edges.
 | `pdb_chain` | text | yes | `A` | Chain the region maps to in the structure. |
 | `pdb_start` | number | yes | `1` | Start residue in PDB numbering. |
 | `pdb_end` | number | yes | `3` | End residue in PDB numbering. |
-| `mapping_status` | text | no | `NOT_IN_STRUCTURE` | Whether the UniProt region could be aligned to PDB residue numbering. Regions that cannot be aligned are not displayed. |
+| `mapping_status` | text | no | `MAPPED` | Whether the UniProt region could be aligned to PDB residue numbering. Regions that cannot be aligned are not displayed. |
 | `annotation_source` | text | no | `UniProtKB` |  |
 | `annotation_source_url` | text | no | `https://www.uniprot.org/uniprotkb/P03452`… | Link to the annotation at its source. |
 | `expert_review_status` | text | no | `pending_expert_review` | Whether a domain expert has reviewed the annotation set. |

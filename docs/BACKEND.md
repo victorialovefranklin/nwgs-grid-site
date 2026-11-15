@@ -35,7 +35,7 @@ and nothing compiled: every line below is read as it was written.
 
 | Language | Files | Lines | Used for |
 |---|---|---|---|
-| Python | 7 | 11,888 | Pipeline, export, validation, site build, alert email, documentation |
+| Python | 7 | 11,897 | Pipeline, export, validation, site build, alert email, documentation |
 | HTML, CSS, JavaScript | 2 | 6,346 | The published page: markup, styles and script in one file |
 | Markdown | 12 | 2,681 | Documentation sources |
 | JavaScript (Node) | 1 | 329 | Markdown to Word conversion |
@@ -89,7 +89,7 @@ Loaded from a CDN at a pinned version. None is bundled, and the page's data, tab
 
 ## 3. The pipeline
 
-`pipeline/nwgs_pipeline.py` is a single module of about 9,916 lines, organized into numbered sections:
+`pipeline/nwgs_pipeline.py` is a single module of about 9,925 lines, organized into numbered sections:
 
 | Section | What it covers |
 |---|---|
